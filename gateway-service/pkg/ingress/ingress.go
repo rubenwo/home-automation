@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/rubenwo/home-automation/gateway-service/pkg/mqtt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -18,7 +19,8 @@ const (
 )
 
 type Ingress struct {
-	router *mux.Router
+	router     *mux.Router
+	mqttClient *mqtt.Client
 }
 
 func New(cfg *Config) (*Ingress, error) {
@@ -26,6 +28,7 @@ func New(cfg *Config) (*Ingress, error) {
 		return nil, fmt.Errorf("cfg cannot be nil")
 	}
 	router := mux.NewRouter()
+	mqttClient := mqtt.New()
 
 	apiRouter := router.PathPrefix(apiPrefix).Subrouter()
 	switch cfg.ApiVersion {
@@ -45,6 +48,14 @@ func New(cfg *Config) (*Ingress, error) {
 						serveReverseProxy(u, writer, request)
 					}).Methods(spec.Methods...)
 				}
+			case "MQTT":
+				if err := mqttClient.Register(spec.Path, spec.Host); err != nil {
+					log.Println(err)
+				}
+				apiRouter.HandleFunc(spec.Path, func(writer http.ResponseWriter, request *http.Request) {
+					request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
+					mqttClient.BrokerMQTTRequest(writer, request)
+				}).Methods("POST")
 			default:
 				return nil, fmt.Errorf("%s is not a supported spec.Protocol", spec.Protocol)
 			}
@@ -54,7 +65,7 @@ func New(cfg *Config) (*Ingress, error) {
 		return nil, fmt.Errorf("%s is not a supported ApiVersion", cfg.ApiVersion)
 	}
 
-	return &Ingress{router: router}, nil
+	return &Ingress{router: router, mqttClient: mqttClient}, nil
 }
 
 func (i *Ingress) ServeHTTP(w http.ResponseWriter, r *http.Request) {

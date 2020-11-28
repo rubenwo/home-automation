@@ -10,3 +10,6 @@ spec:
     methods:
       - GET
     protocol: http
+  - host: mqtt-broker.default.svc.cluster.local
+    path: "/esp32/toggle"
+    protocol: mqtt

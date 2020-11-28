@@ -17,3 +17,9 @@ services:
   tapo.default.svc.cluster.local:
     build: ./tapo-service
     restart: on-failure
+
+  mqtt-broker.default.svc.cluster.local:
+    image: eclipse-mosquitto
+    restart: on-failure
+    ports:
+      - 1883:1883
