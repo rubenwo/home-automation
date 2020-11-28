@@ -49,7 +49,7 @@ func New(cfg *Config) (*Ingress, error) {
 					}).Methods(spec.Methods...)
 				}
 			case "MQTT":
-				if err := mqttClient.Register(spec.Path, spec.Host); err != nil {
+				if err := mqttClient.Register(spec.Path, spec.Host, 10); err != nil {
 					log.Println(err)
 				}
 				apiRouter.HandleFunc(spec.Path, func(writer http.ResponseWriter, request *http.Request) {

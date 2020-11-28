@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 type Client struct {
@@ -17,16 +18,27 @@ func New() *Client {
 	return &Client{clients: make(map[string]mqtt.Client)}
 }
 
-func (c *Client) Register(path, host string) error {
+func (c *Client) Register(path, host string, retry int) error {
 	if _, ok := c.clients[path]; !ok {
 		fmt.Println("registering:", path, host)
 		opts := mqtt.NewClientOptions()
 		opts.AddBroker(fmt.Sprintf("%s:1883", host))
 		opts.SetClientID(uuid.New().String())
 		client := mqtt.NewClient(opts)
-		if token := client.Connect(); token.Wait() && token.Error() != nil {
-			return token.Error()
+		var err error
+		for i := 0; i < retry; i++ {
+			token := client.Connect()
+			token.Wait()
+			err = token.Error()
+			if err == nil {
+				break
+			}
+			time.Sleep(time.Second * 1)
 		}
+		if err != nil {
+			return err
+		}
+
 		c.clients[path] = client
 	}
 	fmt.Println(c.clients)
