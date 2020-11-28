@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  gateway.default.svc.cluster.local:
+    build: ./gateway-service
+    restart: on-failure
+    ports:
+      - 443:443
+      - 80:80
+    volumes:
+      - /mnt/gateway/certs:/certs
+
+  hue.default.svc.cluster.local:
+    build: ./hue-service
+    restart: on-failure
+
+  tapo.default.svc.cluster.local:
+    build: ./tapo-service
+    restart: on-failure

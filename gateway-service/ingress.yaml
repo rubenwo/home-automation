@@ -1,0 +1,7 @@
+apiVersion: v1
+spec:
+  - host: courses.default.svc.cluster.local
+    path: "/modules"
+    methods:
+      - GET
+    protocol: http
