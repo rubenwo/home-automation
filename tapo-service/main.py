@@ -1,6 +1,12 @@
 from fastapi import FastAPI, Response, status
 
+import registry
+from models import NewDevice, Device
+
 app = FastAPI()
+
+registry.load_devices_from_config("./config.yaml")
+print(registry.get_devices())
 
 
 @app.get("/healthz", status_code=200)
@@ -13,11 +19,36 @@ def healthz(response: Response):
     }
 
 
-@app.get("/tapo/information/{device_id}", status_code=200)
-def device_info(device_id: str):
-    print("Returning data for device: {}".format(device_id))
+@app.get("/tapo/devices", status_code=200)
+def get_devices():
+    devices = []
+    for k, v in registry.get_devices().items():
+        dev = Device(device_id=k, device_type=v.get_device_type(), device_info=v.get_device_info())
+        devices.append(dev)
+
     return {
-        "device_id": device_id,
-        "status": "on",
-        "wattage": 0
+        "devices": devices
+    }
+
+
+@app.get("/tapo/devices/{device_id}", status_code=200)
+def device_info(device_id: int):
+    print("Returning data for device: {}".format(device_id))
+    d = registry.get_devices()[device_id]
+    dev = Device(device_id=device_id, device_type=d.get_device_type(), device_info=d.get_device_info())
+    return {
+        "device": dev
+    }
+
+
+@app.post("/tapo/devices/register", status_code=201)
+def register_device(device: NewDevice):
+    registry.add_device(device)
+    devices = []
+    for k, v in registry.get_devices().items():
+        dev = Device(device_id=k, device_type=v.get_device_type(), device_info=v.get_device_info())
+        devices.append(dev)
+
+    return {
+        "devices": devices
     }

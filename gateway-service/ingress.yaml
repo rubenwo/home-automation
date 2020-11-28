@@ -1,10 +1,21 @@
 apiVersion: v1
 spec:
   - host: tapo.default.svc.cluster.local
-    path: "/tapo/information/{device_id}"
+    path: "/tapo/devices/{device_id}"
     methods:
       - GET
     protocol: http
+  - host: tapo.default.svc.cluster.local
+    path: "/tapo/devices/register"
+    methods:
+      - POST
+    protocol: http
+  - host: tapo.default.svc.cluster.local
+    path: "/tapo/devices"
+    methods:
+      - GET
+    protocol: http
+
   - host: hue.default.svc.cluster.local
     path: "/hue/information/{device_id}"
     methods:
