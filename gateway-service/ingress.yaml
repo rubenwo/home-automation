@@ -1,7 +1,12 @@
 apiVersion: v1
 spec:
-  - host: courses.default.svc.cluster.local
-    path: "/modules"
+  - host: tapo.default.svc.cluster.local
+    path: "/tapo/information/{device_id}"
+    methods:
+      - GET
+    protocol: http
+  - host: hue.default.svc.cluster.local
+    path: "/hue/information/{device_id}"
     methods:
       - GET
     protocol: http
