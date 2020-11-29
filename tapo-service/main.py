@@ -88,7 +88,8 @@ def register_device(device: NewDevice):
     registry.add_device(device)
     devices = []
     for k, v in registry.get_devices().items():
-        dev = Device(device_id=k, device_type=v.get_device_type(), device_info=v.get_device_info())
+        dev = Device(device_id=k, device_name=v.get_device_name(), device_type=v.get_device_type(),
+                     device_info=v.get_device_info())
         devices.append(dev)
 
     return {
