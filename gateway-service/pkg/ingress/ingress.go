@@ -31,6 +31,7 @@ func New(cfg *Config) (*Ingress, error) {
 	mqttClient := mqtt.New()
 
 	apiRouter := router.PathPrefix(apiPrefix).Subrouter()
+	apiRouter.Use(LoggingMiddleware)
 	switch cfg.ApiVersion {
 	case "v1":
 		log.Println("Using v1 ingress spec")
