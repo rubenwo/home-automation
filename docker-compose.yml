@@ -19,6 +19,12 @@ services:
     build: ./tapo-service
     restart: on-failure
 
+  web.default.svc.cluster.local:
+    build: ./client/web/home-automation
+    restart: on-failure
+    ports:
+      - 8080:80
+
   mqtt-broker.default.svc.cluster.local:
     image: eclipse-mosquitto
     restart: on-failure

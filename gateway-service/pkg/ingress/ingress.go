@@ -77,6 +77,15 @@ func New(cfg *Config) (*Ingress, error) {
 		return nil, fmt.Errorf("%s is not a supported ApiVersion", cfg.ApiVersion)
 	}
 
+	target := "http://web.default.svc.cluster.local"
+	u, err := url.Parse(target)
+	if err != nil {
+		return nil, fmt.Errorf("invalid catch-all target, parsing error: %w", err)
+	}
+	router.PathPrefix("/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		serveReverseProxy(u, writer, request)
+	}).Methods("GET")
+
 	return &Ingress{router: router, mqttClient: mqttClient}, nil
 }
 
