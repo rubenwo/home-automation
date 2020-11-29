@@ -12,7 +12,7 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 COPY --from=builder /go/gateway-service/gateway-service .
-COPY --from=builder /go/gateway-service/ingress.yaml .
+#COPY --from=builder /go/gateway-service/ingress.yaml .
 #COPY --from=builder /go/gateway-service/database.json .
 #
 #COPY --from=builder /go/gateway-service/assets/crypto/ ./assets/crypto/

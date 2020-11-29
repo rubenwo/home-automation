@@ -9,6 +9,7 @@ services:
       - 80:80
     volumes:
       - /mnt/gateway/certs:/certs
+      - ./ingress.yaml:/root/ingress.yaml
 
   hue.default.svc.cluster.local:
     build: ./hue-service
