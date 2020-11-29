@@ -35,28 +35,39 @@ func New(cfg *Config) (*Ingress, error) {
 	switch cfg.ApiVersion {
 	case "v1":
 		log.Println("Using v1 ingress spec")
-		for _, spec := range cfg.Spec {
+		for index, spec := range cfg.Spec {
 			switch strings.ToUpper(spec.Protocol) {
 			case "HTTP":
-				for index, spec := range cfg.Spec {
-					target := strings.ToLower(spec.Protocol) + "://" + spec.Host
-					u, err := url.Parse(target)
-					if err != nil {
-						return nil, fmt.Errorf("invalid spec at index: %d, parsing error: %w", index, err)
-					}
-					apiRouter.HandleFunc(spec.Path, func(writer http.ResponseWriter, request *http.Request) {
-						request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
-						serveReverseProxy(u, writer, request)
-					}).Methods(spec.Methods...)
-				}
-			case "MQTT":
-				if err := mqttClient.Register(spec.Path, spec.Host, 10); err != nil {
-					log.Println(err)
+				target := strings.ToLower(spec.Protocol) + "://" + spec.Host
+				u, err := url.Parse(target)
+				if err != nil {
+					return nil, fmt.Errorf("invalid spec at index: %d, parsing error: %w", index, err)
 				}
 				apiRouter.HandleFunc(spec.Path, func(writer http.ResponseWriter, request *http.Request) {
 					request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
-					mqttClient.BrokerMQTTRequest(writer, request)
-				}).Methods("POST")
+					serveReverseProxy(u, writer, request)
+				}).Methods(spec.Methods...)
+
+			case "MQTT":
+				fmt.Println("doing things with mqtt")
+				fmt.Println(spec.Methods)
+				for _, method := range spec.Methods {
+					switch strings.ToUpper(method) {
+					case "POST":
+						if err := mqttClient.Register(spec.Path, spec.Host, 10); err != nil {
+							log.Println(err)
+						}
+						apiRouter.HandleFunc(spec.Path, func(writer http.ResponseWriter, request *http.Request) {
+							request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
+							fmt.Println("MQTT")
+							mqttClient.BrokerMQTTRequest(writer, request)
+						}).Methods("POST")
+					case "GET":
+						fmt.Println("TODO: implement websocket to mqtt listener")
+					default:
+						return nil, fmt.Errorf("%s is not a supported method for: %s", method, spec.Protocol)
+					}
+				}
 			default:
 				return nil, fmt.Errorf("%s is not a supported spec.Protocol", spec.Protocol)
 			}

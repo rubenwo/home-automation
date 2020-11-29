@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.homeautomation.services.VolleyService;
 import com.example.homeautomation.services.requests.TapoDevices;
 
+import java.util.stream.Collectors;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -22,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
         TapoDevices t = new TapoDevices((error) -> {
             Log.d(TAG, "onCreate: " + error.getMessage());
         }, (devices) -> {
-            Log.d(TAG, "onCreate: " + devices.get(0).toString());
+            Log.d(TAG, "onCreate: " + devices.stream().map(Object::toString)
+                    .collect(Collectors.joining(", ")));
         });
 
         Log.d(TAG, "onCreate: ");

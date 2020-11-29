@@ -18,8 +18,10 @@ class TapoL510E(TapoDevice):
         return device_info
 
     def get_device_name(self) -> str:
-        device_name = ""
-        return device_name
+        return self.device_name
 
     def get_device_type(self) -> str:
         return self.device_type
+
+    def set_device_name(self, name: str):
+        self.device_name = name

@@ -4,6 +4,7 @@ spec:
     path: "/tapo/devices/{device_id}"
     methods:
       - GET
+      - PUT
     protocol: http
   - host: tapo.default.svc.cluster.local
     path: "/tapo/devices/register"
@@ -21,6 +22,10 @@ spec:
     methods:
       - GET
     protocol: http
+
   - host: mqtt-broker.default.svc.cluster.local
     path: "/esp32/toggle"
+    methods:
+      - POST
+      - GET
     protocol: mqtt

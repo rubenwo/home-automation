@@ -30,10 +30,12 @@ class TapoP100(TapoDevice):
         return device_info
 
     def get_device_name(self) -> str:
-        device_name = ""
-        if self.initialized:
-            device_name = self.p100.getDeviceName()
-        return device_name
+        if self.initialized and self.device_name != "":
+            self.device_name = self.p100.getDeviceName()
+        return self.device_name
 
     def get_device_type(self) -> str:
         return self.device_type
+
+    def set_device_name(self, name: str):
+        self.device_name = name

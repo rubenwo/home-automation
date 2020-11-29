@@ -7,6 +7,7 @@ class TapoDevice:
         self.email = email
         self.password = password
         self.device_type = device_type
+        self.device_name = ""
         self.initialized = False
 
     def turn_on(self):
@@ -22,4 +23,7 @@ class TapoDevice:
         pass
 
     def get_device_type(self) -> str:
+        pass
+
+    def set_device_name(self, name: str):
         pass

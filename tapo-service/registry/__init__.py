@@ -31,5 +31,9 @@ def add_device(dev: NewDevice):
         devices[len(devices)] = TapoL510E(dev.ip_address, dev.email, dev.password, dev.device_type)
 
 
+def update_devices(dev: TapoDevice, idx: int):
+    devices[idx] = dev
+
+
 def get_devices() -> Dict[int, TapoDevice]:
     return devices
