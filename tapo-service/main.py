@@ -32,9 +32,16 @@ def get_devices():
 
 
 @app.get("/tapo/devices/{device_id}", status_code=200)
-def device_info(device_id: int):
+def device_info(device_id: int, response: Response):
     print("Returning data for device: {}".format(device_id))
-    d = registry.get_devices()[device_id]
+    devices = registry.get_devices()
+    if device_id > len(devices) - 1:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {
+            "error_message": "device with id: {} not found".format(device_id)
+        }
+
+    d = devices[device_id]
     dev = Device(device_id=device_id, device_type=d.get_device_type(), device_info=d.get_device_info())
     return {
         "device": dev
