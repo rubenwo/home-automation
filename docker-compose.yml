@@ -19,6 +19,10 @@ services:
     build: ./tapo-service
     restart: on-failure
 
+  registry.default.svc.cluster.local:
+    build: ./registry-service
+    restart: on-failure
+
   web.default.svc.cluster.local:
     build: ./client/web/home-automation
     restart: on-failure

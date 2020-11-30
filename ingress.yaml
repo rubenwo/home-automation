@@ -16,6 +16,11 @@ spec:
     methods:
       - GET
     protocol: http
+  - host: registry.default.svc.cluster.local
+    path: "/devices"
+    methods:
+      - GET
+    protocol: http
 
   - host: hue.default.svc.cluster.local
     path: "/hue/information/{device_id}"

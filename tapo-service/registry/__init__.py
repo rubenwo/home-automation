@@ -1,5 +1,6 @@
 from typing import Dict
 
+import requests
 import yaml
 
 from models import NewDevice
@@ -29,6 +30,16 @@ def add_device(dev: NewDevice):
         devices[len(devices)] = TapoP100(dev.ip_address, dev.email, dev.password, dev.device_type)
     elif dev.device_type == "L510E":
         devices[len(devices)] = TapoL510E(dev.ip_address, dev.email, dev.password, dev.device_type)
+
+    data = {
+        "name": devices[len(devices) - 1].get_device_name(),
+        "device_type": devices[len(devices) - 1].get_device_type(),
+        "device_company": "Tapo",
+    }
+    print(data)
+    url = "http://registry.default.svc.cluster.local/devices"
+    response = requests.post(url, json=data)
+    print(response)
 
 
 def update_devices(dev: TapoDevice, idx: int):
