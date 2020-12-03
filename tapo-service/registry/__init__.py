@@ -15,21 +15,18 @@ class Registry:
         self.registry_url = "http://registry.default.svc.cluster.local/devices"
 
     def add_device(self, dev: NewDevice):
-        if not dev.device_type == "P100" or not dev.device_type == "L510E":
-            print("device of type: {} is not supported".format(dev.device_type))
-        else:
-            new_id = str(uuid.uuid4())
-            if dev.device_type == "P100":
-                self.devices[new_id] = TapoP100(dev.ip_address, dev.email, dev.password, dev.device_type)
-            elif dev.device_type == "L510E":
-                self.devices[new_id] = TapoL510E(dev.ip_address, dev.email, dev.password, dev.device_type)
+        new_id = str(uuid.uuid4())
+        if dev.device_type == "P100":
+            self.devices[new_id] = TapoP100(dev.ip_address, dev.email, dev.password, dev.device_type)
+        elif dev.device_type == "L510E":
+            self.devices[new_id] = TapoL510E(dev.ip_address, dev.email, dev.password, dev.device_type)
 
-            self.expose_new_device(
-                new_id,
-                self.devices[new_id].get_device_name(),
-                "plug" if dev.device_type == "P100" else "light",
-                dev.device_type
-            )
+        self.expose_new_device(
+            new_id,
+            self.devices[new_id].get_device_name(),
+            "plug" if dev.device_type == "P100" else "light",
+            dev.device_type
+        )
 
     def expose_new_device(self, device_id: str, name: str, category: str, device_type: str) -> int:
         data = {
