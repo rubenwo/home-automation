@@ -4,7 +4,6 @@
             style="max-width: 540px; min-width: 150px; height: 350px"
             class="mb-2">
         <b-card-img v-bind:src="img" alt="Image" height="130" width="130" class="mb-4"></b-card-img>
-        <b-progress v-bind:value="progress" :max="100" show-progress class="mb-3"></b-progress>
         <div slot="footer">
             <b-button style="background-color: #c6002a;" @click="updateProgress" v-bind:to="navigate()">Practice!
             </b-button>
@@ -24,15 +23,11 @@
       },
       img: {
         type: String,
-        default: ""
-      },
-      progress: {
-        type: Number,
-        default: 0
+        default: "https://labapp.rubenwoldhuis.nl/static/images/dangers/harmful_hazard.png"
       },
       id: {
-        type: Number,
-        default: 0
+        type: String,
+        default: ""
       }
     },
     methods: {
