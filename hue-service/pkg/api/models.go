@@ -11,6 +11,12 @@ type JsonError struct {
 }
 
 type DeviceInfo struct {
-	DeviceID int    `json:"device_id"`
-	Status   string `json:"status"`
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	Category string  `json:"category"`
+	Product  Product `json:"product"`
+}
+type Product struct {
+	Company string `json:"company"`
+	Type    string `json:"type"`
 }

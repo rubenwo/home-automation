@@ -26,11 +26,22 @@ services:
   web.default.svc.cluster.local:
     build: ./client/web/home-automation
     restart: on-failure
-    ports:
-      - 8080:80
 
   mqtt-broker.default.svc.cluster.local:
     image: eclipse-mosquitto
     restart: on-failure
     ports:
       - 1883:1883
+
+  service.redis:
+    image: bitnami/redis:5.0
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    volumes:
+      - redis_data:/bitnami/redis/data
+
+volumes:
+  redis_data:
+    driver: local

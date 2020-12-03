@@ -1,50 +1,51 @@
+import uuid
 from typing import Dict
 
 import requests
-import yaml
 
 from models import NewDevice
 from registry.device import TapoDevice
 from registry.devices.L510E import TapoL510E
 from registry.devices.p100 import TapoP100
 
-devices = {}
 
+class Registry:
+    def __init__(self):
+        self.devices = {}
+        self.registry_url = "http://registry.default.svc.cluster.local/devices"
 
-def load_devices_from_config(path: str):
-    try:
-        with open(path) as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
-            if data['version'] == 'v1':
-                for idx, spec in zip(range(len(data['spec'])), data['spec']):
-                    if spec['type'] == "P100":
-                        devices[idx] = TapoP100(spec['ip'], spec['email'], spec['password'], spec['type'])
-                    elif spec['type'] == "L510E":
-                        devices[idx] = TapoL510E(spec['ip'], spec['email'], spec['password'], spec['type'])
-    except:
-        print("file: {} not found".format(path))
+    def add_device(self, dev: NewDevice):
+        if not dev.device_type == "P100" or not dev.device_type == "L510E":
+            print("device of type: {} is not supported".format(dev.device_type))
+        else:
+            new_id = str(uuid.uuid4())
+            if dev.device_type == "P100":
+                self.devices[new_id] = TapoP100(dev.ip_address, dev.email, dev.password, dev.device_type)
+            elif dev.device_type == "L510E":
+                self.devices[new_id] = TapoL510E(dev.ip_address, dev.email, dev.password, dev.device_type)
 
+            self.expose_new_device(
+                new_id,
+                self.devices[new_id].get_device_name(),
+                "plug" if dev.device_type == "P100" else "light",
+                dev.device_type
+            )
 
-def add_device(dev: NewDevice):
-    if dev.device_type == "P100":
-        devices[len(devices)] = TapoP100(dev.ip_address, dev.email, dev.password, dev.device_type)
-    elif dev.device_type == "L510E":
-        devices[len(devices)] = TapoL510E(dev.ip_address, dev.email, dev.password, dev.device_type)
+    def expose_new_device(self, device_id: str, name: str, category: str, device_type: str) -> int:
+        data = {
+            "id": device_id,
+            "name": name,
+            "category": category,
+            "product": {
+                "company": "tp-link",
+                "type": device_type
+            }
+        }
+        response = requests.post(self.registry_url, json=data)
+        return response.status_code
 
-    data = {
-        "name": devices[len(devices) - 1].get_device_name(),
-        "device_type": devices[len(devices) - 1].get_device_type(),
-        "device_company": "Tapo",
-    }
-    print(data)
-    url = "http://registry.default.svc.cluster.local/devices"
-    response = requests.post(url, json=data)
-    print(response)
+    def update_devices(self, dev: TapoDevice, dev_id: str):
+        self.devices[dev_id] = dev
 
-
-def update_devices(dev: TapoDevice, idx: int):
-    devices[idx] = dev
-
-
-def get_devices() -> Dict[int, TapoDevice]:
-    return devices
+    def get_devices(self) -> Dict[str, TapoDevice]:
+        return self.devices

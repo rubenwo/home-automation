@@ -44,7 +44,6 @@ func (a *api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
-	// TODO: when the api is not health/ready, send a 503 with a message
 	if err := json.NewEncoder(w).Encode(&HealthzModel{
 		IsHealthy:    true,
 		ErrorMessage: "",

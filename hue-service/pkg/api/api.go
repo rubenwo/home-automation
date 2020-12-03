@@ -2,20 +2,21 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 )
 
 type api struct {
+	registryUrl string
 }
 
 func New() *api {
-	return &api{}
+	return &api{
+		registryUrl: "http://registry.default.svc.cluster.local/devices",
+	}
 }
 
 func (a *api) Run() error {
@@ -32,7 +33,7 @@ func (a *api) Run() error {
 	router.Use(middleware.Timeout(60 * time.Second))
 
 	router.Get("/healthz", a.healthz)
-	router.Get("/hue/information/{device_id}", a.deviceInfo)
+	router.Get("/hue/devices", a.getHueDevices)
 
 	return http.ListenAndServe(":80", router)
 }
@@ -48,22 +49,6 @@ func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *api) deviceInfo(w http.ResponseWriter, r *http.Request) {
-	deviceID, err := strconv.Atoi(chi.URLParam(r, "device_id"))
-	if err != nil {
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			StatusCode: http.StatusNotFound,
-			Message:    err.Error(),
-		}); err != nil {
-			log.Printf("error sending deviceInfo jsonError: %s\n", err.Error())
-		}
-	}
-	fmt.Printf("returning device information for device: %d\n", deviceID)
-	w.Header().Set("content-type", "application/json")
-	if err := json.NewEncoder(w).Encode(&DeviceInfo{
-		DeviceID: deviceID,
-		Status:   "On",
-	}); err != nil {
-		log.Printf("error sending deviceInfo: %s\n", err.Error())
-	}
+func (a *api) getHueDevices(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusFound)
 }

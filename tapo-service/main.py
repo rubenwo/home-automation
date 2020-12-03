@@ -1,12 +1,11 @@
 from fastapi import FastAPI, Response, status
 
-import registry
 from models import NewDevice, Device
+from registry import Registry
 
 app = FastAPI()
 
-registry.load_devices_from_config("./config.yaml")
-print(registry.get_devices())
+registry = Registry()
 
 
 @app.get("/healthz", status_code=200)
@@ -35,29 +34,29 @@ def get_devices():
 
 
 @app.get("/tapo/devices/{device_id}", status_code=200)
-def get_device_info(device_id: int, response: Response):
+def get_device_info(device_id: str, response: Response):
     print("Returning data for device: {}".format(device_id))
     devices = registry.get_devices()
-    if device_id > len(devices) - 1:
+    try:
+        d = devices[device_id]
+        name = d.get_device_name()
+        if name == "":
+            name = device_id
+        dev = Device(device_id=device_id, device_name=name, device_type=d.get_device_type(),
+                     device_info=d.get_device_info())
+        return {
+            "device": dev
+        }
+    except KeyError:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {
             "error_message": "device with id: {} not found".format(device_id)
         }
 
-    d = devices[device_id]
-    name = d.get_device_name()
-    if name == "":
-        name = device_id
-    dev = Device(device_id=device_id, device_name=name, device_type=d.get_device_type(),
-                 device_info=d.get_device_info())
-    return {
-        "device": dev
-    }
-
 
 @app.put("/tapo/devices/{device_id}", status_code=200)
-def update_device_info(device: Device, device_id: int, response: Response):
-    if device.device_id != str(device_id):
+def update_device_info(device: Device, device_id: str, response: Response):
+    if device.device_id != device_id:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {
             "error_message": "device_id in url: {} is not equal to device_id in body: {}".format(device_id,
@@ -66,21 +65,22 @@ def update_device_info(device: Device, device_id: int, response: Response):
 
     print("Updating data for device: {}".format(device_id))
     devices = registry.get_devices()
-    if device_id > len(devices) - 1:
+
+    try:
+        d = devices[device_id]
+        name = device.device_name
+        d.set_device_name(device.device_name)
+        registry.update_devices(d, device_id)
+        dev = Device(device_id=device_id, device_name=name, device_type=d.get_device_type(),
+                     device_info=d.get_device_info())
+        return {
+            "device": dev
+        }
+    except  KeyError:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {
             "error_message": "device with id: {} not found".format(device_id)
         }
-
-    d = devices[device_id]
-    name = device.device_name
-    d.set_device_name(device.device_name)
-    registry.update_devices(d, device_id)
-    dev = Device(device_id=device_id, device_name=name, device_type=d.get_device_type(),
-                 device_info=d.get_device_info())
-    return {
-        "device": dev
-    }
 
 
 @app.post("/tapo/devices/register", status_code=201)
@@ -95,3 +95,24 @@ def register_device(device: NewDevice):
     return {
         "devices": devices
     }
+
+
+@app.get("/tapo/lights/{device_id}", status_code=200)
+def command_lights(device_id: str, response: Response, command: str = ""):
+    try:
+        dev = registry.get_devices()[device_id]
+        if command == "on":
+            dev.turn_on()
+        elif command == "off":
+            dev.turn_off()
+        else:
+            response.status_code = status.HTTP_400_BAD_REQUEST
+            return {
+                "error_message": "command: {} is not valid for device_type: {}".format(command, dev.get_device_type())
+            }
+
+    except KeyError:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {
+            "error_message": "device with id: {} not found".format(device_id)
+        }
