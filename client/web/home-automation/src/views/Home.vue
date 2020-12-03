@@ -13,7 +13,7 @@
                     v-bind:height="10"
                     v-bind:title="device.name"
                     v-bind:id="device.id"
-                    style="max-width: 540px;"
+                    style="max-width: 500px;"
             >
                 >
             </app-card>
@@ -37,17 +37,10 @@
       })
     },
     methods: {
-      ...mapActions("devices", ["fetchDevices", "addNewDevice"])
+      ...mapActions("devices", ["fetchDevices"])
     },
     async mounted() {
       await this.fetchDevices();
-      let data = {
-        "ip_address": "192.168.2.X",
-        "email": "",
-        "password": "",
-        "device_type": "P100"
-      }
-      await this.addNewDevice("tapo", data);
     },
     components: {
       AppCard

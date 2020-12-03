@@ -1,15 +1,13 @@
 <template>
     <b-navbar :sticky="true" toggleable="lg" type="dark" style="background-color: #4287f5;">
         <b-container>
-            <b-navbar-brand href="#" to="/">LabApp</b-navbar-brand>
+            <b-navbar-brand href="#" to="/">Home Automation</b-navbar-brand>
 
             <b-navbar-toggle target="nav_collapse"/>
 
             <b-collapse is-nav id="nav_collapse">
                 <b-navbar-nav>
                     <b-nav-item href="#" to="/" exact>Home</b-nav-item>
-                    <b-nav-item href="#" to="/device" exact>Device</b-nav-item>
-                    <!-- <b-nav-item href="#" to="/settings">Settings</b-nav-item> -->
                 </b-navbar-nav>
                 <b-navbar-nav class="ml-auto">
 
@@ -26,18 +24,22 @@
                 </b-navbar-nav>
             </b-collapse>
         </b-container>
+        <add-device-modal ref="modal"/>
     </b-navbar>
 </template>
 
 <script>
   import {mapActions, mapState} from "vuex";
+  import AddDeviceModal from "./AddDeviceModal";
 
   export default {
     name: "app-toolbar",
     data() {
       return {};
     },
-
+    components: {
+      AddDeviceModal
+    },
     computed: {
       ...mapState("devices", {
         devices: state => state.devices
@@ -46,15 +48,9 @@
 
     methods: {
       ...mapActions("devices", ["addNewDevice"]),
-      onClickAdd: async () => {
-        await this.addNewDevice("tapo", {
-          "ip_address": "192.168.2.X",
-          "email": "",
-          "password": "",
-          "device_type": "P100"
-        });
-        console.log("clicked add")
-      }
+      onClickAdd() {
+        this.$refs.modal.$emit('add_device')
+      },
     }
   };
 </script>

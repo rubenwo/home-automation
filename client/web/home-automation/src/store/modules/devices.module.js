@@ -35,12 +35,12 @@ export default {
         throw err;
       }
     },
-    async addNewDevice({commit}, device_type, data) {
+    async addNewDevice({commit}, data) {
       console.log('addNewDevice')
       console.log(data)
       commit("REQUEST");
       try {
-        const result = await DeviceService.addNewDevice(device_type, data)
+        const result = await DeviceService.addNewDevice(data)
         console.log(result)
       } catch (err) {
         commit("FAILED", err.message);

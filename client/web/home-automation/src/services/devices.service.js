@@ -6,10 +6,10 @@ export default {
     console.log(res);
     return res.data;
   },
-  async addNewDevice(device_type, data) {
-    console.log(device_type, data)
+  async addNewDevice(data) {
+    console.log(data)
     let url = "http://192.168.2.135/api/v1";
-    switch (device_type) {
+    switch (data.device_type) {
       case "tapo":
         url += "/tapo/devices/register";
         break;
@@ -17,7 +17,7 @@ export default {
         //   url += "/hue/devices/register";
         //   break;
     }
-    const res = await ApiService.post(url, data);
+    const res = await ApiService().post(url, data.data);
     console.log(res)
     return res.data;
   }
