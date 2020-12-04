@@ -47,7 +47,7 @@
 
     methods: {
       navigate() {
-        return "device/" + this.id;
+        return "device/" + this.company + "/" + this.id;
       },
     }
   };
