@@ -11,7 +11,11 @@
         >
             <app-card
                     v-bind:height="10"
-                    v-bind:title="device.name"
+                    v-bind:name="device.name"
+                    v-bind:category="device.category"
+                    v-bind:company="device.product.company"
+                    v-bind:device_type="device.product.type"
+                    v-bind:img="getImgUrl(device)"
                     v-bind:id="device.id"
                     style="max-width: 500px;"
             >
@@ -37,7 +41,17 @@
       })
     },
     methods: {
-      ...mapActions("devices", ["fetchDevices"])
+      ...mapActions("devices", ["fetchDevices"]),
+      getImgUrl(device) {
+        switch (device.category) {
+          case "plug":
+            console.log('returning plug')
+            return require('../assets/smart_plug_icon.png')
+          case "light":
+            console.log('returning light')
+            return require('../assets/light_icon.jpg')
+        }
+      },
     },
     async mounted() {
       await this.fetchDevices();

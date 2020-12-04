@@ -43,6 +43,12 @@ class Registry:
 
     def update_devices(self, dev: TapoDevice, dev_id: str):
         self.devices[dev_id] = dev
+        self.expose_new_device(
+            dev_id,
+            dev.get_device_name(),
+            "plug" if dev.device_type == "P100" else "light",
+            dev.device_type
+        )
 
     def get_devices(self) -> Dict[str, TapoDevice]:
         return self.devices

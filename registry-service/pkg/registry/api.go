@@ -12,7 +12,7 @@ import (
 
 type api struct {
 	router  *chi.Mux
-	devices []DeviceInfo
+	devices map[string]DeviceInfo
 }
 
 func New(cfg *Config) (*api, error) {
@@ -22,7 +22,10 @@ func New(cfg *Config) (*api, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("error validating config: %w", err)
 	}
-	a := &api{router: chi.NewRouter()}
+	a := &api{
+		router:  chi.NewRouter(),
+		devices: make(map[string]DeviceInfo),
+	}
 	// A good base middleware stack
 	a.router.Use(middleware.RequestID)
 	a.router.Use(middleware.RealIP)
@@ -59,7 +62,7 @@ func (a *api) postDevice(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	a.devices = append(a.devices, dev)
+	a.devices[dev.ID] = dev
 	a.getDevices(w, r)
 }
 
@@ -67,7 +70,9 @@ func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
 	var devices struct {
 		Devices []DeviceInfo `json:"devices"`
 	}
-	devices.Devices = a.devices
+	for _, v := range a.devices {
+		devices.Devices = append(devices.Devices, v)
+	}
 
 	w.Header().Set("content-type", "application/json")
 	if err := json.NewEncoder(w).Encode(&devices); err != nil {
