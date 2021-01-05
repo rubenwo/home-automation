@@ -1,6 +1,7 @@
 FROM python:3.7
 
-RUN pip install fastapi uvicorn PyP100 pyyaml
+COPY ./req.txt /
+RUN pip install -r req.txt
 
 EXPOSE 80
 

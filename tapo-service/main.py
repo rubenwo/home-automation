@@ -97,7 +97,7 @@ def register_device(device: NewDevice):
     }
 
 
-@app.get("/tapo/lights/{device_id}", status_code=200)
+@app.get("/tapo/lights/{device_id}/{command}", status_code=200)
 def command_lights(device_id: str, response: Response, command: str = ""):
     try:
         dev = registry.get_devices()[device_id]
@@ -116,3 +116,7 @@ def command_lights(device_id: str, response: Response, command: str = ""):
         return {
             "error_message": "device with id: {} not found".format(device_id)
         }
+
+    return {
+
+    }

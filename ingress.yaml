@@ -23,7 +23,7 @@ spec:
       - GET
     protocol: http
   - host: tapo.default.svc.cluster.local
-    path: "/tapo/lights/{device_id}"
+    path: "/tapo/lights/{device_id}/{command}"
     methods:
       - GET
     protocol: http

@@ -1,37 +1,37 @@
 from typing import Dict
 
-from PyP100 import PyP100
-
+from drivers.p100.p100 import P100
 from registry import TapoDevice
 
 
 class TapoP100(TapoDevice):
     def __init__(self, ip_address: str, email: str, password: str, device_type: str):
         super().__init__(ip_address, email, password, device_type)
-        self.p100 = PyP100.P100(self.ip_address, self.email, self.password)
+        self.p100 = P100(self.ip_address)
+
         try:
             self.p100.handshake()
-            self.p100.login()
+            self.p100.login_request(self.email, self.password)
             self.initialized = True
         except:
             print("error thrown when connecting to device at: {}".format(self.ip_address))
             self.initialized = False
 
     def turn_on(self):
-        self.p100.turnOn()
+        self.p100.change_state(1, "88-00-DE-AD-52-E1")
 
     def turn_off(self):
-        self.p100.turnOff()
+        self.p100.change_state(0, "88-00-DE-AD-52-E1")
 
     def get_device_info(self) -> Dict[str, str]:
         device_info = {}
         if self.initialized:
-            device_info = self.p100.getDeviceInfo()
+            device_info = self.p100.get_state()
         return device_info
 
     def get_device_name(self) -> str:
         if self.initialized and self.device_name != "":
-            self.device_name = self.p100.getDeviceName()
+            self.device_name = self.p100.get_state()
         return self.device_name
 
     def get_device_type(self) -> str:
