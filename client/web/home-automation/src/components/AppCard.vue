@@ -7,6 +7,10 @@
                     class="mb-4"></b-card-img>
         <p>{{category}}</p>
         <p>{{company}} : {{device_type}}</p>
+        <div>
+            <b-button variant="success" @click="turnOnDevice">On</b-button>
+            <b-button @click="turnOffDevice()">Off</b-button>
+        </div>
         <div slot="footer">
             <b-button style="background-color: #4287f5;" v-bind:to="navigate()">Information
             </b-button>
@@ -15,6 +19,7 @@
 </template>
 
 <script>
+  import TapoService from "../services/tapo.service"
 
   export default {
     name: "app-card",
@@ -49,6 +54,13 @@
       navigate() {
         return "device/" + this.company + "/" + this.id;
       },
+      turnOnDevice() {
+        console.log(this.id)
+        TapoService.turnOnDevice(this.id);
+      },
+      turnOffDevice() {
+        TapoService.turnOffDevice(this.id);
+      }
     }
   };
 </script>
