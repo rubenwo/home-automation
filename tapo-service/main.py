@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Response, status
 
 from models import NewDevice, Device
-from registry import Registry
+from registry import Registry, TapoL510E
 
 app = FastAPI()
 
@@ -97,11 +97,13 @@ def register_device(device: NewDevice):
     }
 
 
-@app.get("/tapo/lights/{device_id}/{command}", status_code=200)
-def command_lights(device_id: str, response: Response, command: str = ""):
+@app.get("/tapo/lights/{device_id}", status_code=200)
+def command_lights(device_id: str, response: Response, command: str = "", brightness: int = 100):
     try:
         dev = registry.get_devices()[device_id]
-        if command == "on":
+        if command == "on" and isinstance(dev, TapoL510E):
+            dev.set_brightness(brightness=brightness)
+        elif command == "on":
             dev.turn_on()
         elif command == "off":
             dev.turn_off()

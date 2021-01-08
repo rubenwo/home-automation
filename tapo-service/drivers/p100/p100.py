@@ -1,20 +1,22 @@
+import logging
+from time import time
+
 import jsons
+
+import drivers.p100.helpers as helpers
 from drivers.p100.encryption import Encryption
-from drivers.p100.models.key_pair import KeyPair
-from drivers.p100.models.params.handshake_params import HandshakeParams
-from drivers.p100.models.methods.login_device_method import LoginDeviceMethod
-from drivers.p100.models.params.login_device_params import LoginDeviceParams
-from drivers.p100.models.methods.handshake_method import HandshakeMethod
-from drivers.p100.models.methods.set_device_info_method import SetDeviceInfoMethod
-from drivers.p100.models.methods.get_device_info_method import GetDeviceInfoMethod
-from drivers.p100.models.params.device_info_params import DeviceInfoParams
-from drivers.p100.models.methods.secure_passthrough_method import SecurePassthroughMethod
 from drivers.p100.http_client import Http
 from drivers.p100.models.exceptions.ResponseErrorCodeNotZero import ResponseErrorCodeNotZero
-from time import time
+from drivers.p100.models.key_pair import KeyPair
+from drivers.p100.models.methods.get_device_info_method import GetDeviceInfoMethod
+from drivers.p100.models.methods.handshake_method import HandshakeMethod
+from drivers.p100.models.methods.login_device_method import LoginDeviceMethod
+from drivers.p100.models.methods.secure_passthrough_method import SecurePassthroughMethod
+from drivers.p100.models.methods.set_device_info_method import SetDeviceInfoMethod
+from drivers.p100.models.params.device_info_params import DeviceInfoParams
+from drivers.p100.models.params.handshake_params import HandshakeParams
+from drivers.p100.models.params.login_device_params import LoginDeviceParams
 from drivers.p100.tp_link_cipher import TpLinkCipher
-import drivers.p100.helpers as helpers
-import logging
 
 logger = logging.getLogger('root')
 
@@ -63,11 +65,13 @@ class P100:
     def is_on(self) -> bool:
         return self.get_state()['device_on']
 
-    def change_state(self, new_state: int, terminal_uuid: str):
-        new_state_bool = True if new_state == 1 else False
+    def change_state(self, new_state: {}, terminal_uuid: str):
+        new_state_bool = True if new_state["device_on"] == 1 else False
         logger.debug(f"Will change state to {new_state_bool}, terminal uuid: {terminal_uuid}")
         device_info_params = DeviceInfoParams()
         device_info_params.set_device_on(new_state_bool)
+        if "brightness" in new_state:
+            device_info_params.set_brightness(new_state["brightness"])
         logger.debug(f"Device info params: {jsons.dumps(device_info_params)}")
 
         device_info_method = SetDeviceInfoMethod(device_info_params)
