@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"time"
@@ -14,6 +15,7 @@ type api struct {
 	router    *chi.Mux
 	devices   map[string]DeviceInfo
 	scheduler *Scheduler
+	groups    map[string][]string
 }
 
 func New(cfg *Config) (*api, error) {
@@ -27,6 +29,7 @@ func New(cfg *Config) (*api, error) {
 		router:    chi.NewRouter(),
 		devices:   make(map[string]DeviceInfo),
 		scheduler: NewScheduler(),
+		groups:    make(map[string][]string),
 	}
 	// A good base middleware stack
 	a.router.Use(middleware.RequestID)
@@ -44,6 +47,8 @@ func New(cfg *Config) (*api, error) {
 
 	a.router.Get("/schedules", a.getSchedules)
 	a.router.Post("/schedules", a.createSchedule)
+
+	a.router.Post("/group", a.createGroup)
 
 	return a, nil
 }
@@ -91,4 +96,42 @@ func (a *api) createSchedule(w http.ResponseWriter, r *http.Request) {
 
 func (a *api) getSchedules(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func (a *api) createGroup(w http.ResponseWriter, r *http.Request) {
+	var newGroup struct {
+		Devices []string `json:"devices"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&newGroup); err != nil {
+		log.Println("error decoding the body:", err)
+		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+	id := uuid.New().String()
+	a.groups[id] = newGroup.Devices
+
+	var createdGroup struct {
+		ID      string   `json:"id"`
+		Devices []string `json:"devices"`
+	}
+
+	createdGroup.ID = id
+	createdGroup.Devices = newGroup.Devices
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&createdGroup); err != nil {
+		log.Printf("error sending getDevices: %s\n", err.Error())
+	}
+}
+
+func (a *api) getGroups(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Groups map[string][]string `json:"groups"`
+	}
+	data.Groups = a.groups
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&data); err != nil {
+		log.Printf("error sending getDevices: %s\n", err.Error())
+	}
 }
