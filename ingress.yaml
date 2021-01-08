@@ -5,6 +5,12 @@ spec:
     methods:
       - GET
     protocol: http
+  - host: registry.default.svc.cluster.local
+    path: "/schedules"
+    methods:
+      - GET
+      - POST
+    protocol: http
 
   - host: tapo.default.svc.cluster.local
     path: "/tapo/devices/{device_id}"

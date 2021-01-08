@@ -5,7 +5,8 @@ export default {
   state: {
     loading: false,
     error: null,
-    tapoDevice: null
+    tapoDevice: null,
+    tapoDevices: [],
   },
   mutations: {
     REQUEST(state) {
@@ -15,6 +16,10 @@ export default {
     TAPO_DEVICE_LOADED(state, device) {
       state.loading = false;
       state.tapoDevice = device;
+    },
+    TAPO_DEVICES_LOADED(state, devices) {
+      state.loading = false;
+      state.tapoDevices = devices;
     },
     FAILED(state, message) {
       state.loading = false;
@@ -35,6 +40,17 @@ export default {
         commit("FAILED", err.message);
         throw err;
       }
-    }
+    },
+    async fetchTapoDevices({commit}) {
+      commit("REQUEST");
+      try {
+        const result = await TapoService.fetchAllTapoDevices();
+        console.log(result.devices)
+        commit("TAPO_DEVICES_LOADED", result.devices);
+      } catch (err) {
+        commit("FAILED", err.message);
+        throw err;
+      }
+    },
   }
 }
