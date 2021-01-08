@@ -10,7 +10,7 @@
                 v-for="device in this.devices"
         >
             <app-card
-                    v-bind:height="15"
+                    v-bind:height="10"
                     v-bind:name="device.name"
                     v-bind:category="device.category"
                     v-bind:company="device.product.company"

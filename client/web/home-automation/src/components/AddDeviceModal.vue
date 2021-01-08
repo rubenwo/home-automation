@@ -47,8 +47,7 @@
                             <label>Device Type:</label>
                         </b-col>
                         <b-col sm="8">
-                            <input size="sm" class="mx-1" placeholder="device type"
-                                   v-model="newItem.device_type"/>
+                            <b-form-select v-model="newItem.device_type" :options="device_type_options"></b-form-select>
                         </b-col>
                     </b-row>
                 </b-container>
@@ -69,7 +68,11 @@
         email: "",
         password: "",
         device_type: "",
-      }
+      },
+      device_type_options: [
+        {value: "L510E", text: "L510E"},
+        {value: "P100", text: "P100"}
+      ]
     }),
     computed: {
       ...mapState("devices", {
