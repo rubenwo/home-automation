@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/google/uuid"
+	"github.com/rubenwo/home-automation/registry-service/pkg/database"
 	"log"
 	"net/http"
 	"time"
@@ -14,8 +15,10 @@ import (
 type api struct {
 	router    *chi.Mux
 	devices   map[string]DeviceInfo
+	keys      []string
 	scheduler *Scheduler
 	groups    map[string][]string
+	db        database.Database
 }
 
 func New(cfg *Config) (*api, error) {
@@ -25,11 +28,54 @@ func New(cfg *Config) (*api, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("error validating config: %w", err)
 	}
+	db, err := database.Factory("redis")
+	if err != nil {
+		return nil, fmt.Errorf("couldn't create database: %w", err)
+	}
+
 	a := &api{
 		router:    chi.NewRouter(),
 		devices:   make(map[string]DeviceInfo),
 		scheduler: NewScheduler(),
+		keys:      []string{},
 		groups:    make(map[string][]string),
+		db:        db,
+	}
+
+	rawKeys, err := db.Get("registry-keys")
+	if err != nil {
+		fmt.Printf("error retrieving keys: %v\n", err)
+	} else {
+		fmt.Println(rawKeys)
+		rawKeysStr := rawKeys.(string)
+		//rawKeysStr = strings.ReplaceAll(rawKeysStr, "\\", "")
+		//rawKeysStr = strings.ReplaceAll(rawKeysStr, "\"", "")
+		//rawKeysStr = strings.TrimPrefix(rawKeysStr, "[")
+		//rawKeysStr = strings.TrimSuffix(rawKeysStr, "]")
+		//
+		//splitKeys := strings.Split(rawKeysStr, ",")
+		//for _, sp := range splitKeys {
+		//	a.keys = append(a.keys, strings.TrimSpace(sp))
+		//}
+
+		if err := json.Unmarshal([]byte(rawKeysStr), &a.keys); err != nil {
+
+		}
+
+		for _, k := range a.keys {
+			fmt.Println(k)
+			raw, err := a.db.Get(k)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(raw)
+			var dev DeviceInfo
+			if err := json.Unmarshal([]byte(raw.(string)), &dev); err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(dev)
+			a.devices[k] = dev
+		}
 	}
 	// A good base middleware stack
 	a.router.Use(middleware.RequestID)
@@ -73,6 +119,22 @@ func (a *api) postDevice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.devices[dev.ID] = dev
+	jsonData, err := json.Marshal(&dev)
+	if err != nil {
+		log.Println(jsonData)
+	}
+	if err := a.db.Set(fmt.Sprintf("registry-%s", dev.ID), jsonData); err != nil {
+		log.Println(err)
+	}
+	a.keys = append(a.keys, fmt.Sprintf("registry-%s", dev.ID))
+	jsonKeys, err := json.Marshal(&a.keys)
+	if err != nil {
+		log.Println(jsonKeys)
+	}
+	if err := a.db.Set("registry-keys", jsonKeys); err != nil {
+		log.Println(err)
+	}
+
 	a.getDevices(w, r)
 }
 

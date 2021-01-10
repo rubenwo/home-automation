@@ -10,18 +10,26 @@ services:
     volumes:
       - /mnt/gateway/certs:/certs
       - ./ingress.yaml:/root/ingress.yaml
+    depends_on:
+      - redis.default.svc.cluster.local
 
   hue.default.svc.cluster.local:
     build: ./hue-service
     restart: on-failure
+    depends_on:
+      - redis.default.svc.cluster.local
 
   tapo.default.svc.cluster.local:
     build: ./tapo-service
     restart: on-failure
+    depends_on:
+      - redis.default.svc.cluster.local
 
   registry.default.svc.cluster.local:
     build: ./registry-service
     restart: on-failure
+    depends_on:
+      - redis.default.svc.cluster.local
 
   web.default.svc.cluster.local:
     build: ./client/web/home-automation
