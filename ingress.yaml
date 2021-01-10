@@ -13,6 +13,11 @@ spec:
     protocol: http
 
   - host: tapo.default.svc.cluster.local
+    path: /tapo/wake/{device_id}
+    methods:
+      - GET
+    protocol: http
+  - host: tapo.default.svc.cluster.local
     path: "/tapo/devices/{device_id}"
     methods:
       - GET
