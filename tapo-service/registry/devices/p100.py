@@ -71,5 +71,6 @@ class TapoP100(TapoDevice):
         self.device_name = name
 
     def wake_up(self) -> bool:
-        self.__connect__()
+        if not self.initialized or time.time() - self.timeout > 300:
+            self.__connect__()
         return self.initialized
