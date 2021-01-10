@@ -13,6 +13,8 @@ export default {
       state.loading = true;
       state.error = null;
     },
+    WAKE_DEVICE() {
+    },
     TAPO_DEVICE_LOADED(state, device) {
       state.loading = false;
       state.tapoDevice = device;
@@ -52,5 +54,10 @@ export default {
         throw err;
       }
     },
+    async wakeTapoDevice({commit}, deviceId) {
+      commit("WAKE_DEVICE")
+      const result = await TapoService.wakeTapoDevice(deviceId);
+      console.log(result.devices)
+    }
   }
 }

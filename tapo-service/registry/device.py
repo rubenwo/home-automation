@@ -27,3 +27,6 @@ class TapoDevice:
 
     def set_device_name(self, name: str):
         pass
+
+    def wake_up(self) -> bool:
+        pass

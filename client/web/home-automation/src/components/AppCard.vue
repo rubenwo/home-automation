@@ -1,30 +1,40 @@
 <template>
-    <b-card
-            v-bind:sub-title="name"
-            style="max-width: 540px; min-width: 175px; min-height: 425px; max-height: 500px"
-            class="mb-2">
-        <b-card-img v-bind:src="img" alt="Image" height="130" width="130"
-                    class="mb-4"/>
-        <p>{{category}}</p>
-        <p>{{company}} : {{device_type}}</p>
-        <div>
-            <b-button variant="success" @click="turnOnDevice">On</b-button>
-            <b-button @click="turnOffDevice()">Off</b-button>
-            <input v-if="device_type=='L510E'" type="range" min="1" max="100"
-                   v-model="brightness">
-        </div>
-        <div slot="footer">
-            <b-button style="background-color: #4287f5;" v-bind:to="navigate()">Information
-            </b-button>
-        </div>
-    </b-card>
+    <div v-if="this.state === 'loaded'">
+        <b-card
+                v-bind:sub-title="name"
+                style="max-width: 540px; min-width: 175px; min-height: 425px; max-height: 500px"
+                class="mb-2">
+            <b-card-img v-bind:src="img" alt="Image" height="130" width="130"
+                        class="mb-4"/>
+            <p>{{category}}</p>
+            <p>{{company}} : {{device_type}}</p>
+            <div>
+                <b-button variant="success" @click="turnOnDevice">On</b-button>
+                <b-button @click="turnOffDevice()">Off</b-button>
+                <input v-if="device_type=='L510E'" type="range" min="1" max="100"
+                       v-model="brightness">
+            </div>
+            <div slot="footer">
+                <b-button style="background-color: #4287f5;" v-bind:to="navigate()">Information
+                </b-button>
+            </div>
+        </b-card>
+    </div>
+    <div v-else>
+        <h3>Loading results...</h3>
+        <Loading :active.sync="this.state === 'loading'"
+                 :is-full-page="true"/>
+    </div>
 </template>
 
 <script>
   import TapoService from "../services/tapo.service"
+  import {mapActions, mapState} from "vuex";
+  import Loading from 'vue-loading-overlay'
 
   export default {
     name: "app-card",
+    components: {Loading},
     props: {
       name: {
         type: String,
@@ -52,21 +62,41 @@
       }
     },
     data() {
-      return {brightness: 100}
+      return {
+        brightness: 100,
+        state: "loading",
+      }
+    },
+    computed: {
+      ...mapState("tapo", {
+        tapoDevice: state => state.tapoDevice
+      })
     },
     methods: {
+      ...mapActions("tapo", ["wakeTapoDevice"]),
       navigate() {
         return "device/" + this.company + "/" + this.id;
       },
       turnOnDevice() {
-        console.log(this.id, this.brightness)
-        if (this.device_type === 'L510E')
-          TapoService.setDeviceBrightness(this.id, this.brightness)
-        else
-          TapoService.turnOnDevice(this.id);
+        if (this.company === "tp-link") {
+          console.log(this.id, this.brightness)
+          if (this.device_type === 'L510E')
+            TapoService.setDeviceBrightness(this.id, this.brightness)
+          else
+            TapoService.turnOnDevice(this.id);
+        }
       },
       turnOffDevice() {
-        TapoService.turnOffDevice(this.id);
+        if (this.company === "tp-link") {
+          TapoService.turnOffDevice(this.id);
+        }
+      }
+    },
+    async mounted() {
+      console.log(this.company)
+      if (this.company === "tp-link") {
+        await this.wakeTapoDevice(this.id);
+        this.state = 'loaded'
       }
     }
   };

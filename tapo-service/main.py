@@ -18,6 +18,22 @@ def healthz(response: Response):
     }
 
 
+@app.get("/tapo/wake/{device_id}")
+def wake_device(device_id: str, response: Response):
+    try:
+        dev = registry.get_devices()[device_id]
+        is_awake = dev.wake_up()
+        return {
+            "device_id": device_id,
+            "is_awake": is_awake
+        }
+    except KeyError as ke:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {
+            "error_message": "device with id: {} not found".format(device_id)
+        }
+
+
 @app.get("/tapo/devices", status_code=200)
 def get_devices():
     devices = []

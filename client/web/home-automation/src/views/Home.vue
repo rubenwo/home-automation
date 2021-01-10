@@ -39,13 +39,9 @@
       ...mapState("devices", {
         devices: state => state.devices
       }),
-      ...mapState("tapo", {
-        tapoDevices: state => state.tapoDevices
-      })
     },
     methods: {
       ...mapActions("devices", ["fetchDevices"]),
-      ...mapActions("tapo", ["fetchTapoDevices"]),
       getImgUrl(device) {
         switch (device.category) {
           case "plug":
@@ -59,7 +55,6 @@
     },
     async mounted() {
       await this.fetchDevices();
-      await this.fetchTapoDevices();
     },
     components: {
       AppCard

@@ -69,3 +69,7 @@ class TapoP100(TapoDevice):
 
     def set_device_name(self, name: str):
         self.device_name = name
+
+    def wake_up(self) -> bool:
+        self.__connect__()
+        return self.initialized
