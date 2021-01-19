@@ -3,6 +3,7 @@ module github.com/rubenwo/home-automation/gateway-service
 go 1.15
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/go-chi/chi v1.5.0
 	github.com/google/uuid v1.1.2

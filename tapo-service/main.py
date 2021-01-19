@@ -70,6 +70,21 @@ def get_device_info(device_id: str, response: Response):
         }
 
 
+@app.delete("/tapo/devices/{device_id}", status_code=200)
+def delete_device_info(device_id: str, response: Response):
+    print("Deleting device: {}".format(device_id))
+    try:
+        registry.delete_device(device_id)
+        return {
+            "message": "deleted device {} successfully".format(device_id)
+        }
+    except KeyError as e:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {
+            "error_message": "device with id: {} not found".format(device_id)
+        }
+
+
 @app.put("/tapo/devices/{device_id}", status_code=200)
 def update_device_info(device: Device, device_id: str, response: Response):
     if device.device_id != device_id:

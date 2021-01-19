@@ -8,21 +8,20 @@ import com.example.homeautomation.Constants;
 import com.example.homeautomation.listeners.ErrorListener;
 import com.example.homeautomation.models.TapoDevice;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
-public class TapoDevices implements IRequest<JSONObject> {
+public class GetTapoDevice implements IRequest<JSONObject> {
     public interface GetTapoDeviceListener {
-        void onTapoDevices(ArrayList<TapoDevice> devices);
+        void onTapoDevices(TapoDevice device);
     }
 
+    private final String deviceId;
     private final ErrorListener err;
     private final GetTapoDeviceListener tapo;
 
-    public TapoDevices(ErrorListener err, GetTapoDeviceListener tapo) {
+    public GetTapoDevice(String id, ErrorListener err, GetTapoDeviceListener tapo) {
+        this.deviceId = id;
         this.err = err;
         this.tapo = tapo;
     }
@@ -31,21 +30,18 @@ public class TapoDevices implements IRequest<JSONObject> {
     public JsonRequest<JSONObject> doRequest() {
         return new JsonObjectRequest(
                 Request.Method.GET,
-                Constants.BASE_API_URL + "/tapo/devices",
+                Constants.BASE_API_URL + "/tapo/devices/" + deviceId,
                 null,
                 (JSONObject response) -> {
                     try {
-                        JSONArray array = response.getJSONArray("devices");
-                        ArrayList<TapoDevice> devices = new ArrayList<>();
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject obj = array.getJSONObject(i);
-                            devices.add(new TapoDevice(
-                                    obj.getString("device_id"),
-                                    obj.getString("device_type"),
-                                    null
-                            ));
-                        }
-                        tapo.onTapoDevices(devices);
+                        JSONObject obj = response.getJSONObject("device");
+                        TapoDevice dev = new TapoDevice(
+                                obj.getString("device_name"),
+                                obj.getString("device_id"),
+                                obj.getString("device_type"),
+                                null
+                        );
+                        tapo.onTapoDevices(dev);
                     } catch (JSONException e) {
                         err.onError(new Error("exception thrown in TapoDevices.doRequest: " + e.getMessage()));
                     }

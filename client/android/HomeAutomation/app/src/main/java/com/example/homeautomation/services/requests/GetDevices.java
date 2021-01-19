@@ -40,9 +40,11 @@ public class GetDevices implements IRequest<JSONObject> {
                         for (int i = 0; i < array.length(); i++) {
                             JSONObject obj = array.getJSONObject(i);
                             devices.add(new Device(
+                                    obj.getString("category"),
+                                    obj.getString("id"),
                                     obj.getString("name"),
-                                    obj.getString("device_type"),
-                                    obj.getString("device_company")
+                                    obj.getJSONObject("product").getString("type"),
+                                    obj.getJSONObject("product").getString("company")
                             ));
                         }
                         devicesListener.onDevices(devices);

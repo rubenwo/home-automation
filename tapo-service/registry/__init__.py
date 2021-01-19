@@ -78,3 +78,14 @@ class Registry:
 
     def get_devices(self) -> Dict[str, TapoDevice]:
         return self.devices
+
+    def delete_device(self, dev_id: str):
+        if dev_id not in self.devices:
+            raise KeyError(dev_id)
+        del self.devices[dev_id]
+        json_keys = []
+        for k in list(self.devices.keys()):
+            json_keys.append("tapo-{}".format(k))
+        self.database.insert("tapo-keys", json_keys)
+        self.database.delete(dev_id)
+        response = requests.delete("{}/{}".format(self.registry_url, dev_id))

@@ -6,17 +6,20 @@ import android.os.Parcelable;
 import java.util.Dictionary;
 
 public class TapoDevice implements Parcelable {
+    private String name;
     private String deviceId;
     private String deviceType;
     private Dictionary<String, String> deviceInfo;
 
-    public TapoDevice(String deviceId, String deviceType, Dictionary<String, String> deviceInfo) {
+    public TapoDevice(String name, String deviceId, String deviceType, Dictionary<String, String> deviceInfo) {
+        this.name = name;
         this.deviceId = deviceId;
         this.deviceType = deviceType;
         this.deviceInfo = deviceInfo;
     }
 
     public TapoDevice(Parcel in) {
+        name = in.readString();
         deviceId = in.readString();
         deviceType = in.readString();
     }
@@ -60,7 +63,8 @@ public class TapoDevice implements Parcelable {
     @Override
     public String toString() {
         return "TapoDevice{" +
-                "deviceId='" + deviceId + '\'' +
+                "name='" + name + '\'' +
+                ", deviceId='" + deviceId + '\'' +
                 ", deviceType='" + deviceType + '\'' +
                 ", deviceInfo=" + deviceInfo +
                 '}';
@@ -73,6 +77,7 @@ public class TapoDevice implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.name);
         dest.writeString(this.deviceId);
         dest.writeString(this.deviceType);
     }

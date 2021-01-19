@@ -22,6 +22,7 @@ spec:
     methods:
       - GET
       - PUT
+      - DELETE
     protocol: http
   - host: tapo.default.svc.cluster.local
     path: "/tapo/devices/register"

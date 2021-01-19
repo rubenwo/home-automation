@@ -4,18 +4,23 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Device implements Parcelable {
+    private String category;
+    private String id;
     private String name;
     private String device_type;
     private String device_company;
 
-    public Device(String name, String device_type, String device_company) {
+    public Device(String category, String id, String name, String device_type, String device_company) {
+        this.category = category;
+        this.id = id;
         this.name = name;
         this.device_type = device_type;
         this.device_company = device_company;
     }
 
-
     protected Device(Parcel in) {
+        category = in.readString();
+        id = in.readString();
         name = in.readString();
         device_type = in.readString();
         device_company = in.readString();
@@ -45,10 +50,20 @@ public class Device implements Parcelable {
         return device_company;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public String getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "Device{" +
-                "name='" + name + '\'' +
+                "category='" + category + '\'' +
+                ", id='" + id + '\'' +
+                ", name='" + name + '\'' +
                 ", device_type='" + device_type + '\'' +
                 ", device_company='" + device_company + '\'' +
                 '}';
@@ -61,6 +76,8 @@ public class Device implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(category);
+        dest.writeString(id);
         dest.writeString(name);
         dest.writeString(device_type);
         dest.writeString(device_company);

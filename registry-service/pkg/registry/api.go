@@ -90,6 +90,7 @@ func New(cfg *Config) (*api, error) {
 
 	a.router.Get("/devices", a.getDevices)
 	a.router.Post("/devices", a.postDevice)
+	a.router.Delete("/devices/{id}", a.deleteDevice)
 
 	a.router.Get("/schedules", a.getSchedules)
 	a.router.Post("/schedules", a.createSchedule)
@@ -150,6 +151,35 @@ func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(&devices); err != nil {
 		log.Printf("error sending getDevices: %s\n", err.Error())
 	}
+}
+
+func (a *api) deleteDevice(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.NotFound(w, r)
+		return
+	}
+	delete(a.devices, id)
+	if err := a.db.Delete(id); err != nil {
+		log.Println(err)
+		http.Error(w, fmt.Sprintf("error deleting device: %s", err.Error()), http.StatusInternalServerError)
+	}
+	for i, v := range a.keys {
+		if v == id {
+			a.keys = append(a.keys[:i], a.keys[i+1:]...)
+			fmt.Println("removed key from registry-keys")
+			break
+		}
+	}
+
+	jsonKeys, err := json.Marshal(&a.keys)
+	if err != nil {
+		log.Println(jsonKeys)
+	}
+	if err := a.db.Set("registry-keys", jsonKeys); err != nil {
+		log.Println(err)
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (a *api) createSchedule(w http.ResponseWriter, r *http.Request) {

@@ -19,3 +19,11 @@ class Database:
             return data
         except Exception as e:
             raise Exception(e)
+
+    def delete(self, key):
+        print("Database->delete()")
+        try:
+            val = self.client.delete(key)
+            print(val)
+        except Exception as e:
+            print(e)

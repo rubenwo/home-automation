@@ -34,7 +34,7 @@
                             <label>Password:</label>
                         </b-col>
                         <b-col sm="8">
-                            <input size="sm" class="mx-1" placeholder="password"
+                            <input type="password" size="sm" class="mx-1" placeholder="password"
                                    v-model="newItem.password"/>
                         </b-col>
                     </b-row>

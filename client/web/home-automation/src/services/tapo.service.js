@@ -15,6 +15,13 @@ export default {
     console.log(result);
     return result.data;
   },
+  async deleteTapoDevice(deviceId) {
+    const result = await ApiService().delete(
+        "http://192.168.2.135/api/v1/tapo/devices/" + deviceId
+    );
+    console.log(result);
+    return result.data;
+  },
   async fetchAllTapoDevices() {
     const result = await ApiService().get(
         "http://192.168.2.135/api/v1/tapo/devices"
