@@ -74,7 +74,7 @@
       })
     },
     methods: {
-      ...mapActions("tapo", ["wakeTapoDevice"]),
+      ...mapActions("tapo", ["wakeTapoDevice", "fetchTapoDevice"]),
       navigate() {
         return "device/" + this.company + "/" + this.id;
       },
@@ -106,6 +106,7 @@
       console.log(this.company)
       if (this.company === "tp-link") {
         await this.wakeTapoDevice(this.id);
+        await this.fetchTapoDevice(this.id);
         this.state = 'loaded'
       }
     }

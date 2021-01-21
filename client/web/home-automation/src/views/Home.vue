@@ -8,6 +8,7 @@
                 xl="2"
                 v-bind:key="device.id"
                 v-for="device in this.devices"
+                style="margin-right: 25px; margin-left: 25px"
         >
             <app-card
                     v-bind:height="10"
@@ -17,7 +18,6 @@
                     v-bind:device_type="device.product.type"
                     v-bind:img="getImgUrl(device)"
                     v-bind:id="device.id"
-                    style="max-width: 500px;"
             >
                 >
             </app-card>

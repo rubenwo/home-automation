@@ -1,6 +1,9 @@
 <template>
     <div>
+        <b-img v-bind:src="getImgUrl()" fluid center/>
         <p>{{tapoDevice.device_name}}</p>
+
+        <p>{{tapoDevice}}</p>
 
         <div v-if="this.tapoDevice.device_type === 'L510E'">
             <p>LIGHT</p>
@@ -27,6 +30,16 @@
     },
     methods: {
       ...mapActions("tapo", ["fetchTapoDevice"]),
+      getImgUrl() {
+        switch (this.tapoDevice.device_type) {
+          case "P100":
+            console.log('returning plug')
+            return require('../assets/smart_plug_icon.png')
+          case "L510E":
+            console.log('returning light')
+            return require('../assets/light_icon.jpg')
+        }
+      },
     },
     async mounted() {
       this.id = this.$route.params.id;
