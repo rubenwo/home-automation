@@ -4,6 +4,7 @@ spec:
     path: "/devices"
     methods:
       - GET
+      - POST
     protocol: http
   - host: registry.default.svc.cluster.local
     path: "/schedules"

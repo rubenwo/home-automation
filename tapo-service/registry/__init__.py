@@ -89,3 +89,4 @@ class Registry:
         self.database.insert("tapo-keys", json_keys)
         self.database.delete(dev_id)
         response = requests.delete("{}/{}".format(self.registry_url, dev_id))
+        print(response)

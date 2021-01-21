@@ -143,6 +143,7 @@ func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
 	var devices struct {
 		Devices []DeviceInfo `json:"devices"`
 	}
+	devices.Devices = make([]DeviceInfo, 0)
 	for _, v := range a.devices {
 		devices.Devices = append(devices.Devices, v)
 	}
@@ -159,18 +160,22 @@ func (a *api) deleteDevice(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	fmt.Println(id)
+	fmt.Println(a.devices)
 	delete(a.devices, id)
-	if err := a.db.Delete(id); err != nil {
+	fmt.Println(a.devices)
+	if err := a.db.Delete(fmt.Sprintf("registry-%s", id)); err != nil {
 		log.Println(err)
 		http.Error(w, fmt.Sprintf("error deleting device: %s", err.Error()), http.StatusInternalServerError)
 	}
 	for i, v := range a.keys {
-		if v == id {
+		if v == fmt.Sprintf("registry-%s", id) {
 			a.keys = append(a.keys[:i], a.keys[i+1:]...)
 			fmt.Println("removed key from registry-keys")
 			break
 		}
 	}
+	fmt.Println(a.keys)
 
 	jsonKeys, err := json.Marshal(&a.keys)
 	if err != nil {
@@ -179,7 +184,14 @@ func (a *api) deleteDevice(w http.ResponseWriter, r *http.Request) {
 	if err := a.db.Set("registry-keys", jsonKeys); err != nil {
 		log.Println(err)
 	}
-	w.WriteHeader(http.StatusOK)
+	var msg struct {
+		Message string `json:"message"`
+	}
+	msg.Message = fmt.Sprintf("deleted device: %s successfully", id)
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&msg); err != nil {
+		log.Printf("error sending deleteDevice msg: %s\n", err.Error())
+	}
 }
 
 func (a *api) createSchedule(w http.ResponseWriter, r *http.Request) {
@@ -212,7 +224,7 @@ func (a *api) createGroup(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("content-type", "application/json")
 	if err := json.NewEncoder(w).Encode(&createdGroup); err != nil {
-		log.Printf("error sending getDevices: %s\n", err.Error())
+		log.Printf("error sending createGroup: %s\n", err.Error())
 	}
 }
 
