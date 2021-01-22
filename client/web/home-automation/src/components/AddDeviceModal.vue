@@ -5,53 +5,70 @@
                 <b-container fluid>
                     <b-row class="my-1">
                         <b-col sm="4">
-                            <label>IP Address:</label>
-                        </b-col>
-                        <b-col sm="8">
-                            <input size="sm" class="mx-1" placeholder="ip address"
-                                   v-model="newItem.ip"/>
-                        </b-col>
-                    </b-row>
-                </b-container>
-            </b-input-group>
-            <b-input-group>
-                <b-container fluid>
-                    <b-row class="my-1">
-                        <b-col sm="4">
-                            <label>Email:</label>
-                        </b-col>
-                        <b-col sm="8">
-                            <input size="sm" class="mx-1" placeholder="email"
-                                   v-model="newItem.email"/>
-                        </b-col>
-                    </b-row>
-                </b-container>
-            </b-input-group>
-            <b-input-group>
-                <b-container fluid>
-                    <b-row class="my-1">
-                        <b-col sm="4">
-                            <label>Password:</label>
-                        </b-col>
-                        <b-col sm="8">
-                            <input type="password" size="sm" class="mx-1" placeholder="password"
-                                   v-model="newItem.password"/>
-                        </b-col>
-                    </b-row>
-                </b-container>
-            </b-input-group>
-            <b-input-group>
-                <b-container fluid>
-                    <b-row class="my-1">
-                        <b-col sm="4">
                             <label>Device Type:</label>
                         </b-col>
                         <b-col sm="8">
-                            <b-form-select v-model="newItem.device_type" :options="device_type_options"></b-form-select>
+                            <b-form-select v-model="device_type" :options="device_type_options"></b-form-select>
                         </b-col>
                     </b-row>
                 </b-container>
             </b-input-group>
+            <div v-if="isTapoDevice()">
+                <b-input-group>
+                    <b-container fluid>
+                        <b-row class="my-1">
+                            <b-col sm="4">
+                                <label>IP Address:</label>
+                            </b-col>
+                            <b-col sm="8">
+                                <input size="sm" class="mx-1" placeholder="ip address"
+                                       v-model="newItem.ip"/>
+                            </b-col>
+                        </b-row>
+                    </b-container>
+                </b-input-group>
+                <b-input-group>
+                    <b-container fluid>
+                        <b-row class="my-1">
+                            <b-col sm="4">
+                                <label>Email:</label>
+                            </b-col>
+                            <b-col sm="8">
+                                <input size="sm" class="mx-1" placeholder="email"
+                                       v-model="newItem.email"/>
+                            </b-col>
+                        </b-row>
+                    </b-container>
+                </b-input-group>
+                <b-input-group>
+                    <b-container fluid>
+                        <b-row class="my-1">
+                            <b-col sm="4">
+                                <label>Password:</label>
+                            </b-col>
+                            <b-col sm="8">
+                                <input type="password" size="sm" class="mx-1" placeholder="password"
+                                       v-model="newItem.password"/>
+                            </b-col>
+                        </b-row>
+                    </b-container>
+                </b-input-group>
+            </div>
+            <div v-if="isLEDStripDevice()">
+                <b-input-group>
+                    <b-container fluid>
+                        <b-row class="my-1">
+                            <b-col sm="4">
+                                <label>IP Address:</label>
+                            </b-col>
+                            <b-col sm="8">
+                                <input size="sm" class="mx-1" placeholder="ip address"
+                                       v-model="newItem.ip"/>
+                            </b-col>
+                        </b-row>
+                    </b-container>
+                </b-input-group>
+            </div>
         </b-form-group>
     </b-modal>
 
@@ -63,6 +80,7 @@
   export default {
     name: "AddDeviceModal",
     data: () => ({
+      device_type: "",
       newItem: {
         ip: "",
         email: "",
@@ -71,7 +89,8 @@
       },
       device_type_options: [
         {value: "L510E", text: "L510E"},
-        {value: "P100", text: "P100"}
+        {value: "P100", text: "P100"},
+        {value: "LED_STRIP", text: "LED Strip"}
       ]
     }),
     computed: {
@@ -81,7 +100,12 @@
     },
     methods: {
       ...mapActions("devices", ["addNewDevice"]),
-
+      isTapoDevice() {
+        return (this.device_type === 'L510E' || this.device_type === 'P100');
+      },
+      isLEDStripDevice() {
+        return this.device_type === "LED_STRIP"
+      },
       handleOk(evt) {
         evt.preventDefault();
         console.log(this.newItem)
@@ -90,17 +114,33 @@
       handleCancel() {
       },
       async handleSubmit() {
-        let input = {
-          device_type: "tapo",
-          data: {
-            "ip_address": this.newItem.ip,
-            "email": this.newItem.email,
-            "password": this.newItem.password,
-            "device_type": this.newItem.device_type
+        let input = {};
+        if (this.isTapoDevice()) {
+          input = {
+            device_type: "tapo",
+            data: {
+              "ip_address": this.newItem.ip,
+              "email": this.newItem.email,
+              "password": this.newItem.password,
+              "device_type": this.newItem.device_type
+            }
+          }
+        } else if (this.isLEDStripDevice()) {
+          input = {
+            device_type: "LED_STRIP",
+            data: {
+              "id": "123-456-789-xyz",
+              "name": "Led Strip xyz",
+              "category": "led-strip",
+              "product": {
+                "company": "esp32",
+                "type": this.device_type,
+              }
+            }
           }
         }
         await this.addNewDevice(input);
-
+        this.device_type = "";
         this.newItem.ip = "";
         this.newItem.email = "";
         this.newItem.password = "";

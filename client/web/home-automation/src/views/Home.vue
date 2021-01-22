@@ -50,6 +50,9 @@
           case "light":
             console.log('returning light')
             return require('../assets/light_icon.jpg')
+          case "led-strip":
+            console.log('returning led-strip')
+            return require('../assets/led_strip_icon.png')
         }
       },
     },

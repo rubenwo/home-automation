@@ -13,6 +13,9 @@ export default {
       case "tapo":
         url += "/tapo/devices/register";
         break;
+      case "LED_STRIP":
+        url += "/devices";
+        break;
         // case "hue":
         //   url += "/hue/devices/register";
         //   break;

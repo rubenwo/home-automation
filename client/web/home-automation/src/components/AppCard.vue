@@ -8,7 +8,7 @@
                         class="mb-4"/>
             <p>{{category}}</p>
             <p>{{company}} : {{device_type}}</p>
-            <div>
+            <div v-if="company==='tp-link'">
                 <b-button variant="success" @click="turnOnDevice">On</b-button>
                 <b-button @click="turnOffDevice()">Off</b-button>
                 <input v-if="device_type=='L510E'" type="range" min="1" max="100"
@@ -94,8 +94,10 @@
       },
       async deleteDevice() {
         console.log(this.id)
-        const res = await TapoService.deleteTapoDevice(this.id);
-        console.log(res)
+        if (this.company === "tp-link") {
+          const res = await TapoService.deleteTapoDevice(this.id);
+          console.log(res)
+        }
       },
       async brightnessChanged() {
         console.log(this.brightness)
@@ -107,6 +109,8 @@
       if (this.company === "tp-link") {
         await this.wakeTapoDevice(this.id);
         await this.fetchTapoDevice(this.id);
+        this.state = 'loaded'
+      } else {
         this.state = 'loaded'
       }
     }
