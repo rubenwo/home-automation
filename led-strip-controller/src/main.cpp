@@ -1,18 +1,16 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <HTTPClient.h>
 #include <WebServer.h>
 #include <ArduinoJson.h>
 #include <Adafruit_NeoPixel.h>
-
-#define NUM_OF_LEDS 8
-#define PIN 4
 
 const char *ssid = "";
 const char *password = "";
 
 WebServer server(80);
 
-Adafruit_NeoPixel pixels(NUM_OF_LEDS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel led_strip(150, 4, NEO_GRB + NEO_KHZ800);
 
 // JSON data buffer
 StaticJsonDocument<500> jsonDocument;
@@ -63,16 +61,11 @@ void setup()
     int blue = jsonDocument["blue"];
     Serial.printf("R: %d, G: %d, B: %d\n", red, green, blue);
 
-    if (on)
+    for (auto i = 0; i < led_strip.numPixels(); i++)
     {
-      digitalWrite(2, HIGH);
-      on = false;
+      led_strip.setPixelColor(i, red, green, blue);
     }
-    else
-    {
-      digitalWrite(2, LOW);
-      on = true;
-    }
+    led_strip.show();
     jsonDocument.clear();
     jsonDocument["message"] = "successfully changed colour of the led";
     serializeJson(jsonDocument, buffer);
@@ -85,6 +78,7 @@ void setup()
     jsonDocument["device_name"] = "led_strip_a";
     jsonDocument["device_type"] = "RGB_LED_STRIP";
     jsonDocument["device_info"] = jsonDocument.createNestedObject();
+    jsonDocument["device_info"]["mode"] = "single"; // implement gradient, animation, etc.
     jsonDocument["device_info"]["R"] = 127;
     jsonDocument["device_info"]["G"] = 0;
     jsonDocument["device_info"]["B"] = 255;
@@ -94,7 +88,39 @@ void setup()
   });
 
   server.begin();
+
   // init led strip
+  led_strip.begin();
+  int r, g, b;
+  r = 245;
+  g = 149;
+  b = 24;
+  for (auto i = 0; i < led_strip.numPixels(); i++)
+  {
+    led_strip.setPixelColor(i, r, g, b);
+  }
+  led_strip.show();
+
+  // announce online
+  HTTPClient http;
+  http.begin("http://192.168.2.135/api/v1/new_id");
+  int httpResponseCode = http.GET();
+  String payload = "{}";
+  if (httpResponseCode > 0)
+  {
+    Serial.printf("HTTP Response code: %d\n", httpResponseCode);
+    payload = http.getString();
+  }
+  else
+  {
+    Serial.printf("Error code: %d\n", httpResponseCode);
+  }
+  http.end();
+  Serial.println(payload);
+
+  deserializeJson(jsonDocument, payload);
+  String val = jsonDocument["id"];
+  Serial.println(val);
 }
 
 void loop()

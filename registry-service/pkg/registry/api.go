@@ -88,6 +88,8 @@ func New(cfg *Config) (*api, error) {
 	// processing should be stopped.
 	a.router.Use(middleware.Timeout(60 * time.Second))
 
+	a.router.Get("/new_id", a.getNewID)
+
 	a.router.Get("/devices", a.getDevices)
 	a.router.Post("/devices", a.postDevice)
 	a.router.Delete("/devices/{id}", a.deleteDevice)
@@ -109,6 +111,18 @@ func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 		ErrorMessage: "",
 	}); err != nil {
 		log.Printf("error sending healthz: %s\n", err.Error())
+	}
+}
+
+func (a *api) getNewID(w http.ResponseWriter, r *http.Request) {
+	var resp struct {
+		ID string `json:"id"`
+	}
+	resp.ID = uuid.New().String()
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("error sending getDevices: %s\n", err.Error())
 	}
 }
 
