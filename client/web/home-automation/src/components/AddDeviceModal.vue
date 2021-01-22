@@ -122,7 +122,7 @@
               "ip_address": this.newItem.ip,
               "email": this.newItem.email,
               "password": this.newItem.password,
-              "device_type": this.newItem.device_type
+              "device_type": this.device_type
             }
           }
         } else if (this.isLEDStripDevice()) {
