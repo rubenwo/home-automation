@@ -102,25 +102,25 @@ void setup()
   led_strip.show();
 
   // announce online
-  HTTPClient http;
-  http.begin("http://192.168.2.135/api/v1/new_id");
-  int httpResponseCode = http.GET();
-  String payload = "{}";
-  if (httpResponseCode > 0)
-  {
-    Serial.printf("HTTP Response code: %d\n", httpResponseCode);
-    payload = http.getString();
-  }
-  else
-  {
-    Serial.printf("Error code: %d\n", httpResponseCode);
-  }
-  http.end();
-  Serial.println(payload);
+  // HTTPClient http;
+  // http.begin("http://192.168.2.135/api/v1/new_id");
+  // int httpResponseCode = http.GET();
+  // String payload = "{}";
+  // if (httpResponseCode > 0)
+  // {
+  //   Serial.printf("HTTP Response code: %d\n", httpResponseCode);
+  //   payload = http.getString();
+  // }
+  // else
+  // {
+  //   Serial.printf("Error code: %d\n", httpResponseCode);
+  // }
+  // http.end();
+  // Serial.println(payload);
 
-  deserializeJson(jsonDocument, payload);
-  String val = jsonDocument["id"];
-  Serial.println(val);
+  // deserializeJson(jsonDocument, payload);
+  // String val = jsonDocument["id"];
+  // Serial.println(val);
 }
 
 void loop()

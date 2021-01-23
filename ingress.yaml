@@ -4,11 +4,13 @@ spec:
     path: "/new_id"
     methods:
       - GET
+    protocol: http
   - host: registry.default.svc.cluster.local
     path: "/devices"
     methods:
       - GET
       - POST
+    protocol: http
   - host: registry.default.svc.cluster.local
     path: "/devices/{id}"
     methods:
