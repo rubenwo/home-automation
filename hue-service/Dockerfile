@@ -11,8 +11,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o hue-service ./cmd/api
 
-FROM alpine:latest
-RUN echo "ipv6" >> /etc/modules
+FROM alpine:3.7
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
