@@ -9,20 +9,39 @@
 <script>
   import Verte from 'verte';
   import 'verte/dist/verte.css';
+  import LedStripService from "../services/led_strip.service";
 
   export default {
     name: "LedStripDevice",
+    id: {
+      type: String,
+      default: ""
+    },
     components: {Verte},
     methods: {
       onButtonClick() {
-        console.log(this.color)
+        console.log(this.color);
+        let rgb = this.color.replace(/[^\d,]/g, '').split(',');
+
+        console.log(rgb)
+        let command = {
+          mode: "SINGLE_COLOR_RGB",
+          "red": parseInt(rgb[0]),
+          "green": parseInt(rgb[1]),
+          "blue": parseInt(rgb[2])
+        };
+        LedStripService.commandLedStripDevice(this.id, command);
       }
     },
     data() {
       return {
         color: "",
       }
-    }
+    },
+    async mounted() {
+      this.id = this.$route.params.id;
+      console.log(this.id)
+    },
   }
 
 </script>
