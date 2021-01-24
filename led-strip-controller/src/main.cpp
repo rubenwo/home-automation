@@ -14,6 +14,8 @@
 const char *ssid = "";
 const char *password = "";
 
+String device_name = "rgb esp32 led-strip";
+
 WebServer server(HTTP_PORT);
 
 Adafruit_NeoPixel led_strip(LED_COUNT, LED_STRIP_DATA_PIN, NEO_GRB + NEO_KHZ800);
@@ -62,12 +64,34 @@ Mode from_string(const String &str)
   return Mode::INVALID;
 }
 
+String mode_to_string(Mode m)
+{
+  switch (m)
+  {
+  case Mode::SINGLE_COLOR_RGB:
+    return "SINGLE_COLOR_RGB";
+  case Mode::SINGLE_COLOR_HSV:
+    return "SINGLE_COLOR_HSV";
+  case Mode::GRADIENT_RGB:
+    return "GRADIENT_RGB";
+  case Mode::GRADIENT_HSV:
+    return "GRADIENT_HSV";
+  case Mode::ANIMATION_RGB:
+    return "ANIMATION_RGB";
+  case Mode::ANIMATION_HSV:
+    return "ANIMATION_HSV";
+  case Mode::INVALID:
+    return "INVALID";
+  }
+  return "INVALID";
+}
+
 unsigned long timer;
 int animation_speed = 10;
 
 // JSON data buffer
-StaticJsonDocument<500> jsonDocument;
-char buffer[500];
+StaticJsonDocument<1000> jsonDocument;
+char buffer[1000];
 
 void setup()
 {
@@ -224,15 +248,77 @@ void setup()
 
   server.on("/info", HTTP_GET, []() {
     jsonDocument.clear();
-    jsonDocument["device_id"] = "123-456-789-xyz";
-    jsonDocument["device_name"] = "led_strip_a";
+    jsonDocument["device_name"] = device_name.c_str();
     jsonDocument["device_type"] = "RGB_LED_STRIP";
     jsonDocument["device_info"] = jsonDocument.createNestedObject();
-    jsonDocument["device_info"]["mode"] = "single"; // implement gradient, animation, etc.
-    jsonDocument["device_info"]["R"] = 127;
-    jsonDocument["device_info"]["G"] = 0;
-    jsonDocument["device_info"]["B"] = 255;
-
+    jsonDocument["device_info"]["current_mode"] = mode_to_string(mode);
+    jsonDocument["device_info"]["supported_modes"] = jsonDocument.createNestedArray();
+    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::SINGLE_COLOR_RGB));
+    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::SINGLE_COLOR_HSV));
+    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::GRADIENT_RGB));
+    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::GRADIENT_HSV));
+    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::ANIMATION_RGB));
+    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::ANIMATION_HSV));
+    jsonDocument["device_info"]["data"] = jsonDocument.createNestedObject();
+    switch (mode)
+    {
+    case SINGLE_COLOR_RGB:
+    {
+      jsonDocument["device_info"]["data"]["red"] = red;
+      jsonDocument["device_info"]["data"]["green"] = green;
+      jsonDocument["device_info"]["data"]["blue"] = blue;
+    }
+    break;
+    case SINGLE_COLOR_HSV:
+    {
+      jsonDocument["device_info"]["data"]["hue"] = hue;
+      jsonDocument["device_info"]["data"]["saturation"] = saturation;
+      jsonDocument["device_info"]["data"]["value"] = value;
+    }
+    break;
+    case ANIMATION_RGB:
+    {
+      jsonDocument["device_info"]["data"]["red"] = red;
+      jsonDocument["device_info"]["data"]["green"] = green;
+      jsonDocument["device_info"]["data"]["blue"] = blue;
+      jsonDocument["device_info"]["data"]["animation_speed"] = animation_speed;
+    }
+    break;
+    case ANIMATION_HSV:
+    {
+      jsonDocument["device_info"]["data"]["hue"] = hue;
+      jsonDocument["device_info"]["data"]["saturation"] = saturation;
+      jsonDocument["device_info"]["data"]["value"] = value;
+      jsonDocument["device_info"]["data"]["animation_speed"] = animation_speed;
+    }
+    break;
+    case GRADIENT_RGB:
+    {
+      jsonDocument["device_info"]["data"]["gradients"] = jsonDocument.createNestedArray();
+      for (auto c : gradient_rgb_config)
+      {
+        auto obj = jsonDocument["device_info"]["data"]["gradients"].createNestedObject();
+        obj["red"] = c.r;
+        obj["green"] = c.g;
+        obj["blue"] = c.b;
+      }
+    }
+    break;
+    case GRADIENT_HSV:
+    {
+      jsonDocument["device_info"]["data"]["gradients"] = jsonDocument.createNestedArray();
+      for (auto c : gradient_hsv_config)
+      {
+        auto obj = jsonDocument["device_info"]["data"]["gradients"].createNestedObject();
+        obj["hue"] = c.h;
+        obj["saturation"] = c.s;
+        obj["value"] = c.v;
+      }
+    }
+    break;
+    default:
+      break;
+    }
     serializeJson(jsonDocument, buffer);
     server.send(200, "application/json", buffer);
   });

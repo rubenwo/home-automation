@@ -25,14 +25,12 @@ type JsonError struct {
 }
 
 type LedControllerInfo struct {
-	DeviceID   string `json:"device_id"`
 	DeviceName string `json:"device_name"`
 	DeviceType string `json:"device_type"`
 	DeviceInfo struct {
-		Mode string `json:"mode"`
-		R    int    `json:"r"`
-		G    int    `json:"g"`
-		B    int    `json:"b"`
+		SupportedModes []string    `json:"supported_modes"`
+		CurrentMode    string      `json:"current_mode"`
+		Data           interface{} `json:"data"`
 	}
 }
 

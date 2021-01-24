@@ -199,8 +199,8 @@ func (a *api) registerDevice(w http.ResponseWriter, r *http.Request) {
 			ID:             id,
 			Name:           ledControllerInfo.DeviceName,
 			NumLeds:        150,
-			SupportedModes: []string{"SINGLE_COLOR_RGB", "SINGLE_COLOR_HSV", "GRADIENT_RGB", "GRADIENT_HSV", "ANIMATION_RGB", "ANIMATION_HSV"},
-			CurrentMode:    ledControllerInfo.DeviceInfo.Mode,
+			SupportedModes: ledControllerInfo.DeviceInfo.SupportedModes,
+			CurrentMode:    ledControllerInfo.DeviceInfo.CurrentMode,
 			IPAddress:      d.IPAddress,
 		})
 	}
