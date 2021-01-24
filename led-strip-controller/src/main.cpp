@@ -88,7 +88,7 @@ void setup()
   server.on("/healthz", HTTP_GET, []() {
     Serial.println("/healthz");
     jsonDocument.clear();
-    jsonDocument["isHealthy"] = true;
+    jsonDocument["is_healthy"] = true;
     jsonDocument["error_message"] = "";
     serializeJson(jsonDocument, buffer);
     server.send(200, "application/json", buffer);

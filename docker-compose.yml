@@ -13,6 +13,12 @@ services:
     depends_on:
       - redis.default.svc.cluster.local
 
+  led-strip.default.svc.cluster.local:
+    build: ./led-strip-service
+    restart: on-failure
+    depends_on:
+      - redis.default.svc.cluster.local
+
   hue.default.svc.cluster.local:
     build: ./hue-service
     restart: on-failure

@@ -129,13 +129,7 @@
           input = {
             device_type: "LED_STRIP",
             data: {
-              "id": "123-456-789-xyz",
-              "name": "Led Strip xyz",
-              "category": "led-strip",
-              "product": {
-                "company": "esp32",
-                "type": this.device_type,
-              }
+              "ip_address": this.newItem.ip,
             }
           }
         }

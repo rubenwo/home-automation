@@ -23,6 +23,24 @@ spec:
       - POST
     protocol: http
 
+  - host: led-strip.default.svc.cluster.local
+    path: /leds/devices
+    methods:
+      - GET
+    protocol: http
+
+  - host: led-strip.default.svc.cluster.local
+    path: /leds/devices/register
+    methods:
+      - POST
+    protocol: http
+
+  - host: led-strip.default.svc.cluster.local
+    path: /leds/devices/{id}/command
+    methods:
+      - POST
+    protocol: http
+
   - host: tapo.default.svc.cluster.local
     path: /tapo/wake/{device_id}
     methods:

@@ -14,7 +14,7 @@ export default {
         url += "/tapo/devices/register";
         break;
       case "LED_STRIP":
-        url += "/devices";
+        url += "/leds/devices/register";
         break;
         // case "hue":
         //   url += "/hue/devices/register";
