@@ -14,7 +14,7 @@
                 <input v-if="device_type=='L510E'" type="range" min="1" max="100"
                        v-model="brightness" @change="brightnessChanged()">
             </div>
-            <div v-if="device_type==='RGB_LED_STRIP'">
+            <div v-if="device_type==='RGB_LED_STRIP'" style="text-align: center;">
                 <b-button pill @click="onRGBClick()" center>
                     <verte v-model="color" picker="wheel" model="rgb"/>
                 </b-button>

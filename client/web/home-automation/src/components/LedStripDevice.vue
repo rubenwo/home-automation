@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="text-align: center">
         <b-button pill @click="onButtonClick" center>
             <verte v-model="color" picker="wheel" model="rgb"/>
         </b-button>

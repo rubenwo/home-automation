@@ -178,7 +178,7 @@ func (a *api) registerDevice(w http.ResponseWriter, r *http.Request) {
 				Name:           ledControllerInfo.DeviceName,
 				NumLeds:        150,
 				SupportedModes: []string{"SINGLE_COLOR_RGB", "SINGLE_COLOR_HSV", "GRADIENT_RGB", "GRADIENT_HSV", "ANIMATION_RGB", "ANIMATION_HSV"},
-				CurrentMode:    ledControllerInfo.DeviceInfo.Mode,
+				CurrentMode:    ledControllerInfo.DeviceInfo.CurrentMode,
 				IPAddress:      d.IPAddress,
 			},
 		}
@@ -379,4 +379,54 @@ func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	http.NotFound(w, r)
+}
+
+type DeviceNotFoundError struct {
+	ID string
+}
+
+func (dnf *DeviceNotFoundError) Error() string {
+	return fmt.Sprintf("device with id: %s not found", dnf.ID)
+}
+
+func getDeviceUsingIDFromDB(deviceId string, db database.Database) (LedDeviceModel, error) {
+	devices, err := devicesFromDB(db)
+	if err != nil {
+		return LedDeviceModel{}, err
+	}
+	for _, device := range devices {
+		if device.ID == deviceId {
+			return device, nil
+		}
+	}
+	return LedDeviceModel{}, &DeviceNotFoundError{ID: deviceId}
+}
+
+func devicesFromDB(db database.Database) ([]LedDeviceModel, error) {
+	//rawData, err := db.Get("led-strip-devices")
+	//	//if err != nil {
+	//	//	return nil, fmt.Errorf("")
+	//	//}
+	//	//
+	//	//fmt.Println(v)
+	//	//if v == nil {
+	//	//	http.NotFound(w, r)
+	//	//	return
+	//	//}
+	//	//
+	//	//vStr := v.(string)
+	//	//var devices []LedDeviceModel
+	//	//if err := json.Unmarshal([]byte(vStr), &devices); err != nil {
+	//	//	log.Println(err)
+	//	//	w.Header().Set("content-type", "application/json")
+	//	//	if err := json.NewEncoder(w).Encode(&JsonError{
+	//	//		Code:         http.StatusInternalServerError,
+	//	//		ErrorMessage: err.Error(),
+	//	//	}); err != nil {
+	//	//		log.Printf("error sending json_error: %s\n", err.Error())
+	//	//	}
+	//	//	return
+	//	//}
+
+	return nil, nil
 }

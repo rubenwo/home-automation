@@ -25,6 +25,12 @@ services:
     depends_on:
       - redis.default.svc.cluster.local
 
+  food.default.svc.cluster.local:
+    build: ./food-service
+    restart: on-failure
+    depends_on:
+      - redis.default.svc.cluster.local
+
   tapo.default.svc.cluster.local:
     build: ./tapo-service
     restart: on-failure

@@ -8,6 +8,7 @@
             <b-collapse is-nav id="nav_collapse">
                 <b-navbar-nav>
                     <b-nav-item href="#" to="/" exact>Home</b-nav-item>
+                    <b-nav-item href="#" to="/recipes" exact>Recipes</b-nav-item>
                 </b-navbar-nav>
                 <b-navbar-nav class="ml-auto">
 

@@ -23,6 +23,18 @@ spec:
       - POST
     protocol: http
 
+  - host: food.default.svc.cluster.local
+    path: "/recipes"
+    methods:
+      - GET
+      - POST
+    protocol: http
+  - host: food.default.svc.cluster.local
+    path: "/recipes/{id}"
+    methods:
+      - DELETE
+    protocol: http
+
   - host: led-strip.default.svc.cluster.local
     path: /leds/devices
     methods:
