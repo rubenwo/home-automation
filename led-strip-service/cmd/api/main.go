@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
 	"github.com/google/uuid"
-	"github.com/rubenwo/home-automation/led-strip-service/pkg/database"
+	"github.com/rubenwo/home-automation/libraries/go/pkg/database"
 	"io/ioutil"
 	"log"
 	"net/http"

@@ -4,5 +4,9 @@ github.com/go-chi/chi v1.5.1/go.mod h1:REp24E+25iKvxgeTfHmdUoL5x15kBiDBlnIl5bCwe
 github.com/go-redis/redis v6.15.9+incompatible/go.mod h1:NAIEuMOZ/fxfXJIrKDQDz8wamY7mA7PouImQ2Jvg6kA=
 github.com/google/uuid v1.2.0 h1:qJYtXnJRWmpe7m/3XlyhrsLrEURqHRM2kxzoxXqyUDs=
 github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/rubenwo/home-automation v0.0.0-20210128211535-72c13b2106f8 h1:i0DGBFXqFJGaiQnA5wSMZ/lVzxl8u1FPXxNbpZjrpHw=
+github.com/rubenwo/home-automation/libraries/go v0.0.0-20210128211535-72c13b2106f8 h1:dCZ3N85/3XgLhDttEYH6qVErTQICngkLH7zV1XZVJPI=
+github.com/rubenwo/home-automation/libraries/go v0.0.0-20210128211535-72c13b2106f8/go.mod h1:VibZf62ujNE3l8tV/5mKRVEQU4NxvI4Pp4OrfKAuBAw=
 golang.org/x/sys v0.0.0-20210123231150-1d476976d117 h1:M1sK0uTIn2x3HD5sySUPBg7ml5hmlQ/t7n7cIM6My9w=
 golang.org/x/sys v0.0.0-20210123231150-1d476976d117/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
