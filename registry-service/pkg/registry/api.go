@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/google/uuid"
-	"github.com/rubenwo/home-automation/registry-service/pkg/database"
+	"github.com/rubenwo/home-automation/libraries/go/pkg/database"
 	"log"
 	"net/http"
 	"time"

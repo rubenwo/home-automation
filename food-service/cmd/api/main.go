@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
-	"github.com/rubenwo/home-automation/food-service/pkg/database"
+	"github.com/rubenwo/home-automation/libraries/go/pkg/database"
 	"log"
 	"net/http"
 	"time"
@@ -38,7 +38,7 @@ func main() {
 	router.Get("/recipes", a.getRecipes)
 	router.Post("/recipes", a.addRecipe)
 	router.Delete("/recipes/{id}", a.deleteRecipe)
-	fmt.Println(router)
+
 	log.Println("food-service is online")
 	if err := http.ListenAndServe(":80", router); err != nil {
 		log.Println(err)
