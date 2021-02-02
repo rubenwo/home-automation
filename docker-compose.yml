@@ -44,7 +44,7 @@ services:
       - redis.default.svc.cluster.local
 
   web.default.svc.cluster.local:
-    build: ./client/web/home-automation
+    build: ./client/web/vue/home-automation
     restart: on-failure
 
   mqtt-broker.default.svc.cluster.local:
