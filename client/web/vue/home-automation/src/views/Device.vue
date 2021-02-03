@@ -1,5 +1,5 @@
 <template>
-    <div class="row">
+    <div class="row" style="background-color: rgba(255, 255, 255, 0.7)">
         <div v-if="this.company === 'tp-link'">
             <tapo-device/>
         </div>

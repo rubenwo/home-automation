@@ -2,7 +2,7 @@
     <div v-if="this.state === 'loaded'">
         <b-card
                 v-bind:sub-title="name"
-                style="max-width: 540px; min-width: 200px; min-height: 425px; max-height: 500px"
+                style="max-width: 540px; min-width: 200px; min-height: 425px; max-height: 500px; background-color: rgba(255, 255, 255, 0.7)"
                 class="mb-2">
             <b-card-img v-bind:src="img" alt="Image" height="130" width="130"
                         class="mb-4"/>

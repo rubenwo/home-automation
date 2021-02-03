@@ -1,5 +1,5 @@
 <template>
-    <b-navbar :sticky="true" toggleable="lg" type="dark" style="background-color: #4287f5;">
+    <b-navbar :sticky="true" toggleable="lg" type="dark" style="background-color: rgba(70, 70, 70, 0.7)">
         <b-container>
             <b-navbar-brand href="#" to="/">Home Automation</b-navbar-brand>
 
