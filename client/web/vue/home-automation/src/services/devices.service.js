@@ -2,13 +2,18 @@ import ApiService from "./api.service";
 
 export default {
   async fetchDevices() {
-    const res = await ApiService().get("http://192.168.2.135/api/v1/devices");
+    console.log(ApiService().baseUrl)
+    const res = await ApiService()
+      .get("/api/v1/devices")
+      .catch(() => {
+      return null;
+    });
     console.log(res);
     return res.data;
   },
   async addNewDevice(data) {
     console.log(data)
-    let url = "http://192.168.2.135/api/v1";
+    let url = "/api/v1";
     switch (data.device_type) {
       case "tapo":
         url += "/tapo/devices/register";
