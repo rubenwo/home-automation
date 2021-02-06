@@ -15,6 +15,7 @@
 </template>
 
 <script>
+  import FoodService from '../services/food.service';
 
   export default {
     name: "RecipeCard",
@@ -36,6 +37,10 @@
       navigate() {
         return "recipe/" + this.id;
       },
+    },
+    async mounted() {
+      const recipes = await FoodService.fetchRecipes(this.id);
+      console.log(recipes);
     }
   }
 </script>

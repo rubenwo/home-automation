@@ -13,6 +13,7 @@
                 <b-button @click="turnOffDevice()">Off</b-button>
                 <input v-if="device_type=='L510E'" type="range" min="1" max="100"
                        v-model="brightness" @change="brightnessChanged()">
+                <p>Status: {{this.dev.device_info.device_on === "True" ? "On":"Off"}}</p>
             </div>
             <div v-if="device_type==='RGB_LED_STRIP'" style="text-align: center;">
                 <b-button pill @click="onRGBClick()" center>
@@ -34,12 +35,11 @@
 </template>
 
 <script>
-  import TapoService from "../services/tapo.service"
-  import {mapActions, mapState} from "vuex";
   import Loading from 'vue-loading-overlay'
   import Verte from 'verte';
   import 'verte/dist/verte.css';
   import LedStripService from "../services/led_strip.service";
+  import TapoService from '../services/tapo.service';
 
   export default {
     name: "app-card",
@@ -75,32 +75,26 @@
         brightness: 100,
         state: "loading",
         color: "",
+        dev: {},
       }
     },
-    computed: {
-      ...mapState("tapo", {
-        tapoDevice: state => state.tapoDevice
-      })
-    },
     methods: {
-      ...mapActions("tapo", ["wakeTapoDevice", "fetchTapoDevice"]),
       navigate() {
         return "device/" + this.company + "/" + this.id;
       },
-      turnOnDevice() {
+      async turnOnDevice() {
         if (this.company === "tp-link") {
-          console.log(this.id, this.brightness)
           if (this.device_type === 'L510E') {
-            TapoService.setDeviceBrightness(this.id, this.brightness)
+            await TapoService.setDeviceBrightness(this.id, this.brightness)
           } else
-            TapoService.turnOnDevice(this.id);
+            await TapoService.turnOnDevice(this.id);
+          const deviceResult = await TapoService.fetchTapoDevice(this.id);
+          this.dev = deviceResult.device;
         }
       },
       onRGBClick() {
-        console.log(this.color);
         let rgb = this.color.replace(/[^\d,]/g, '').split(',');
 
-        console.log(rgb)
         let command = {
           mode: "SINGLE_COLOR_RGB",
           "red": parseInt(rgb[0]),
@@ -109,28 +103,27 @@
         };
         LedStripService.commandLedStripDevice(this.id, command);
       },
-      turnOffDevice() {
+      async turnOffDevice() {
         if (this.company === "tp-link") {
-          TapoService.turnOffDevice(this.id);
+          await TapoService.turnOffDevice(this.id);
+          const deviceResult = await TapoService.fetchTapoDevice(this.id);
+          this.dev = deviceResult.device;
         }
       },
       async deleteDevice() {
-        console.log(this.id)
         if (this.company === "tp-link") {
-          const res = await TapoService.deleteTapoDevice(this.id);
-          console.log(res)
+          await TapoService.deleteTapoDevice(this.id);
         }
       },
       async brightnessChanged() {
-        console.log(this.brightness)
         await TapoService.setDeviceBrightness(this.id, this.brightness)
       },
     },
     async mounted() {
-      console.log(this.company)
       if (this.company === "tp-link") {
-        await this.wakeTapoDevice(this.id);
-        await this.fetchTapoDevice(this.id);
+        await TapoService.wakeTapoDevice(this.id);
+        const deviceResult = await TapoService.fetchTapoDevice(this.id);
+        this.dev = deviceResult.device;
         this.state = 'loaded'
       } else {
         this.state = 'loaded'

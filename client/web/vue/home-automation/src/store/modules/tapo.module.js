@@ -7,6 +7,7 @@ export default {
     error: null,
     tapoDevice: null,
     tapoDevices: [],
+    devs: {},
   },
   mutations: {
     REQUEST(state) {
@@ -26,6 +27,11 @@ export default {
     FAILED(state, message) {
       state.loading = false;
       state.error = message;
+    },
+    DEV_LOADED(state, dev) {
+      state.loading = false;
+      state.devs[dev.device_id] = dev;
+      console.log(state.devs);
     }
   },
   getters: {
@@ -38,6 +44,7 @@ export default {
         const result = await TapoService.fetchTapoDevice(deviceId);
         console.log(result.device)
         commit("TAPO_DEVICE_LOADED", result.device);
+        commit("DEV_LOADED", result.device);
       } catch (err) {
         commit("FAILED", err.message);
         throw err;

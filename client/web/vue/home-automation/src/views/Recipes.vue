@@ -21,6 +21,7 @@
 
 <script>
   import RecipeCard from "../components/RecipeCard";
+  import FoodService from "../services/food.service";
 
   export default {
     name: "Recipes",
@@ -40,6 +41,10 @@
       getImgUrl() {
         return require('../assets/pasta_test_img.jpeg')
       }
+    },
+    async mounted() {
+      const recipes = await FoodService.fetchRecipes(this.id);
+      console.log(recipes);
     }
   }
 </script>
