@@ -19,19 +19,20 @@
                             variant="primary"
                             title="Click here to add a new device!"
                             @click="onClickAdd"
-                            v-b-modal.help-modal
                     ><img src="../assets/add.png" width="25" height="25"/>
                     </b-button>
                 </b-navbar-nav>
             </b-collapse>
         </b-container>
-        <add-device-modal ref="modal"/>
+        <add-device-modal ref="deviceModal"/>
+        <add-recipe-modal ref="recipeModal"/>
     </b-navbar>
 </template>
 
 <script>
   import {mapActions, mapState} from "vuex";
   import AddDeviceModal from "./AddDeviceModal";
+  import AddRecipeModal from "./AddRecipeModal";
 
   export default {
     name: "app-toolbar",
@@ -39,6 +40,7 @@
       return {};
     },
     components: {
+      AddRecipeModal,
       AddDeviceModal
     },
     computed: {
@@ -50,7 +52,15 @@
     methods: {
       ...mapActions("devices", ["addNewDevice"]),
       onClickAdd() {
-        this.$refs.modal.$emit('add_device')
+        console.log(this.$route)
+        switch (this.$route.name) {
+          case "Home":
+            this.$refs.deviceModal.$emit('add_device');
+            break;
+          case "Recipes":
+            this.$refs.recipeModal.$emit('add_recipe');
+            break;
+        }
       },
     }
   };

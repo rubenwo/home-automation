@@ -175,11 +175,18 @@ func (a *api) deleteRecipe(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	found := false
 	for i, recipe := range recipes {
 		if recipe.ID == id {
 			recipes = append(recipes[:i], recipes[i+1:]...)
+			found = true
+			break
 		}
+	}
+	if !found {
+		log.Printf("recipe with id: %s not found\n", id)
+		http.Error(w, fmt.Errorf("recipe with id: %s not found", id).Error(), http.StatusNotFound)
+		return
 	}
 
 	jsonData, err := json.Marshal(recipes)

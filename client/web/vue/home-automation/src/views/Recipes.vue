@@ -1,5 +1,5 @@
 <template>
-    <div style="margin-top: 10px">
+    <div class="row" style="margin-top: 10px">
         <b-col
                 cols="4"
                 sm="3"
@@ -28,13 +28,7 @@
     components: {RecipeCard},
     data() {
       return {
-        recipes: [
-          {
-            id: "0001",
-            name: "Pasta",
-            img: this.getImgUrl()
-          }
-        ],
+        recipes: [],
       }
     },
     methods: {
@@ -45,6 +39,7 @@
     async mounted() {
       const recipes = await FoodService.fetchRecipes(this.id);
       console.log(recipes);
+      this.recipes = recipes.recipes;
     }
   }
 </script>

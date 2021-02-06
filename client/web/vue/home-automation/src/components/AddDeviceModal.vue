@@ -1,5 +1,5 @@
 <template>
-    <b-modal size="xl" id="deviceModal" ref="modal" @ok="handleOk" @cancel="handleCancel" @close="handleCancel">
+    <b-modal size="xl" id="deviceModal" ref="deviceModal" @ok="handleOk" @cancel="handleCancel" @close="handleCancel">
         <b-form-group>
             <b-input-group>
                 <b-container fluid>
@@ -140,14 +140,14 @@
         this.newItem.password = "";
         this.newItem.device_type = "";
         this.$nextTick(() => {
-          this.$refs.modal.hide();
+          this.$refs.deviceModal.hide();
         });
       }
     },
     created() {
       this.$on('add_device', () => {
-
-        this.$refs.modal.show()
+        console.log("Got Event in Device")
+        this.$refs.deviceModal.show()
       })
     },
   }
