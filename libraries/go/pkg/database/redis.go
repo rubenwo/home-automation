@@ -10,7 +10,7 @@ type redisDB struct {
 	client *redis.Client
 }
 
-func createRedisDatabase() (Database, error) {
+func createRedisDatabase(options ...func(*Database) error) (Database, error) {
 	// create a new client with default options
 	// Addr is defined by the docker-compose.yml file
 	client := redis.NewClient(&redis.Options{

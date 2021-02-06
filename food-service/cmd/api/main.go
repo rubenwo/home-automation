@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
+	"github.com/google/uuid"
 	"github.com/rubenwo/home-automation/libraries/go/pkg/database"
 	"log"
 	"net/http"
@@ -36,6 +37,7 @@ func main() {
 	router.Use(middleware.Timeout(60 * time.Second))
 
 	router.Get("/recipes", a.getRecipes)
+	router.Get("/recipes/{id}", a.getRecipe)
 	router.Post("/recipes", a.addRecipe)
 	router.Delete("/recipes/{id}", a.deleteRecipe)
 
@@ -75,13 +77,50 @@ func (a *api) getRecipes(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error sending getDevices: %s\n", err.Error())
 	}
 }
+
+func (a *api) getRecipe(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	v, err := a.db.Get("food-recipes")
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var recipes []Recipe
+	if err := json.Unmarshal([]byte(v.(string)), &recipes); err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, recipe := range recipes {
+		if recipe.ID == id {
+			var resp struct {
+				Recipe Recipe `json:"recipe"`
+			}
+			resp.Recipe = recipe
+			w.Header().Set("content-type", "application/json")
+			if err := json.NewEncoder(w).Encode(&resp); err != nil {
+				log.Printf("error sending getDevices: %s\n", err.Error())
+			}
+			return
+		}
+	}
+	http.Error(w, fmt.Sprintf("recipe with id: %s not found", id), http.StatusNotFound)
+}
+
 func (a *api) addRecipe(w http.ResponseWriter, r *http.Request) {
+	id := uuid.New().String()
+
 	var recipe Recipe
 	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
+
+	recipe.ID = id
 
 	v, err := a.db.Get("food-recipes")
 	if err != nil && err != redis.Nil {

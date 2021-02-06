@@ -13,12 +13,12 @@ type Database interface {
 
 // Factory is a factory function that creates a database based on the databaseName param.
 // The databaseName must be "redis".
-func Factory(databaseName string) (Database, error) {
+func Factory(databaseName string, options ...func(*Database) error) (Database, error) {
 	switch databaseName {
 	case "redis":
-		return createRedisDatabase()
+		return createRedisDatabase(options...)
 	case "boltdb":
-		return createBoltDatabase()
+		return createBoltDatabase(options...)
 	default:
 		return nil, &NotImplementedDatabaseError{database: databaseName}
 	}

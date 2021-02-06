@@ -16,7 +16,7 @@ type boltDB struct {
 	*bolt.DB
 }
 
-func createBoltDatabase() (Database, error) {
+func createBoltDatabase(options ...func(*Database) error) (Database, error) {
 	// create a new client with default options
 	var db boltDB
 	var err error
