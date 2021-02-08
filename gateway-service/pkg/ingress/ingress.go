@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/rubenwo/home-automation/gateway-service/pkg/auth"
 	"github.com/rubenwo/home-automation/gateway-service/pkg/mqtt"
 	"log"
 	"net/http"
@@ -23,15 +24,26 @@ type Ingress struct {
 	mqttClient *mqtt.Client
 }
 
-func New(cfg *Config) (*Ingress, error) {
+//New create a new ingress router. The config specifies with back-ends the gateway has. This cannot be nil
+//The authenticator is used for the /auth(/login,/logout,/register,/refresh) endpoints.
+//The last arguments are apiMiddleware. This is a slice of mux.MiddlewareFuncs that are applied to the /api/v1 endpoints.
+func New(cfg *Config, authenticator auth.Authenticator, apiMiddleware ...mux.MiddlewareFunc) (*Ingress, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("cfg cannot be nil")
 	}
+
 	router := mux.NewRouter()
 	mqttClient := mqtt.New()
 
+	authRouter := router.PathPrefix(authPrefix).Subrouter()
+	authRouter.HandleFunc("/login", authenticator.Login).Methods("POST")
+	authRouter.HandleFunc("/logout", authenticator.Logout).Methods("GET")
+	authRouter.HandleFunc("/register", authenticator.Register).Methods("POST")
+	authRouter.HandleFunc("/refresh", authenticator.RefreshToken).Methods("GET")
+
 	apiRouter := router.PathPrefix(apiPrefix).Subrouter()
-	apiRouter.Use(LoggingMiddleware)
+	apiRouter.Use(apiMiddleware...)
+
 	switch cfg.ApiVersion {
 	case "v1":
 		log.Println("Using v1 ingress spec")

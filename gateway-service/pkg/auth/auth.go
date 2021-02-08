@@ -18,6 +18,6 @@ type Authenticator interface {
 	RefreshToken(w http.ResponseWriter, r *http.Request)
 }
 
-type FederatedAuthenticator interface {
+type TokenExchanger interface {
 	ExchangeToken(r *http.Request) (Claims, error)
 }

@@ -1,19 +1,42 @@
 package main
 
 import (
+	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/rubenwo/home-automation/gateway-service/pkg/auth"
 	"github.com/rubenwo/home-automation/gateway-service/pkg/ingress"
 	"log"
 	"net/http"
+	"os"
+	"time"
 )
 
 func main() {
+	jwtKey := os.Getenv("JWT_KEY")
+
+	if jwtKey == "" {
+		log.Fatal("jwt key can't be empty")
+	}
+
+	adminEnabled := false
+	if os.Getenv("ENABLE_ADMIN") == "true" {
+		adminEnabled = true
+	}
+	fmt.Println(adminEnabled)
 	cfg, err := ingress.ParseConfig("./ingress.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	router, err := ingress.New(cfg)
+	authenticator := auth.NewDefaultClient([]byte(jwtKey), time.Hour*1, adminEnabled)
+
+	mfw := []mux.MiddlewareFunc{
+		ingress.LoggingMiddleware,
+		authenticator.AuthorizationMiddleware,
+	}
+
+	router, err := ingress.New(cfg, authenticator, mfw...)
 	if err != nil {
 		log.Fatal(err)
 	}
