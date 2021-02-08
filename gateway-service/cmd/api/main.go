@@ -42,7 +42,7 @@ func main() {
 	}
 
 	handler := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
+		AllowedOrigins: []string{"http://localhost:8080", "http://localhost", "http://192.168.2.135"},
 		AllowedMethods: []string{
 			http.MethodHead,
 			http.MethodGet,
