@@ -1,13 +1,11 @@
 <template>
-    <p>This is a Hue device</p>
+  <p>This is a Hue device</p>
 </template>
 
 <script>
-  export default {
-    name: "HueDevice"
-  }
+export default {
+  name: "HueDevice"
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -31,48 +31,47 @@ export default {
     }
   },
   actions: {
-    async login({commit}, {username, password}) {
-      commit('CLEAR_ERROR');
+    async login({ commit }, { username, password }) {
+      commit("CLEAR_ERROR");
       console.log("logging in");
       const resp = await AuthService.login(username, password);
       console.log(resp);
       if (resp.status === 200) {
-        const {username, user_id, token} = resp.data;
-        localStorage.setItem('token', token);
-        localStorage.setItem('username', username);
-        localStorage.setItem('userid', user_id);
+        const { username, user_id, token } = resp.data;
+        localStorage.setItem("token", token);
+        localStorage.setItem("username", username);
+        localStorage.setItem("userid", user_id);
 
         commit("SET_USERNAME", username);
-        commit('SET_TOKEN', token);
-        commit('SET_ID', user_id);
+        commit("SET_TOKEN", token);
+        commit("SET_ID", user_id);
       }
     },
-    logout({commit}) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
-      localStorage.removeItem('userid');
-      commit('CLEAR_ALL');
-      commit('CLEAR_ERROR');
+    logout({ commit }) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+      localStorage.removeItem("userid");
+      commit("CLEAR_ALL");
+      commit("CLEAR_ERROR");
     }
   },
   getters: {
-    isLoggedIn: (state) => {
-      if (state.token == null)
-        return false
-      const parseJwt = (token) => {
+    isLoggedIn: state => {
+      if (state.token == null) return false;
+      const parseJwt = token => {
         try {
-          return JSON.parse(atob(token.split('.')[1]));
+          return JSON.parse(atob(token.split(".")[1]));
         } catch (e) {
-          return null
+          return null;
         }
-      }
-      let parsedToken = parseJwt(state.token)
+      };
+      let parsedToken = parseJwt(state.token);
       if (parsedToken == null) {
         // eslint-disable-next-line no-console
-        console.log("error decoding!")
+        console.log("error decoding!");
       }
-      return parsedToken.exp > Math.floor(Date.now() / 1000)
+      return parsedToken.exp > Math.floor(Date.now() / 1000);
     },
-    getBearerToken: state => state.token,
+    getBearerToken: state => state.token
   }
 };

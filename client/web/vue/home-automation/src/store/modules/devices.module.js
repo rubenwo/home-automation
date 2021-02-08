@@ -25,7 +25,7 @@ export default {
     devices: state => state.devices.filter(device => device.status)
   },
   actions: {
-    async fetchDevices({commit}) {
+    async fetchDevices({ commit }) {
       commit("REQUEST");
       try {
         const result = await DeviceService.fetchDevices();
@@ -35,13 +35,13 @@ export default {
         throw err;
       }
     },
-    async addNewDevice({commit}, data) {
-      console.log('addNewDevice')
-      console.log(data)
+    async addNewDevice({ commit }, data) {
+      console.log("addNewDevice");
+      console.log(data);
       commit("REQUEST");
       try {
-        const result = await DeviceService.addNewDevice(data)
-        console.log(result)
+        const result = await DeviceService.addNewDevice(data);
+        console.log(result);
       } catch (err) {
         commit("FAILED", err.message);
         throw err;

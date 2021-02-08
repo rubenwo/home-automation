@@ -7,15 +7,14 @@ export default {
     error: null,
     tapoDevice: null,
     tapoDevices: [],
-    devs: {},
+    devs: {}
   },
   mutations: {
     REQUEST(state) {
       state.loading = true;
       state.error = null;
     },
-    WAKE_DEVICE() {
-    },
+    WAKE_DEVICE() {},
     TAPO_DEVICE_LOADED(state, device) {
       state.loading = false;
       state.tapoDevice = device;
@@ -38,11 +37,11 @@ export default {
     tapoDevice: state => state.tapoDevice
   },
   actions: {
-    async fetchTapoDevice({commit}, deviceId) {
+    async fetchTapoDevice({ commit }, deviceId) {
       commit("REQUEST");
       try {
         const result = await TapoService.fetchTapoDevice(deviceId);
-        console.log(result.device)
+        console.log(result.device);
         commit("TAPO_DEVICE_LOADED", result.device);
         commit("DEV_LOADED", result.device);
       } catch (err) {
@@ -50,21 +49,21 @@ export default {
         throw err;
       }
     },
-    async fetchTapoDevices({commit}) {
+    async fetchTapoDevices({ commit }) {
       commit("REQUEST");
       try {
         const result = await TapoService.fetchAllTapoDevices();
-        console.log(result.devices)
+        console.log(result.devices);
         commit("TAPO_DEVICES_LOADED", result.devices);
       } catch (err) {
         commit("FAILED", err.message);
         throw err;
       }
     },
-    async wakeTapoDevice({commit}, deviceId) {
-      commit("WAKE_DEVICE")
+    async wakeTapoDevice({ commit }, deviceId) {
+      commit("WAKE_DEVICE");
       const result = await TapoService.wakeTapoDevice(deviceId);
-      console.log(result.devices)
+      console.log(result.devices);
     }
   }
-}
+};

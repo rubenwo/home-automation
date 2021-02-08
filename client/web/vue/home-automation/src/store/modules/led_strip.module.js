@@ -6,7 +6,7 @@ export default {
     loading: false,
     error: null,
     ledStripDevices: [],
-    commandMessage: "",
+    commandMessage: ""
   },
   mutations: {
     REQUEST(state) {
@@ -30,25 +30,25 @@ export default {
     tapoDevice: state => state.tapoDevice
   },
   actions: {
-    async fetchAllLedStripDevices({commit}) {
+    async fetchAllLedStripDevices({ commit }) {
       commit("REQUEST");
       try {
         const result = await LedStripService.fetchAllLedStripDevices();
-        console.log(result.devices)
+        console.log(result.devices);
         commit("LED_STRIP_DEVICES_LOADED", result.devices);
       } catch (err) {
         commit("FAILED", err.message);
         throw err;
       }
     },
-    async commandLedStripDevice({commit}, data) {
+    async commandLedStripDevice({ commit }, data) {
       commit("REQUEST");
       try {
         const result = await LedStripService.commandLedStripDevice(
-            data.deviceId,
-            data.command
+          data.deviceId,
+          data.command
         );
-        console.log(result)
+        console.log(result);
         commit("LED_STRIP_DEVICE_COMMANDED", result.message);
       } catch (err) {
         commit("FAILED", err.message);
@@ -56,4 +56,4 @@ export default {
       }
     }
   }
-}
+};
