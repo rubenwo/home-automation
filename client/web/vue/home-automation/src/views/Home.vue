@@ -39,9 +39,11 @@
       ...mapState("devices", {
         devices: state => state.devices
       }),
+      ...mapState("auth", ["error"]),
     },
     methods: {
       ...mapActions("devices", ["fetchDevices"]),
+      ...mapActions("auth", ["login"]),
       getImgUrl(device) {
         switch (device.category) {
           case "plug":
@@ -58,6 +60,11 @@
     },
     async mounted() {
       await this.fetchDevices();
+      let data = {
+        username: "admin",
+        password: process.env.VUE_APP_ADMIN_PWD
+      };
+      await this.login(data)
     },
     components: {
       AppCard

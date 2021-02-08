@@ -2,12 +2,11 @@ import ApiService from "./api.service";
 
 export default {
   async fetchDevices() {
-    console.log(ApiService().baseUrl)
     const res = await ApiService()
-      .get("/api/v1/devices")
-      .catch(() => {
-      return null;
-    });
+        .get("/api/v1/devices")
+        .catch(() => {
+          return null;
+        });
     console.log(res);
     return res.data;
   },

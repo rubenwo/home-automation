@@ -33,8 +33,9 @@ export default {
   actions: {
     async login({commit}, {username, password}) {
       commit('CLEAR_ERROR');
+      console.log("logging in");
       const resp = await AuthService.login(username, password);
-      console.log(resp)
+      console.log(resp);
       if (resp.status === 200) {
         const {username, user_id, token} = resp.data;
         localStorage.setItem('token', token);
