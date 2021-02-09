@@ -14,13 +14,12 @@ const BearerSchema = "Bearer "
 
 type DefaultClient struct {
 	key             []byte
-	expired         map[string]int64
 	adminEnabled    bool
 	tokenExpiration time.Duration
 }
 
 func NewDefaultClient(key []byte, tokenExpiration time.Duration, adminEnabled bool) *DefaultClient {
-	return &DefaultClient{key: key, tokenExpiration: tokenExpiration, adminEnabled: adminEnabled, expired: make(map[string]int64)}
+	return &DefaultClient{key: key, tokenExpiration: tokenExpiration, adminEnabled: adminEnabled}
 }
 
 func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler {
@@ -93,8 +92,9 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 	expirationTime := time.Now().Add(c.tokenExpiration)
 
 	claims := Claims{
-		Username: "admin",
-		UserID:   "1",
+		Username:      "admin",
+		UserID:        "1",
+		Authorization: Authorization{Roles: []string{"admin"}},
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -120,7 +120,7 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *DefaultClient) Logout(w http.ResponseWriter, r *http.Request) {
-
+	w.WriteHeader(http.StatusOK)
 }
 
 func (c *DefaultClient) Register(w http.ResponseWriter, r *http.Request) {
@@ -128,5 +128,5 @@ func (c *DefaultClient) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *DefaultClient) RefreshToken(w http.ResponseWriter, r *http.Request) {
-
+	w.WriteHeader(http.StatusOK)
 }

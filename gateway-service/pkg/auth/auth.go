@@ -6,9 +6,14 @@ import (
 )
 
 type Claims struct {
-	Username string `json:"username"`
-	UserID   string `json:"user_id"`
+	Username      string        `json:"username"`
+	UserID        string        `json:"user_id"`
+	Authorization Authorization `json:"authorization"`
 	jwt.StandardClaims
+}
+
+type Authorization struct {
+	Roles []string `json:"roles"`
 }
 
 type Authenticator interface {
