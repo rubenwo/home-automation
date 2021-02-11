@@ -9,10 +9,12 @@ import (
 type Config struct {
 	ApiVersion string `yaml:"apiVersion"`
 	Spec       []struct {
-		Host     string   `yaml:"host"`
-		Path     string   `yaml:"path"`
-		Methods  []string `yaml:"methods"`
-		Protocol string   `yaml:"protocol"`
+		Host   string `yaml:"host"`
+		Routes []struct {
+			Path     string   `yaml:"path"`
+			Methods  []string `yaml:"methods"`
+			Protocol string   `yaml:"protocol"`
+		} `yaml:"routes"`
 	} `yaml:"spec"`
 }
 

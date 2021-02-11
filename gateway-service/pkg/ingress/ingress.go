@@ -48,40 +48,42 @@ func New(cfg *Config, authenticator auth.Authenticator, apiMiddleware ...mux.Mid
 	case "v1":
 		log.Println("Using v1 ingress spec")
 		for index, spec := range cfg.Spec {
-			switch strings.ToUpper(spec.Protocol) {
-			case "HTTP":
-				target := strings.ToLower(spec.Protocol) + "://" + spec.Host
-				u, err := url.Parse(target)
-				if err != nil {
-					return nil, fmt.Errorf("invalid spec at index: %d, parsing error: %w", index, err)
-				}
-				apiRouter.HandleFunc(spec.Path, func(writer http.ResponseWriter, request *http.Request) {
-					request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
-					serveReverseProxy(u, writer, request)
-				}).Methods(spec.Methods...)
-
-			case "MQTT":
-				fmt.Println("doing things with mqtt")
-				fmt.Println(spec.Methods)
-				for _, method := range spec.Methods {
-					switch strings.ToUpper(method) {
-					case "POST":
-						if err := mqttClient.Register(spec.Path, spec.Host, 10); err != nil {
-							log.Println(err)
-						}
-						apiRouter.HandleFunc(spec.Path, func(writer http.ResponseWriter, request *http.Request) {
-							request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
-							fmt.Println("MQTT")
-							mqttClient.BrokerMQTTRequest(writer, request)
-						}).Methods("POST")
-					case "GET":
-						fmt.Println("TODO: implement websocket to mqtt listener")
-					default:
-						return nil, fmt.Errorf("%s is not a supported method for: %s", method, spec.Protocol)
+			for _, route := range spec.Routes {
+				switch strings.ToUpper(route.Protocol) {
+				case "HTTP":
+					target := strings.ToLower(route.Protocol) + "://" + spec.Host
+					u, err := url.Parse(target)
+					if err != nil {
+						return nil, fmt.Errorf("invalid spec at index: %d, parsing error: %w", index, err)
 					}
+					apiRouter.HandleFunc(route.Path, func(writer http.ResponseWriter, request *http.Request) {
+						request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
+						serveReverseProxy(u, writer, request)
+					}).Methods(route.Methods...)
+
+				case "MQTT":
+					fmt.Println("doing things with mqtt")
+					fmt.Println(route.Methods)
+					for _, method := range route.Methods {
+						switch strings.ToUpper(method) {
+						case "POST":
+							if err := mqttClient.Register(route.Path, spec.Host, 10); err != nil {
+								log.Println(err)
+							}
+							apiRouter.HandleFunc(route.Path, func(writer http.ResponseWriter, request *http.Request) {
+								request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
+								fmt.Println("MQTT")
+								mqttClient.BrokerMQTTRequest(writer, request)
+							}).Methods("POST")
+						case "GET":
+							fmt.Println("TODO: implement websocket to mqtt listener")
+						default:
+							return nil, fmt.Errorf("%s is not a supported method for: %s", method, route.Protocol)
+						}
+					}
+				default:
+					return nil, fmt.Errorf("%s is not a supported spec.Protocol", route.Protocol)
 				}
-			default:
-				return nil, fmt.Errorf("%s is not a supported spec.Protocol", spec.Protocol)
 			}
 		}
 
@@ -97,6 +99,13 @@ func New(cfg *Config, authenticator auth.Authenticator, apiMiddleware ...mux.Mid
 	router.PathPrefix("/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		serveReverseProxy(u, writer, request)
 	}).Methods("GET")
+
+	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+		tpl, err1 := route.GetPathTemplate()
+		met, err2 := route.GetMethods()
+		fmt.Println(tpl, err1, met, err2)
+		return nil
+	})
 
 	return &Ingress{router: router, mqttClient: mqttClient}, nil
 }

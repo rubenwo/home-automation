@@ -1,100 +1,93 @@
 apiVersion: v1
 spec:
   - host: registry.default.svc.cluster.local
-    path: "/new_id"
-    methods:
-      - GET
-    protocol: http
-  - host: registry.default.svc.cluster.local
-    path: "/devices"
-    methods:
-      - GET
-      - POST
-    protocol: http
-  - host: registry.default.svc.cluster.local
-    path: "/devices/{id}"
-    methods:
-      - DELETE
-    protocol: http
-  - host: registry.default.svc.cluster.local
-    path: "/schedules"
-    methods:
-      - GET
-      - POST
-    protocol: http
+    routes:
+      - path: "/new_id"
+        methods:
+          - GET
+        protocol: http
+      - path: "/devices"
+        methods:
+          - GET
+          - POST
+        protocol: http
+      - path: "/devices/{id}"
+        methods:
+          - DELETE
+        protocol: http
+      - path: "/schedules"
+        methods:
+          - GET
+          - POST
+        protocol: http
 
   - host: food.default.svc.cluster.local
-    path: "/recipes"
-    methods:
-      - GET
-      - POST
-    protocol: http
-  - host: food.default.svc.cluster.local
-    path: "/recipes/{id}"
-    methods:
-      - GET
-    protocol: http
-  - host: food.default.svc.cluster.local
-    path: "/recipes/{id}"
-    methods:
-      - DELETE
-    protocol: http
+    routes:
+      - path: "/recipes"
+        methods:
+          - GET
+          - POST
+        protocol: http
+      - path: "/recipes/{id}"
+        methods:
+          - GET
+        protocol: http
+      - path: "/recipes/{id}"
+        methods:
+          - DELETE
+        protocol: http
 
   - host: led-strip.default.svc.cluster.local
-    path: /leds/devices
-    methods:
-      - GET
-    protocol: http
-
-  - host: led-strip.default.svc.cluster.local
-    path: /leds/devices/register
-    methods:
-      - POST
-    protocol: http
-
-  - host: led-strip.default.svc.cluster.local
-    path: /leds/devices/{id}/command
-    methods:
-      - POST
-    protocol: http
+    routes:
+      - path: "/leds/devices"
+        methods:
+          - GET
+        protocol: http
+      - path: "/leds/devices/register"
+        methods:
+          - POST
+        protocol: http
+      - path: "/leds/devices/{id}/command"
+        methods:
+          - POST
+        protocol: http
 
   - host: tapo.default.svc.cluster.local
-    path: /tapo/wake/{device_id}
-    methods:
-      - GET
-    protocol: http
-  - host: tapo.default.svc.cluster.local
-    path: "/tapo/devices/{device_id}"
-    methods:
-      - GET
-      - PUT
-      - DELETE
-    protocol: http
-  - host: tapo.default.svc.cluster.local
-    path: "/tapo/devices/register"
-    methods:
-      - POST
-    protocol: http
-  - host: tapo.default.svc.cluster.local
-    path: "/tapo/devices"
-    methods:
-      - GET
-    protocol: http
-  - host: tapo.default.svc.cluster.local
-    path: "/tapo/lights/{device_id}"
-    methods:
-      - GET
-    protocol: http
+    routes:
+      - path: /tapo/wake/{device_id}
+        methods:
+          - GET
+        protocol: http
+      - path: "/tapo/devices/{device_id}"
+        methods:
+          - GET
+          - PUT
+          - DELETE
+        protocol: http
+      - path: "/tapo/devices/register"
+        methods:
+          - POST
+        protocol: http
+      - path: "/tapo/devices"
+        methods:
+          - GET
+        protocol: http
+      - path: "/tapo/lights/{device_id}"
+        methods:
+          - GET
+        protocol: http
 
   - host: hue.default.svc.cluster.local
-    path: "/hue/devices"
-    methods:
-      - GET
-    protocol: http
+    routes:
+      - path: "/hue/devices"
+        methods:
+          - GET
+        protocol: http
 
   - host: mqtt-broker.default.svc.cluster.local
-    path: "/esp32/toggle"
-    methods:
-      - POST
-      - GET
-    protocol: mqtt
+    routes:
+      - path: "/esp32/toggle"
+        methods:
+          - POST
+          - GET
+        protocol: mqtt
