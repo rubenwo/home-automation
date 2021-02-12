@@ -4,6 +4,7 @@ import (
 	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,11 +12,16 @@ import (
 )
 
 type Client struct {
-	clients map[string]mqtt.Client
+	clients  map[string]mqtt.Client
+	upgrader websocket.Upgrader
 }
 
 func New() *Client {
-	return &Client{clients: make(map[string]mqtt.Client)}
+	return &Client{clients: make(map[string]mqtt.Client), upgrader: websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}}
 }
 
 func (c *Client) Register(path, host string, retry int) error {
@@ -59,6 +65,41 @@ func (c *Client) BrokerMQTTRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (c *Client) SocketMQTTRequest(w http.ResponseWriter, r *http.Request) {
+	conn, err := c.upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer conn.Close()
+	path := r.URL.Path
+	client, ok := c.clients[path]
+	if !ok {
+		http.Error(w, fmt.Errorf("client for path: %s, was not registered", path).Error(), http.StatusBadRequest)
+		return
+	}
+	go func() {
+		client.Subscribe(path, 0, func(cl mqtt.Client, msg mqtt.Message) {
+			msg.Ack()
+			payload := msg.Payload()
+			fmt.Println(string(payload))
+			if err := conn.WriteMessage(websocket.TextMessage, payload); err != nil {
+				log.Println(err)
+			}
+		})
+	}()
+
+	for {
+		mt, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("read: ", err)
+			break
+		}
+		log.Printf("recv: %s\n", message)
+		fmt.Println(mt)
+	}
 }
 
 func (c *Client) post(data []byte, path string) error {

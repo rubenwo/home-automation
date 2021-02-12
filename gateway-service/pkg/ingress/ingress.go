@@ -65,18 +65,23 @@ func New(cfg *Config, authenticator auth.Authenticator, apiMiddleware ...mux.Mid
 					fmt.Println("doing things with mqtt")
 					fmt.Println(route.Methods)
 					for _, method := range route.Methods {
+						if err := mqttClient.Register(route.Path, spec.Host, 10); err != nil {
+							log.Fatal(err)
+						}
 						switch strings.ToUpper(method) {
 						case "POST":
-							if err := mqttClient.Register(route.Path, spec.Host, 10); err != nil {
-								log.Println(err)
-							}
+
 							apiRouter.HandleFunc(route.Path, func(writer http.ResponseWriter, request *http.Request) {
 								request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
-								fmt.Println("MQTT")
+								fmt.Println("MQTT POST")
 								mqttClient.BrokerMQTTRequest(writer, request)
 							}).Methods("POST")
 						case "GET":
-							fmt.Println("TODO: implement websocket to mqtt listener")
+							apiRouter.HandleFunc(route.Path, func(writer http.ResponseWriter, request *http.Request) {
+								request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
+								fmt.Println("MQTT GET")
+								mqttClient.SocketMQTTRequest(writer, request)
+							}).Methods("GET")
 						default:
 							return nil, fmt.Errorf("%s is not a supported method for: %s", method, route.Protocol)
 						}

@@ -25,6 +25,14 @@ func NewDefaultClient(key []byte, tokenExpiration time.Duration, adminEnabled bo
 func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("AuthorizationMiddleware => checking permissions...")
+		for _, header := range r.Header["Upgrade"] {
+			if header == "websocket" {
+				fmt.Println("websocket connection")
+				next.ServeHTTP(w, r)
+				return
+			}
+		}
+
 		authHeader := r.Header.Get("Authorization")
 
 		if authHeader == "" {
