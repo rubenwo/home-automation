@@ -87,6 +87,7 @@ func (c *Client) SocketMQTTRequest(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(string(payload))
 			if err := conn.WriteMessage(websocket.TextMessage, payload); err != nil {
 				log.Println(err)
+				client.Unsubscribe(path)
 			}
 		})
 	}()
