@@ -20,6 +20,15 @@ spec:
           - GET
           - POST
         protocol: http
+      - path: "/sensors"
+        methods:
+          - GET
+          - POST
+        protocol: http
+      - path: "/sensors/{id}"
+        methods:
+          - DELETE
+        protocol: http
 
   - host: food.default.svc.cluster.local
     routes:

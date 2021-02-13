@@ -15,3 +15,10 @@ type Product struct {
 	Company string `json:"company"`
 	Type    string `json:"type"`
 }
+
+type SensorDevice struct {
+	ID             string      `json:"id"`
+	Name           string      `json:"name"`
+	SensorType     string      `json:"sensor_type"`
+	ConnectionData interface{} `json:"connection_data"`
+}

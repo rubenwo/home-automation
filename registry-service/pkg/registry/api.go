@@ -90,6 +90,10 @@ func New(cfg *Config) (*api, error) {
 
 	a.router.Get("/new_id", a.getNewID)
 
+	a.router.Get("/sensors", a.getSensors)
+	a.router.Post("/sensors", a.addSensor)
+	a.router.Delete("/sensors/{id}", a.deleteSensor)
+
 	a.router.Get("/devices", a.getDevices)
 	a.router.Post("/devices", a.postDevice)
 	a.router.Delete("/devices/{id}", a.deleteDevice)
@@ -114,6 +118,8 @@ func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+
+
 func (a *api) getNewID(w http.ResponseWriter, r *http.Request) {
 	var resp struct {
 		ID string `json:"id"`
@@ -125,6 +131,10 @@ func (a *api) getNewID(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error sending getDevices: %s\n", err.Error())
 	}
 }
+
+func (a *api) getSensors(w http.ResponseWriter, r *http.Request) {}
+func (a *api) addSensor(w http.ResponseWriter, r *http.Request) {}
+func (a *api) deleteSensor(w http.ResponseWriter, r *http.Request) {}
 
 func (a *api) postDevice(w http.ResponseWriter, r *http.Request) {
 	var dev DeviceInfo

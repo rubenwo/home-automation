@@ -21,7 +21,6 @@
 
 <script>
 import RecipeCard from "../components/RecipeCard";
-import FoodService from "../services/food.service";
 
 export default {
   name: "Recipes",
@@ -32,11 +31,7 @@ export default {
     };
   },
   methods: {},
-  async mounted() {
-    const recipes = await FoodService.fetchRecipes(this.id);
-    console.log(recipes);
-    this.recipes = recipes.recipes;
-  }
+  async mounted() {}
 };
 </script>
 
