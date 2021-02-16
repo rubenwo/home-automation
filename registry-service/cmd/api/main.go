@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	router, err := registry.New(&registry.Config{DatabaseBackend: "boltdb"})
+	router, err := registry.New(&registry.Config{DatabaseBackend: "redis"})
 	if err != nil {
 		log.Fatal(err)
 	}
