@@ -1,2 +1,6 @@
 
 tapo-service/t.py
+
+registry-service/url.db.lock
+
+registry-service/url.db

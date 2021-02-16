@@ -1,38 +1,23 @@
 <template>
-  <div class="row" style="margin-top: 10px">
-    <b-col
-      cols="4"
-      sm="3"
-      md="3"
-      lg="2"
-      xl="2"
-      v-bind:key="recipe.id"
-      v-for="recipe in this.recipes"
-      style="margin-right: 25px; margin-left: 25px"
-    >
-      <recipe-card
-        v-bind:name="recipe.name"
-        v-bind:img="recipe.img"
-        v-bind:id="recipe.id"
-      />
-    </b-col>
-  </div>
+    <div>
+        <p style="color: aliceblue">This is the sensors part</p>
+    </div>
 </template>
 
 <script>
-import RecipeCard from "../components/RecipeCard";
 
-export default {
-  name: "Recipes",
-  components: { RecipeCard },
-  data() {
-    return {
-      recipes: []
-    };
-  },
-  methods: {},
-  async mounted() {}
-};
+  export default {
+    name: "Recipes",
+    components: {},
+    data() {
+      return {
+        recipes: []
+      };
+    },
+    methods: {},
+    async mounted() {
+    }
+  };
 </script>
 
 <style></style>

@@ -28,7 +28,7 @@ func New(cfg *Config) (*api, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("error validating config: %w", err)
 	}
-	db, err := database.Factory("redis")
+	db, err := database.Factory(cfg.DatabaseBackend)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't create database: %w", err)
 	}
@@ -118,8 +118,6 @@ func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
-
 func (a *api) getNewID(w http.ResponseWriter, r *http.Request) {
 	var resp struct {
 		ID string `json:"id"`
@@ -132,8 +130,8 @@ func (a *api) getNewID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *api) getSensors(w http.ResponseWriter, r *http.Request) {}
-func (a *api) addSensor(w http.ResponseWriter, r *http.Request) {}
+func (a *api) getSensors(w http.ResponseWriter, r *http.Request)   {}
+func (a *api) addSensor(w http.ResponseWriter, r *http.Request)    {}
 func (a *api) deleteSensor(w http.ResponseWriter, r *http.Request) {}
 
 func (a *api) postDevice(w http.ResponseWriter, r *http.Request) {
@@ -219,7 +217,7 @@ func (a *api) deleteDevice(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) createSchedule(w http.ResponseWriter, r *http.Request) {
-	a.scheduler.createSchedule()
+	a.scheduler.CreateSchedule(Schedule{})
 }
 
 func (a *api) getSchedules(w http.ResponseWriter, r *http.Request) {

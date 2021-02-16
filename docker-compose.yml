@@ -69,6 +69,3 @@ services:
       - /mnt/redis-data:/data
     entrypoint: redis-server --appendonly yes
 
-volumes:
-  redis_data:
-    driver: local
