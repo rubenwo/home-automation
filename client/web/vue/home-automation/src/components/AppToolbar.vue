@@ -5,39 +5,32 @@
             type="dark"
             style="background-color: rgba(70, 70, 70, 0.7)"
     >
-
-        <b-container>
-            <b-button v-b-toggle.sidebar-variant><img src="../assets/burger.png" width="25" height="25"/></b-button>
-
-            <b-sidebar id="sidebar-variant" title="Sidebar" bg-variant="dark" text-variant="light" shadow>
-                <div class="px-3 py-2">
-                    <b-navbar-nav>
-                        <b-nav-item href="#" to="/" exact>Home</b-nav-item>
-                        <b-nav-item href="#" to="/schedules" exact>Schedules</b-nav-item>
-                        <b-nav-item href="#" to="/sensors" exact>Sensors</b-nav-item>
-                        <b-nav-item href="#" to="/recipes" exact>Recipes</b-nav-item>
-                    </b-navbar-nav>
-                </div>
-            </b-sidebar>
-            <b-navbar-brand href="#" to="/">Home Automation</b-navbar-brand>
-
-            <b-navbar-toggle target="nav_collapse"/>
-
-            <b-collapse is-nav id="nav_collapse">
-
+        <b-sidebar id="sidebar-variant" title="Sidebar" bg-variant="dark" text-variant="light"
+                   style="background-color: rgba(70, 70, 70, 0.7)">
+            <div class="px-3 py-2">
                 <b-navbar-nav class="ml-auto">
-                    <b-button
-                            pill
-                            img="./assets/add.png"
-                            v-b-tooltip.hover
-                            variant="primary"
-                            title="Click here to add a new"
-                            @click="onClickAdd"
-                    ><img src="../assets/add.png" width="25" height="25"/>
-                    </b-button>
+                    <b-nav-item href="#" to="/" exact>Home</b-nav-item>
+                    <b-nav-item href="#" to="/schedules" exact>Schedules</b-nav-item>
+                    <b-nav-item href="#" to="/sensors" exact>Sensors</b-nav-item>
+                    <b-nav-item href="#" to="/recipes" exact>Recipes</b-nav-item>
                 </b-navbar-nav>
-            </b-collapse>
-        </b-container>
+            </div>
+        </b-sidebar>
+
+        <b-navbar-brand>
+            <b-button v-b-toggle.sidebar-variant><img src="../assets/burger.png" width="25" height="25"/></b-button>
+        </b-navbar-brand>
+        <b-navbar-nav class="ml-auto">
+            <b-button
+                    pill
+                    img="./assets/add.png"
+                    v-b-tooltip.hover
+                    variant="primary"
+                    title="Click here to add a new"
+                    @click="onClickAdd"
+            ><img src="../assets/add.png" width="25" height="25"/>
+            </b-button>
+        </b-navbar-nav>
         <add-device-modal ref="deviceModal"/>
         <add-schedule-modal ref="scheduleModal"/>
         <add-sensor-modal ref="sensorModal"/>

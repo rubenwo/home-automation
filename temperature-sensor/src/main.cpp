@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include <Adafruit_BMP085.h>
 #include <Adafruit_BMP280.h>
+#include <TinyGPS++.h>
 
 // Replace the next variables with your SSID/Password combination
 const char *ssid = "";
@@ -15,6 +16,9 @@ const char *mqtt_server = "192.168.2.135";
 
 Adafruit_BMP280 bmp280; // I2C
 Adafruit_BMP085 bmp180;
+
+TinyGPSPlus gps;
+HardwareSerial gps_serial(2);
 
 struct Button
 {
@@ -66,8 +70,46 @@ struct bmp280_sensor_data
                                temperature, pressure, altitude); }
 };
 
-TaskHandle_t collect_sensor_data_task_handle;
-QueueHandle_t bmp180_sensor_data_queue, bmp280_sensor_data_queue;
+struct gps_data
+{
+  double gps_altitude;
+  double gps_course_degree;
+  double gps_hdop;
+  double gps_lon;
+  double gps_lat;
+
+  uint32_t gps_sat_amount;
+  double gps_kmph;
+
+  void Print() { Serial.printf("gps_data-> gps_altitude: %f, gps_course_degree: %f, gps_hdop: %f, gps_lon: %f, gps_lat: %f, gps_sat_amount: %d, gps_kmph: %f\n",
+                               gps_altitude, gps_course_degree, gps_hdop, gps_lon, gps_lat, gps_sat_amount, gps_kmph); }
+};
+
+TaskHandle_t collect_sensor_data_task_handle, collect_gps_data_handle;
+QueueHandle_t bmp180_sensor_data_queue, bmp280_sensor_data_queue, gps_data_queue;
+
+void collect_gps_data_task(void *pvParameters)
+{
+  gps_data gps_data;
+  for (;;)
+  {
+    while (gps_serial.available() > 0)
+    {
+      gps.encode(gps_serial.read());
+    }
+    gps_data.gps_altitude = gps.altitude.meters();
+    gps_data.gps_course_degree = gps.course.deg();
+    gps_data.gps_hdop = gps.hdop.hdop();
+    gps_data.gps_kmph = gps.speed.kmph();
+    gps_data.gps_lat = gps.location.lat();
+    gps_data.gps_lon = gps.location.lng();
+    gps_data.gps_sat_amount = gps.satellites.value();
+
+    xQueueSend(gps_data_queue, &gps_data, portMAX_DELAY);
+    vTaskDelay(2000);
+  }
+  vTaskDelete(NULL);
+}
 
 void collect_sensor_data_task(void *pvParameters)
 {
@@ -90,7 +132,7 @@ void collect_sensor_data_task(void *pvParameters)
     xQueueSend(bmp180_sensor_data_queue, &bmp180_sensor_data, portMAX_DELAY);
     xQueueSend(bmp280_sensor_data_queue, &bmp280_sensor_data, portMAX_DELAY);
 
-    delay(250);
+    vTaskDelay(1000);
   }
   vTaskDelete(NULL);
 }
@@ -143,6 +185,7 @@ void setup()
     {
     }
   }
+  gps_serial.begin(9600);
 
   /* Default settings from datasheet. */
   bmp280.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
@@ -156,6 +199,7 @@ void setup()
 
   bmp180_sensor_data_queue = xQueueCreate(1, sizeof(bmp180_sensor_data));
   bmp280_sensor_data_queue = xQueueCreate(1, sizeof(bmp280_sensor_data));
+  gps_data_queue = xQueueCreate(1, sizeof(gps_data));
 
   xTaskCreatePinnedToCore(
       collect_sensor_data_task,
@@ -165,7 +209,17 @@ void setup()
       0,
       &collect_sensor_data_task_handle,
       0);
-  Serial.println("Task created...");
+
+  xTaskCreatePinnedToCore(
+      collect_gps_data_task,
+      "collect_gps_data_task",
+      10000,
+      NULL,
+      0,
+      &collect_gps_data_handle,
+      0);
+
+  Serial.println("Tasks created...");
 }
 // JSON data buffer
 StaticJsonDocument<1000> jsonDocument;
@@ -174,7 +228,7 @@ void loop()
 {
   bmp180_sensor_data bmp180_sensor_data;
   bmp280_sensor_data bmp280_sensor_data;
-
+  gps_data gps_data;
   while (!mqtt_client.connected())
   {
     mqtt_client.connect("ESP32 temperature sensor");
@@ -207,6 +261,25 @@ void loop()
     jsonDocument["data"]["temperature"] = bmp280_sensor_data.temperature;
     jsonDocument["data"]["pressure"] = bmp280_sensor_data.pressure;
     jsonDocument["data"]["altitude"] = bmp280_sensor_data.altitude;
+
+    serializeJson(jsonDocument, buffer);
+    mqtt_client.publish("/esp32/toggle", buffer);
+  }
+
+  if (xQueueReceive(gps_data_queue, &gps_data, 0))
+  {
+    gps_data.Print();
+
+    jsonDocument.clear();
+    jsonDocument["message_type"] = "GPS_DATA";
+    jsonDocument["data"] = jsonDocument.createNestedObject();
+    jsonDocument["data"]["gps_altitude"] = gps_data.gps_altitude;
+    jsonDocument["data"]["gps_course_degree"] = gps_data.gps_course_degree;
+    jsonDocument["data"]["gps_hdop"] = gps_data.gps_hdop;
+    jsonDocument["data"]["gps_lon"] = gps_data.gps_lon;
+    jsonDocument["data"]["gps_lat"] = gps_data.gps_lat;
+    jsonDocument["data"]["gps_sat_amount"] = gps_data.gps_sat_amount;
+    jsonDocument["data"]["gps_kmph"] = gps_data.gps_kmph;
 
     serializeJson(jsonDocument, buffer);
     mqtt_client.publish("/esp32/toggle", buffer);
