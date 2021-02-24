@@ -69,3 +69,12 @@ services:
       - /mnt/redis-data:/data
     entrypoint: redis-server --appendonly yes
 
+  postgres.default.svc.cluster.local:
+    image: postgres
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=home_automation_database
+    volumes:
+      - /mnt/postgres-data:/var/lib/postgresql/data/
+    
