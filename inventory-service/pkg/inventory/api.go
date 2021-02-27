@@ -9,6 +9,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -36,6 +37,10 @@ func New(cfg *Config) (*api, error) {
 		return nil, fmt.Errorf("database ping failed: %w", err)
 	}
 
+	if err := createSchema(db); err != nil {
+		return nil, fmt.Errorf("couldn't create schema: %w", err)
+	}
+
 	a := &api{
 		router: chi.NewRouter(),
 		db:     db,
@@ -53,6 +58,10 @@ func New(cfg *Config) (*api, error) {
 
 	a.router.Get("/healthz", a.healthz)
 
+	a.router.Get("/inventory", a.getInventory)
+	a.router.Post("/inventory", a.addItemToInventory)
+	a.router.Delete("/inventory/{id}", a.deleteItemFromInventory)
+
 	return a, nil
 }
 
@@ -68,4 +77,59 @@ func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 	}); err != nil {
 		log.Printf("error sending healthz: %s\n", err.Error())
 	}
+}
+
+func (a *api) getInventory(w http.ResponseWriter, r *http.Request) {
+	var items []Item
+	if err := a.db.Model(&items).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	if items == nil {
+		items = []Item{}
+	}
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&items); err != nil {
+		log.Printf("error sending healthz: %s\n", err.Error())
+	}
+}
+
+func (a *api) addItemToInventory(w http.ResponseWriter, r *http.Request) {
+	var item Item
+	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't decode body: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	result, err := a.db.Model(&item).Insert()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("couldn't insert model into database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(result)
+	// return the entire inventory now
+	a.getInventory(w, r)
+}
+
+func (a *api) deleteItemFromInventory(w http.ResponseWriter, r *http.Request) {
+	rawId := chi.URLParam(r, "id")
+	if rawId == "" {
+		http.Error(w, "no id was provided in the request", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		http.Error(w, "provided id was not a number, thus couldn't be parsed", http.StatusBadRequest)
+		return
+	}
+
+	result, err := a.db.Model(&Item{Id: int64(id)}).Where("item.id = ?", id).Delete()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("an error occured when deleteing item with id: %d, error: %s", id, err.Error()), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(result)
+	a.getInventory(w, r)
 }

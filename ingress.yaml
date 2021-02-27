@@ -100,3 +100,15 @@ spec:
           - POST
           - GET
         protocol: mqtt
+
+  - host: inventory.default.svc.cluster.local
+    routes:
+      - path: "/inventory"
+        methods:
+          - POST
+          - GET
+        protocol: http
+      - path: "/inventory/{id}"
+        methods:
+          - DELETE
+        protocol: http
