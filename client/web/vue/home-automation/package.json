@@ -15,6 +15,7 @@
     "vue": "^2.6.11",
     "vue-color": "^2.8.1",
     "vue-colour-picker": "^0.0.5",
+    "vue-graph": "^0.8.7",
     "vue-loading-overlay": "^3.4.2",
     "vue-router": "^3.2.0",
     "vuex": "^3.4.0"

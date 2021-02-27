@@ -4,7 +4,7 @@ import store from "@/store";
 export default () => {
   //console.log(process.env.VUE_APP_BACKEND_URL);
   const http = axios.create({
-    baseURL: process.env.VUE_APP_BACKEND_URL,
+    baseURL: "http://" + process.env.VUE_APP_BACKEND_URL,
     withCredentials: true,
     headers: {
       ...(store.getters["auth/getBearerToken"] && {
