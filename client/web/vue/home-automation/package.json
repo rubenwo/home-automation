@@ -11,6 +11,7 @@
     "axios": "^0.21.0",
     "bootstrap-vue": "^2.20.0",
     "core-js": "^3.6.5",
+    "lodash": "^4.17.21",
     "verte": "^0.0.12",
     "vue": "^2.6.11",
     "vue-color": "^2.8.1",
@@ -18,6 +19,7 @@
     "vue-graph": "^0.8.7",
     "vue-loading-overlay": "^3.4.2",
     "vue-router": "^3.2.0",
+    "vuetable-2": "^2.0.0-beta.4",
     "vuex": "^3.4.0"
   },
   "devDependencies": {
