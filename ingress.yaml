@@ -111,4 +111,5 @@ spec:
       - path: "/inventory/{id}"
         methods:
           - DELETE
+          - PUT
         protocol: http

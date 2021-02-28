@@ -11,7 +11,7 @@ func main() {
 	// TODO: get the database credentials from environment
 	router, err := inventory.New(&inventory.Config{
 		DatabaseAddr:     "postgres.default.svc.cluster.local:5432",
-		//DatabaseAddr:     "localhost:5432",
+		//DatabaseAddr:     "192.168.2.135:5432",
 		DatabaseUser:     "user",
 		DatabasePassword: "password",
 		DatabaseName:     "home_automation_database",

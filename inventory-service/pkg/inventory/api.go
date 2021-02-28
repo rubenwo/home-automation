@@ -61,6 +61,7 @@ func New(cfg *Config) (*api, error) {
 	a.router.Get("/inventory", a.getInventory)
 	a.router.Post("/inventory", a.addItemToInventory)
 	a.router.Delete("/inventory/{id}", a.deleteItemFromInventory)
+	a.router.Put("/inventory/{id}", a.updateItemFromInventory)
 
 	return a, nil
 }
@@ -128,6 +129,36 @@ func (a *api) deleteItemFromInventory(w http.ResponseWriter, r *http.Request) {
 	result, err := a.db.Model(&Item{Id: int64(id)}).Where("item.id = ?", id).Delete()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("an error occured when deleteing item with id: %d, error: %s", id, err.Error()), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(result)
+	a.getInventory(w, r)
+}
+
+func (a *api) updateItemFromInventory(w http.ResponseWriter, r *http.Request) {
+	rawId := chi.URLParam(r, "id")
+	if rawId == "" {
+		http.Error(w, "no id was provided in the request", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.Atoi(rawId)
+	if err != nil {
+		http.Error(w, "provided id was not a number, thus couldn't be parsed", http.StatusBadRequest)
+		return
+	}
+	var item Item
+	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't decode body: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+	if item.Id != int64(id) {
+		http.Error(w, "the id in the request path does not equal the id in the request body", http.StatusBadRequest)
+		return
+	}
+
+	result, err := a.db.Model(&item).Where("item.id = ?", id).Update()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("an error occured when updating item with id: %d, error: %s", id, err.Error()), http.StatusInternalServerError)
 		return
 	}
 	fmt.Println(result)
