@@ -5,11 +5,11 @@ import store from "./store";
 import BootstrapVue from "bootstrap-vue";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
-import VueGraph from "vue-graph";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 Vue.config.productionTip = false;
 Vue.use(BootstrapVue);
-Vue.use(VueGraph);
+Vue.component("font-awesome-icon", FontAwesomeIcon);
 
 new Vue({
   router,
