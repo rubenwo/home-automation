@@ -49,7 +49,7 @@
                                     class="mx-1"
                                     placeholder="name"
                                     type="number"
-                                    v-model="addItemData.count"
+                                    v-model.number="addItemData.count"
                             />
                         </b-col>
                     </b-row>
@@ -131,9 +131,9 @@
         }
       },
       async dataManager(sortOrder, pagination) {
-        if (this.data.length < 1) return;
+        if (this.inventory.length < 1) return;
 
-        let local = this.data;
+        let local = this.inventory;
 
         // sortOrder can be empty, so we have to check for that as well
         if (sortOrder.length > 0) {
@@ -182,6 +182,7 @@
         console.log("CANCEL")
       },
       async handleSubmit() {
+        console.log(this.addItemData)
         const res = await InventoryService.addInventoryItem(this.addItemData);
         console.log(res);
         this.inventory = res;
@@ -191,7 +192,7 @@
           count: 0
         };
         this.$nextTick(() => {
-          this.$refs.deviceModal.hide();
+          this.$refs.add_inventory_item.hide();
         });
       }
     },
