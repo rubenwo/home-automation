@@ -80,8 +80,9 @@ services:
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=home_automation_database
+      - POSTGRES_MULTIPLE_DATABASES=inventory_database,registry_database,food_database
     volumes:
       - /mnt/postgres-data:/var/lib/postgresql/data/
+      - ./docker-postgresql-multiple-databases:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432

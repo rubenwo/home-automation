@@ -29,6 +29,8 @@ type HealthzModel struct {
 
 type Item struct {
 	Id          int64  `json:"id"`
+	Category    string `json:"category"`
+	Product     string `json:"product"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Count       int    `json:"count"`

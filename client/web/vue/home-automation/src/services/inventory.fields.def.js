@@ -9,6 +9,14 @@ export default [
     sortField: "id"
   },
   {
+    name: "category",
+    sortField: "category"
+  },
+  {
+    name: "product",
+    sortField: "product"
+  },
+  {
     name: "name",
     sortField: "name"
   },

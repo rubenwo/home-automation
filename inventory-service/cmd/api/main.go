@@ -14,7 +14,7 @@ func main() {
 		//DatabaseAddr:     "192.168.2.135:5432",
 		DatabaseUser:     "user",
 		DatabasePassword: "password",
-		DatabaseName:     "home_automation_database",
+		DatabaseName:     "inventory_database",
 	})
 	if err != nil {
 		log.Fatal(err)
