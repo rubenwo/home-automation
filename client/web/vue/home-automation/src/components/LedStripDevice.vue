@@ -3,6 +3,8 @@
     <b-button pill @click="onButtonClick" center>
       <verte v-model="color" picker="wheel" model="rgb" />
     </b-button>
+
+    <p></p>
   </div>
 </template>
 
@@ -35,12 +37,16 @@ export default {
   },
   data() {
     return {
-      color: ""
+      color: "",
+      device: {}
     };
   },
   async mounted() {
     this.id = this.$route.params.id;
     console.log(this.id);
+    const res = await LedStripService.fetchAllLedStripDevices();
+    console.log(res);
+    this.device = res;
   }
 };
 </script>
