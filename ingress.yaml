@@ -40,9 +40,7 @@ spec:
       - path: "/recipes/{id}"
         methods:
           - GET
-        protocol: http
-      - path: "/recipes/{id}"
-        methods:
+          - PUT
           - DELETE
         protocol: http
 
