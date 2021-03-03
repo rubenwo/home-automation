@@ -27,16 +27,19 @@ export default {
   data() {
     return {
       recipe: {
+        id: 0,
         name: "",
         img: "",
         ingredients: [
           {
+            id: 0,
             name: "",
             amount: ""
           }
         ],
         steps: [
           {
+            id: 0,
             instruction: ""
           }
         ]
@@ -46,13 +49,9 @@ export default {
   async created() {
     this.id = this.$route.params.id;
 
-    const res = await FoodService.fetchRecipes();
-    for (let recipe of res.recipes) {
-      if (this.id === recipe.id) {
-        this.recipe = recipe;
-        break;
-      }
-    }
+    const res = await FoodService.fetchRecipe(this.id);
+    console.log(res);
+    this.recipe = res.recipe;
   },
   mounted() {}
 };
