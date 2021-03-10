@@ -111,3 +111,21 @@ spec:
           - DELETE
           - PUT
         protocol: http
+
+  - host: video-streaming-hub.default.svc.cluster.local
+    routes:
+      - path: "/cameras"
+        methods:
+          - POST
+          - GET
+        protocol: http
+      - path: "/camera/{id}"
+        methods:
+          - DELETE
+          - GET
+          - PUT
+        protocol: http
+      - path: "/stream/{id}"
+        methods:
+          - GET
+        protocol: http

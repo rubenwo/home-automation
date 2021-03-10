@@ -57,6 +57,12 @@ services:
     build: ./client/web/vue/home-automation
     restart: on-failure
 
+  video-streaming-hub.default.svc.cluster.local:
+    build: ./video-streaming-hub-service
+    restart: on-failure
+    depends_on:
+      - postgres.default.svc.cluster.local
+
   mqtt-broker.default.svc.cluster.local:
     image: eclipse-mosquitto:1.6.13
     restart: on-failure
