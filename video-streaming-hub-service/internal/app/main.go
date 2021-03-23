@@ -8,9 +8,13 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-pg/pg/v10"
 	"github.com/gorilla/websocket"
+	"github.com/rubenwo/home-automation/video-streaming-hub-service/pkg/mjpeg"
 	"github.com/rubenwo/home-automation/video-streaming-hub-service/pkg/rtsp"
+	"image"
+	"image/jpeg"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -18,6 +22,8 @@ import (
 type api struct {
 	db          *pg.DB
 	rtspClients []*rtsp.Client
+
+	imageStreams map[string][]chan image.Image
 }
 
 func Run(cfg Config) error {
@@ -40,7 +46,9 @@ func Run(cfg Config) error {
 	}
 
 	a := &api{
-		db: db,
+		db:           db,
+		rtspClients:  []*rtsp.Client{},
+		imageStreams: make(map[string][]chan image.Image),
 	}
 
 	router := chi.NewRouter()
@@ -65,7 +73,8 @@ func Run(cfg Config) error {
 	router.Put("/camera/{id}", a.updateCamera)
 	router.Get("/camera/{id}", a.getCamera)
 
-	router.Get("/stream/{id}", a.streamVideoWS)
+	router.Get("/stream/http/{id}", a.streamVideoMultipart)
+	router.Get("/stream/ws/{id}", a.streamVideoWS)
 
 	if err := http.ListenAndServe(cfg.ApiAddr, router); err != nil {
 		return fmt.Errorf("http.ListenAndServe error: %w", err)
@@ -175,6 +184,82 @@ func (a *api) deleteCamera(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(result)
 	a.getCameras(w, r)
+}
+
+func (a *api) createImageStream(u *url.URL) (chan image.Image, error) {
+	client := &http.Client{}
+
+	resp, err := client.Get("http://192.168.2.27")
+	if err != nil {
+		log.Fatal(err)
+	}
+	decoder, err := mjpeg.NewDecoderFromResponse(resp)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c := make(chan image.Image)
+	go func(c chan image.Image) {
+		for {
+			start := time.Now()
+			img, err := decoder.Decode()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("FPS: %f\n", float64(1000)/float64(time.Since(start).Milliseconds()))
+			c <- img
+		}
+	}(c)
+	return c, nil
+}
+
+func (a *api) streamVideoMultipart(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("couldn't convert id: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+	fmt.Println(id)
+
+	u, err := url.Parse("http://192.168.2.27")
+	if err != nil {
+		log.Fatal(err)
+	}
+	c, err := a.createImageStream(u)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	/*
+		void handle_jpg_stream(void)
+		{
+		    WiFiClient client = server.client();
+		    String response = "HTTP/1.1 200 OK\r\n";
+		    response += "Content-Type: multipart/x-mixed-replace; boundary=frame\r\n\r\n";
+		    server.sendContent(response);
+
+		    while (1)
+		    {
+		        cam.run();
+		        if (!client.connected())
+		            break;
+		        response = "--frame\r\n";
+		        response += "Content-Type: image/jpeg\r\n\r\n";
+		        server.sendContent(response);
+
+		        client.write((char *)cam.getfb(), cam.getSize());
+		        server.sendContent("\r\n");
+		        if (!client.connected())
+		            break;
+		    }
+		}
+	*/
+
+	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+	w.WriteHeader(http.StatusOK)
+	for img := range c {
+		jpeg.Encode(w, img, nil)
+	}
 }
 
 func (a *api) streamVideoWS(w http.ResponseWriter, r *http.Request) {

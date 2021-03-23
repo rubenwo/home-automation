@@ -28,8 +28,8 @@ export default {
   name: "RecipeCard",
   props: {
     id: {
-      type: String,
-      default: ""
+      type: Number,
+      default: -1
     },
     name: {
       type: String,

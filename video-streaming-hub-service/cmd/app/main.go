@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/rubenwo/home-automation/video-streaming-hub-service/internal/app"
+	_ "image/jpeg"
 	"log"
 )
 

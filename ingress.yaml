@@ -125,7 +125,11 @@ spec:
           - GET
           - PUT
         protocol: http
-      - path: "/stream/{id}"
+      - path: "/stream/ws/{id}"
+        methods:
+          - GET
+        protocol: http
+      - path: "/stream/http/{id}"
         methods:
           - GET
         protocol: http
