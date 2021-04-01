@@ -11,6 +11,7 @@ func createSchema(db *pg.DB) error {
 		(*DeviceInfo)(nil),
 		(*Product)(nil),
 		(*SensorDevice)(nil),
+		(*ConnectionData)(nil),
 	}
 
 	for _, model := range models {
@@ -41,8 +42,13 @@ type Product struct {
 }
 
 type SensorDevice struct {
-	Id             int64       `json:"id"`
-	Name           string      `json:"name"`
-	SensorType     string      `json:"sensor_type"`
-	ConnectionData interface{} `json:"connection_data"`
+	Id             int64          `json:"id"`
+	Name           string         `json:"name"`
+	SensorType     string         `json:"sensor_type"`
+	ConnectionData ConnectionData `json:"connection_data"`
+}
+
+type ConnectionData struct {
+	IpAddr string `json:"ip_addr"`
+
 }

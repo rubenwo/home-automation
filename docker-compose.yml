@@ -86,7 +86,7 @@ services:
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_MULTIPLE_DATABASES=inventory_database,registry_database,food_database
+      - POSTGRES_MULTIPLE_DATABASES=inventory_database,registry_database,food_database,camera_database
     volumes:
       - /mnt/postgres-data:/var/lib/postgresql/data/
     ports:
