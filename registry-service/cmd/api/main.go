@@ -7,7 +7,14 @@ import (
 )
 
 func main() {
-	router, err := registry.New(&registry.Config{DatabaseBackend: "redis"})
+	router, err := registry.New(&registry.Config{
+		DatabaseBackend:   "redis",
+		PgDatabaseBackend: "postgres.default.svc.cluster.local:5432",
+		//PgDatabaseBackend:     "192.168.2.135:5432",
+		PgDatabaseUser:     "user",
+		PgDatabasePassword: "password",
+		PgDatabaseName:     "registry_database",
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

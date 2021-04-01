@@ -1,14 +1,17 @@
 package registry
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-pg/pg/v10"
 	"github.com/google/uuid"
 	"github.com/rubenwo/home-automation/libraries/go/pkg/database"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -19,6 +22,7 @@ type api struct {
 	scheduler *Scheduler
 	groups    map[string][]string
 	db        database.Database
+	pgDb      *pg.DB
 }
 
 func New(cfg *Config) (*api, error) {
@@ -33,6 +37,21 @@ func New(cfg *Config) (*api, error) {
 		return nil, fmt.Errorf("couldn't create database: %w", err)
 	}
 
+	pgDb := pg.Connect(&pg.Options{
+		Addr:     cfg.PgDatabaseBackend,
+		User:     cfg.PgDatabaseUser,
+		Password: cfg.PgDatabasePassword,
+		Database: cfg.PgDatabaseName,
+	})
+
+	if err := pgDb.Ping(context.Background()); err != nil {
+		return nil, fmt.Errorf("database ping failed: %w", err)
+	}
+
+	if err := createSchema(pgDb); err != nil {
+		return nil, fmt.Errorf("couldn't create schema: %w", err)
+	}
+
 	a := &api{
 		router:    chi.NewRouter(),
 		devices:   make(map[string]DeviceInfo),
@@ -40,6 +59,7 @@ func New(cfg *Config) (*api, error) {
 		keys:      []string{},
 		groups:    make(map[string][]string),
 		db:        db,
+		pgDb:      pgDb,
 	}
 
 	rawKeys, err := db.Get("registry-keys")
@@ -48,18 +68,9 @@ func New(cfg *Config) (*api, error) {
 	} else {
 		fmt.Println(rawKeys)
 		rawKeysStr := rawKeys.(string)
-		//rawKeysStr = strings.ReplaceAll(rawKeysStr, "\\", "")
-		//rawKeysStr = strings.ReplaceAll(rawKeysStr, "\"", "")
-		//rawKeysStr = strings.TrimPrefix(rawKeysStr, "[")
-		//rawKeysStr = strings.TrimSuffix(rawKeysStr, "]")
-		//
-		//splitKeys := strings.Split(rawKeysStr, ",")
-		//for _, sp := range splitKeys {
-		//	a.keys = append(a.keys, strings.TrimSpace(sp))
-		//}
 
 		if err := json.Unmarshal([]byte(rawKeysStr), &a.keys); err != nil {
-
+			return nil, fmt.Errorf("couldn't unmarshal the keys from the database")
 		}
 
 		for _, k := range a.keys {
@@ -130,9 +141,55 @@ func (a *api) getNewID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *api) getSensors(w http.ResponseWriter, r *http.Request)   {}
-func (a *api) addSensor(w http.ResponseWriter, r *http.Request)    {}
-func (a *api) deleteSensor(w http.ResponseWriter, r *http.Request) {}
+func (a *api) getSensors(w http.ResponseWriter, r *http.Request) {
+	var sensors []SensorDevice
+	if err := a.pgDb.Model(&sensors).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	if sensors == nil {
+		sensors = []SensorDevice{}
+	}
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&sensors); err != nil {
+		log.Printf("error sending sensors: %s\n", err.Error())
+	}
+}
+
+func (a *api) addSensor(w http.ResponseWriter, r *http.Request) {
+	var sensor SensorDevice
+	if err := json.NewDecoder(r.Body).Decode(&sensor); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't decode body: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	result, err := a.pgDb.Model(&sensor).Insert()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("couldn't insert model into database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(result)
+	// return the entire inventory now
+	a.getSensors(w, r)
+
+}
+func (a *api) deleteSensor(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "provided id was not a number, thus couldn't be parsed", http.StatusBadRequest)
+		return
+	}
+
+	result, err := a.pgDb.Model(&SensorDevice{Id: int64(id)}).Where("item.id = ?", id).Delete()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("an error occured when deleteing item with id: %d, error: %s", id, err.Error()), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(result)
+	a.getSensors(w, r)
+}
 
 func (a *api) postDevice(w http.ResponseWriter, r *http.Request) {
 	var dev DeviceInfo
