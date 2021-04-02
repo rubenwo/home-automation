@@ -301,6 +301,8 @@ func (a *api) streamVideoWS(w http.ResponseWriter, r *http.Request) {
 			return true
 		},
 	}
+
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return

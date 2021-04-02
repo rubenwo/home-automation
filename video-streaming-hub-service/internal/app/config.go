@@ -13,7 +13,15 @@ type Config struct {
 
 func (c Config) Validate() error {
 	if c.ApiAddr == "" {
-		return fmt.Errorf("field 'Addr' cannot be empty")
+		return fmt.Errorf("field 'ApiAddr' cannot be empty")
+	}
+
+	if c.DatabaseAddr == "" {
+		return fmt.Errorf("field 'DatabaseAddr' cannot be empty")
+	}
+
+	if c.DatabaseName == "" {
+		return fmt.Errorf("field 'DatabaseName' cannot be empty")
 	}
 
 	return nil
