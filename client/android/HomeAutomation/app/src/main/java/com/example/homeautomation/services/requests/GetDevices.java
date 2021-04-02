@@ -1,5 +1,6 @@
 package com.example.homeautomation.services.requests;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -13,16 +14,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GetDevices implements IRequest<JSONObject> {
     public interface GetDevicesListener {
         void onDevices(ArrayList<Device> devices);
     }
 
+    private final String authToken;
     private final ErrorListener err;
     private final GetDevices.GetDevicesListener devicesListener;
 
-    public GetDevices(ErrorListener err, GetDevices.GetDevicesListener devicesListener) {
+    public GetDevices(String authToken, ErrorListener err, GetDevices.GetDevicesListener devicesListener) {
+        this.authToken = authToken;
         this.err = err;
         this.devicesListener = devicesListener;
     }
@@ -53,6 +58,13 @@ public class GetDevices implements IRequest<JSONObject> {
                     }
                 },
                 (VolleyError error) -> err.onError(new Error(error))
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + authToken);
+                return headers;
+            }
+        };
     }
 }

@@ -2,6 +2,7 @@ package com.example.homeautomation.services;
 
 import android.content.Context;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
@@ -28,6 +29,10 @@ public class VolleyService {
         if (jsonRequest == null) {
             return;
         }
+        jsonRequest.setRetryPolicy(new DefaultRetryPolicy(
+                60 * 1000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue.add(jsonRequest);
     }
 
