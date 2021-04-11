@@ -44,7 +44,7 @@ export default {
     console.log("Starting connection to WebSocket Server");
     console.log(process.env.VUE_APP_BACKEND_URL);
 
-    let url = "ws://";
+    let url = "wss://";
     if (process.env.VUE_APP_BACKEND_URL === "/") url += window.location.host;
     else url += process.env.VUE_APP_BACKEND_URL;
     url += "/api/v1/esp32/toggle";
