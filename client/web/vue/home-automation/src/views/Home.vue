@@ -28,7 +28,7 @@
 <script>
 // @ is an alias to /src
 import AppCard from "@/components/AppCard.vue";
-import { mapActions, mapState, mapGetters } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "Home",
@@ -38,13 +38,10 @@ export default {
   computed: {
     ...mapState("devices", {
       devices: state => state.devices
-    }),
-    ...mapState("auth", ["error"])
+    })
   },
   methods: {
     ...mapActions("devices", ["fetchDevices"]),
-    ...mapActions("auth", ["login", "logout"]),
-    ...mapGetters("auth", ["isLoggedIn"]),
     getImgUrl(device) {
       switch (device.category) {
         case "plug":
@@ -60,14 +57,6 @@ export default {
     }
   },
   async mounted() {
-    console.log(this.isLoggedIn());
-    if (!this.isLoggedIn()) {
-      let data = {
-        username: "admin",
-        password: process.env.VUE_APP_ADMIN_PWD
-      };
-      await this.login(data);
-    }
     await this.fetchDevices();
   },
   components: {

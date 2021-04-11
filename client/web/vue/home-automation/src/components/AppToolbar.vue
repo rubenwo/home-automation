@@ -29,6 +29,10 @@
             @click="onClickAdd"
             ><img src="../assets/add.png" width="25" height="25" />
           </b-button>
+          <b-nav-item-dropdown right v-if="isLoggedIn">
+            <template slot="button-content">{{ username }}</template>
+            <b-dropdown-item v-on:click="logout">Signout</b-dropdown-item>
+          </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
     </b-container>
@@ -44,6 +48,7 @@ import AddDeviceModal from "./AddDeviceModal";
 import AddRecipeModal from "./AddRecipeModal";
 import AddScheduleModal from "./AddScheduleModal";
 import AddSensorModal from "./AddSensorModal";
+import { mapActions, mapState, mapGetters } from "vuex";
 
 export default {
   name: "app-toolbar",
@@ -56,9 +61,13 @@ export default {
     AddScheduleModal,
     AddSensorModal
   },
-  computed: {},
+  computed: {
+    ...mapState("auth", ["username"]),
+    ...mapGetters("auth", ["isLoggedIn"])
+  },
 
   methods: {
+    ...mapActions("auth", ["logout"]),
     getAddButtonHint() {
       return "test";
     },

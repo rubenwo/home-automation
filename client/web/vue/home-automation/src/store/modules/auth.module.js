@@ -45,7 +45,9 @@ export default {
         commit("SET_USERNAME", username);
         commit("SET_TOKEN", token);
         commit("SET_ID", user_id);
+        return true;
       }
+      return false;
     },
     async logout({ commit }) {
       localStorage.removeItem("token");
@@ -53,11 +55,6 @@ export default {
       localStorage.removeItem("userid");
       commit("CLEAR_ALL");
       commit("CLEAR_ERROR");
-      let data = {
-        username: "admin",
-        password: process.env.VUE_APP_ADMIN_PWD
-      };
-      await this.login(data);
     }
   },
   getters: {
