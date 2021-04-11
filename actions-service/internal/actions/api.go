@@ -21,7 +21,7 @@ func Run(cfg *Config) error {
 		return fmt.Errorf("%v: %w", ConfigValidationError, err)
 	}
 
-	a := &api{}
+	a := &api{intentProcessors: cfg.IntentProcessors}
 
 	router := chi.NewRouter()
 
