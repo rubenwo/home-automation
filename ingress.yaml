@@ -91,6 +91,13 @@ spec:
           - GET
         protocol: http
 
+  - host: actions.default.svc.cluster.local
+    routes:
+      - path: "/webhook/request"
+        methods:
+          - POST
+        protocol: http
+
   - host: mqtt-broker.default.svc.cluster.local
     routes:
       - path: "/esp32/toggle"

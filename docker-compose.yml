@@ -63,6 +63,12 @@ services:
     depends_on:
       - postgres.default.svc.cluster.local
 
+  actions.default.svc.cluster.local:
+    build: ./actions-service
+    restart: on-failure
+    depends_on:
+      - postgres.default.svc.cluster.local
+
   mqtt-broker.default.svc.cluster.local:
     image: eclipse-mosquitto:1.6.13
     restart: on-failure
