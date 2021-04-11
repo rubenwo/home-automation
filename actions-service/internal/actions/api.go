@@ -53,6 +53,7 @@ func (a *api) onWebhookRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(req)
+	fmt.Println(req.QueryResult.Intent.DisplayName)
 	processor, ok := a.intentProcessors[req.QueryResult.Intent.DisplayName]
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
