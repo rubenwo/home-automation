@@ -55,8 +55,15 @@ func main() {
 		AllowCredentials: true,
 	}).Handler(router)
 
+	// If certificate exists, host on 443
+	if _, err := os.Stat("/certs/fullchain.pem"); err == nil {
+		// path/to/whatever exists
+		if err := http.ListenAndServeTLS(":443", "/certs/fullchain.pem", "/certs/privkey.pem", handler); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 	if err := http.ListenAndServe(":80", handler); err != nil {
 		log.Fatal(err)
 	}
-
 }
