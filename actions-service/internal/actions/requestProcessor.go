@@ -37,7 +37,7 @@ func (p *ProcessTurnOnRequest) ProcessIntent(params map[string]string) (string, 
 		return "", fmt.Errorf("device %s not found", requestedDevice)
 	}
 	switch strings.ToLower(deviceCompany) {
-	case "tapo":
+	case "tp-link":
 		if err := commandTapoDevice(deviceId, "on", 100); err != nil {
 			return "", err
 		}
@@ -75,7 +75,7 @@ func (p *ProcessTurnOffRequest) ProcessIntent(params map[string]string) (string,
 		return "", fmt.Errorf("device %s not found", requestedDevice)
 	}
 	switch strings.ToLower(deviceCompany) {
-	case "tapo":
+	case "tp-link":
 		if err := commandTapoDevice(deviceId, "off", 0); err != nil {
 			return "", err
 		}
