@@ -20,6 +20,24 @@ func (p *ProcessTurnOnRequest) ProcessIntent(params map[string]string) (string, 
 
 	requestedDevice := params["device"]
 
+	if requestedDevice == "all" {
+		var errors []error
+
+		for _, device := range deviceRespone.Devices {
+			switch device.Product.Company {
+			case "tp-link":
+				if err := commandTapoDevice(device.Id, "on", 100); err != nil {
+					errors = append(errors, err)
+				}
+			}
+		}
+
+		if errors != nil {
+			return "", fmt.Errorf("%v", errors)
+		}
+		return fmt.Sprint("turned on all supported devices successfully"), nil
+	}
+
 	var (
 		deviceId      = ""
 		deviceCompany = ""
@@ -57,6 +75,24 @@ func (p *ProcessTurnOffRequest) ProcessIntent(params map[string]string) (string,
 	}
 
 	requestedDevice := params["device"]
+
+	if requestedDevice == "all" {
+		var errors []error
+
+		for _, device := range deviceRespone.Devices {
+			switch device.Product.Company {
+			case "tp-link":
+				if err := commandTapoDevice(device.Id, "on", 100); err != nil {
+					errors = append(errors, err)
+				}
+			}
+		}
+
+		if errors != nil {
+			return "", fmt.Errorf("%v", errors)
+		}
+		return fmt.Sprint("turned on all supported devices successfully"), nil
+	}
 
 	var (
 		deviceId      = ""

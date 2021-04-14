@@ -2,11 +2,11 @@ package ingress
 
 import (
 	"fmt"
+	"github.com/apex/log"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/rubenwo/home-automation/gateway-service/pkg/auth"
 	"github.com/rubenwo/home-automation/gateway-service/pkg/mqtt"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -50,7 +50,7 @@ func New(cfg *Config, authenticator auth.Authenticator, globalMiddleware []mux.M
 
 	switch cfg.ApiVersion {
 	case "v1":
-		log.Println("Using v1 ingress spec")
+		log.Info("Using v1 ingress spec")
 		for index, spec := range cfg.Spec {
 			for _, route := range spec.Routes {
 				switch strings.ToUpper(route.Protocol) {
@@ -66,24 +66,24 @@ func New(cfg *Config, authenticator auth.Authenticator, globalMiddleware []mux.M
 					}).Methods(route.Methods...)
 
 				case "MQTT":
-					fmt.Println("doing things with mqtt")
-					fmt.Println(route.Methods)
+					log.Infof("doing things with mqtt")
+					log.Infof("%v", route.Methods)
 					for _, method := range route.Methods {
 						if err := mqttClient.Register(route.Path, spec.Host, 10); err != nil {
-							log.Fatal(err)
+							log.Fatalf("%v", err)
 						}
 						switch strings.ToUpper(method) {
 						case "POST":
 
 							apiRouter.HandleFunc(route.Path, func(writer http.ResponseWriter, request *http.Request) {
 								request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
-								fmt.Println("MQTT POST")
+								log.Infof("MQTT POST")
 								mqttClient.BrokerMQTTRequest(writer, request)
 							}).Methods("POST")
 						case "GET":
 							apiRouter.HandleFunc(route.Path, func(writer http.ResponseWriter, request *http.Request) {
 								request.URL.Path = strings.TrimPrefix(request.URL.Path, apiPrefix)
-								fmt.Println("MQTT GET")
+								log.Infof("MQTT GET")
 								mqttClient.SocketMQTTRequest(writer, request)
 							}).Methods("GET")
 						default:
@@ -112,7 +112,7 @@ func New(cfg *Config, authenticator auth.Authenticator, globalMiddleware []mux.M
 	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err1 := route.GetPathTemplate()
 		met, err2 := route.GetMethods()
-		fmt.Println(tpl, err1, met, err2)
+		log.Infof("%s, %v, %v, %v", tpl, err1, met, err2)
 		return nil
 	})
 
