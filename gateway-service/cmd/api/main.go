@@ -31,12 +31,15 @@ func main() {
 
 	authenticator := auth.NewDefaultClient([]byte(jwtKey), time.Hour*1, adminEnabled)
 
-	mfw := []mux.MiddlewareFunc{
+	globalMiddlewares := []mux.MiddlewareFunc{
 		ingress.LoggingMiddleware,
+	}
+
+	apiMiddlewares := []mux.MiddlewareFunc{
 		authenticator.AuthorizationMiddleware,
 	}
 
-	router, err := ingress.New(cfg, authenticator, mfw...)
+	router, err := ingress.New(cfg, authenticator, globalMiddlewares, apiMiddlewares)
 	if err != nil {
 		log.Fatal(err)
 	}
