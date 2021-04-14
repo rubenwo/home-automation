@@ -82,7 +82,7 @@ func (p *ProcessTurnOffRequest) ProcessIntent(params map[string]string) (string,
 		for _, device := range deviceRespone.Devices {
 			switch device.Product.Company {
 			case "tp-link":
-				if err := commandTapoDevice(device.Id, "on", 100); err != nil {
+				if err := commandTapoDevice(device.Id, "off", 0); err != nil {
 					errors = append(errors, err)
 				}
 			}
