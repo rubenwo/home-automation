@@ -26,7 +26,9 @@ type Ingress struct {
 
 //New create a new ingress router. The config specifies with back-ends the gateway has. This cannot be nil
 //The authenticator is used for the /auth(/login,/logout,/register,/refresh) endpoints.
-//The last arguments are apiMiddleware. This is a slice of mux.MiddlewareFuncs that are applied to the /api/v1 endpoints.
+//globalMiddleware is a slice of middleware functions that are applied on every request that comes in
+//apiMiddleware is a slice of middleware function that are applied on any request starting with /api/v1. (These are
+// defined in the config).
 func New(cfg *Config, authenticator auth.Authenticator, globalMiddleware []mux.MiddlewareFunc, apiMiddleware []mux.MiddlewareFunc) (*Ingress, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("cfg cannot be nil")
