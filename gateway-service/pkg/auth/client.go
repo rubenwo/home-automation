@@ -114,6 +114,15 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if lr.Username == "" {
+		http.Error(w, "username cannot be empty", http.StatusUnauthorized)
+		return
+	}
+	if lr.Password == "" {
+		http.Error(w, "password cannot be empty", http.StatusUnauthorized)
+		return
+	}
+
 	if lr.Username == "admin" {
 		if c.adminEnabled {
 			adminPassword := os.Getenv("ADMIN_PWD")
