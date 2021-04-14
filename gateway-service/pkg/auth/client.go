@@ -134,6 +134,10 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "admin account is disabled", http.StatusUnauthorized)
 			return
 		}
+	}else{
+		log.Printf("'%s' is not a valid username", lr.Username)
+		http.Error(w, fmt.Sprintf("'%s' does not exist", lr.Username), http.StatusUnauthorized)
+		return
 	}
 
 	expirationTime := time.Now().Add(c.tokenExpiration)
