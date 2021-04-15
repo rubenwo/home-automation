@@ -1,4 +1,4 @@
-package actions
+package intentprocessor
 
 import (
 	"encoding/json"

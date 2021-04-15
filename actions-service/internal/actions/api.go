@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi"
+	"github.com/rubenwo/home-automation/actions-service/internal/actions/intentprocessor"
 	"github.com/rubenwo/home-automation/actions-service/internal/actions/models"
 	"log"
 	"net/http"
 )
 
 type api struct {
-	intentProcessors map[string]IntentProcessor
+	intentProcessors map[string]intentprocessor.IntentProcessor
 }
 
 func Run(cfg *Config) error {
