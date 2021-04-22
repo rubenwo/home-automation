@@ -13,12 +13,17 @@ spec:
         protocol: http
       - path: "/devices/{id}"
         methods:
+          - GET
           - DELETE
         protocol: http
       - path: "/schedules"
         methods:
           - GET
           - POST
+      - path: "/schedules/{id}"
+        methods:
+          - GET
+          - DELETE
         protocol: http
       - path: "/sensors"
         methods:

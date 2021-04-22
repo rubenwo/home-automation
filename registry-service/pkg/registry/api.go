@@ -65,9 +65,13 @@ func New(cfg *Config) (*api, error) {
 	rawKeys, err := db.Get("registry-keys")
 	if err != nil {
 		fmt.Printf("error retrieving keys: %v\n", err)
+	} else if rawKeys == nil || rawKeys.(string) == "" {
+		fmt.Println("rawKeys is nil")
 	} else {
 		fmt.Println(rawKeys)
 		rawKeysStr := rawKeys.(string)
+
+		fmt.Println(rawKeysStr)
 
 		if err := json.Unmarshal([]byte(rawKeysStr), &a.keys); err != nil {
 			return nil, fmt.Errorf("couldn't unmarshal the keys from the database")
@@ -107,10 +111,13 @@ func New(cfg *Config) (*api, error) {
 
 	a.router.Get("/devices", a.getDevices)
 	a.router.Post("/devices", a.postDevice)
+	a.router.Get("/devices/{id}", a.getDevice)
 	a.router.Delete("/devices/{id}", a.deleteDevice)
 
 	a.router.Get("/schedules", a.getSchedules)
 	a.router.Post("/schedules", a.createSchedule)
+	a.router.Get("/schedules/{id}", a.getSchedule)
+	a.router.Delete("/schedules/{id}", a.deleteSchedule)
 
 	a.router.Post("/group", a.createGroup)
 
@@ -191,93 +198,182 @@ func (a *api) deleteSensor(w http.ResponseWriter, r *http.Request) {
 	a.getSensors(w, r)
 }
 
-func (a *api) postDevice(w http.ResponseWriter, r *http.Request) {
-	var dev DeviceInfo
-	if err := json.NewDecoder(r.Body).Decode(&dev); err != nil {
-		log.Println("error decoding the body:", err)
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
+	var deviceInfos []DeviceInfo
+	if err := a.pgDb.Model(&deviceInfos).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
-	a.devices[dev.ID] = dev
-	jsonData, err := json.Marshal(&dev)
-	if err != nil {
-		log.Println(jsonData)
-	}
-	if err := a.db.Set(fmt.Sprintf("registry-%s", dev.ID), jsonData); err != nil {
-		log.Println(err)
-	}
-	a.keys = append(a.keys, fmt.Sprintf("registry-%s", dev.ID))
-	jsonKeys, err := json.Marshal(&a.keys)
-	if err != nil {
-		log.Println(jsonKeys)
-	}
-	if err := a.db.Set("registry-keys", jsonKeys); err != nil {
-		log.Println(err)
+
+	if deviceInfos == nil {
+		deviceInfos = []DeviceInfo{}
 	}
 
-	a.getDevices(w, r)
-}
-
-func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
-	var devices struct {
+	var resp struct {
 		Devices []DeviceInfo `json:"devices"`
 	}
-	devices.Devices = make([]DeviceInfo, 0)
-	for _, v := range a.devices {
-		devices.Devices = append(devices.Devices, v)
-	}
+	resp.Devices = deviceInfos
 
 	w.Header().Set("content-type", "application/json")
-	if err := json.NewEncoder(w).Encode(&devices); err != nil {
-		log.Printf("error sending getDevices: %s\n", err.Error())
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("error sending devices: %s\n", err.Error())
 	}
+}
+func (a *api) getDevice(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, "no id provided", http.StatusBadRequest)
+		return
+	}
+
+	var device DeviceInfo
+	if err := a.pgDb.Model(&device).Where("device_info.id = ?", id).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	if device.ID == "" {
+		device = DeviceInfo{}
+	}
+
+	var resp struct {
+		Device DeviceInfo `json:"device"`
+	}
+	resp.Device = device
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("error sending devices: %s\n", err.Error())
+	}
+}
+func (a *api) postDevice(w http.ResponseWriter, r *http.Request) {
+	var device DeviceInfo
+	if err := json.NewDecoder(r.Body).Decode(&device); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't decode body: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	result, err := a.pgDb.Model(&device).Insert()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("couldn't insert model into database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(result)
+	// return the entire inventory now
+	a.getDevices(w, r)
 }
 
 func (a *api) deleteDevice(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		http.NotFound(w, r)
+		http.Error(w, "no id provided", http.StatusBadRequest)
 		return
 	}
-	fmt.Println(id)
-	fmt.Println(a.devices)
-	delete(a.devices, id)
-	fmt.Println(a.devices)
-	if err := a.db.Delete(fmt.Sprintf("registry-%s", id)); err != nil {
-		log.Println(err)
-		http.Error(w, fmt.Sprintf("error deleting device: %s", err.Error()), http.StatusInternalServerError)
-	}
-	for i, v := range a.keys {
-		if v == fmt.Sprintf("registry-%s", id) {
-			a.keys = append(a.keys[:i], a.keys[i+1:]...)
-			fmt.Println("removed key from registry-keys")
-			break
-		}
-	}
-	fmt.Println(a.keys)
 
-	jsonKeys, err := json.Marshal(&a.keys)
+	result, err := a.pgDb.Model(&DeviceInfo{ID: id}).Where("device_info.id = ?", id).Delete()
 	if err != nil {
-		log.Println(jsonKeys)
+		http.Error(w, fmt.Sprintf("an error occured when deleteing item with id: %s, error: %s", id, err.Error()), http.StatusInternalServerError)
+		return
 	}
-	if err := a.db.Set("registry-keys", jsonKeys); err != nil {
-		log.Println(err)
-	}
-	var msg struct {
-		Message string `json:"message"`
-	}
-	msg.Message = fmt.Sprintf("deleted device: %s successfully", id)
-	w.Header().Set("content-type", "application/json")
-	if err := json.NewEncoder(w).Encode(&msg); err != nil {
-		log.Printf("error sending deleteDevice msg: %s\n", err.Error())
-	}
+	fmt.Println(result)
+	a.getDevices(w, r)
 }
+
+//func (a *api) postDevice(w http.ResponseWriter, r *http.Request) {
+//	var dev DeviceInfo
+//	if err := json.NewDecoder(r.Body).Decode(&dev); err != nil {
+//		log.Println("error decoding the body:", err)
+//		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+//		return
+//	}
+//	a.devices[dev.ID] = dev
+//	jsonData, err := json.Marshal(&dev)
+//	if err != nil {
+//		log.Println(jsonData)
+//	}
+//	if err := a.db.Set(fmt.Sprintf("registry-%s", dev.ID), jsonData); err != nil {
+//		log.Println(err)
+//	}
+//	a.keys = append(a.keys, fmt.Sprintf("registry-%s", dev.ID))
+//	jsonKeys, err := json.Marshal(&a.keys)
+//	if err != nil {
+//		log.Println(jsonKeys)
+//	}
+//	if err := a.db.Set("registry-keys", jsonKeys); err != nil {
+//		log.Println(err)
+//	}
+//
+//	a.getDevices(w, r)
+//}
+//
+//func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
+//	var devices struct {
+//		Devices []DeviceInfo `json:"devices"`
+//	}
+//	devices.Devices = make([]DeviceInfo, 0)
+//	for _, v := range a.devices {
+//		devices.Devices = append(devices.Devices, v)
+//	}
+//
+//	w.Header().Set("content-type", "application/json")
+//	if err := json.NewEncoder(w).Encode(&devices); err != nil {
+//		log.Printf("error sending getDevices: %s\n", err.Error())
+//	}
+//}
+//
+//func (a *api) deleteDevice(w http.ResponseWriter, r *http.Request) {
+//	id := chi.URLParam(r, "id")
+//	if id == "" {
+//		http.NotFound(w, r)
+//		return
+//	}
+//	fmt.Println(id)
+//	fmt.Println(a.devices)
+//	delete(a.devices, id)
+//	fmt.Println(a.devices)
+//	if err := a.db.Delete(fmt.Sprintf("registry-%s", id)); err != nil {
+//		log.Println(err)
+//		http.Error(w, fmt.Sprintf("error deleting device: %s", err.Error()), http.StatusInternalServerError)
+//	}
+//	for i, v := range a.keys {
+//		if v == fmt.Sprintf("registry-%s", id) {
+//			a.keys = append(a.keys[:i], a.keys[i+1:]...)
+//			fmt.Println("removed key from registry-keys")
+//			break
+//		}
+//	}
+//	fmt.Println(a.keys)
+//
+//	jsonKeys, err := json.Marshal(&a.keys)
+//	if err != nil {
+//		log.Println(jsonKeys)
+//	}
+//	if err := a.db.Set("registry-keys", jsonKeys); err != nil {
+//		log.Println(err)
+//	}
+//	var msg struct {
+//		Message string `json:"message"`
+//	}
+//	msg.Message = fmt.Sprintf("deleted device: %s successfully", id)
+//	w.Header().Set("content-type", "application/json")
+//	if err := json.NewEncoder(w).Encode(&msg); err != nil {
+//		log.Printf("error sending deleteDevice msg: %s\n", err.Error())
+//	}
+//}
 
 func (a *api) createSchedule(w http.ResponseWriter, r *http.Request) {
 	a.scheduler.CreateSchedule(Schedule{})
 }
 
 func (a *api) getSchedules(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (a *api) getSchedule(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (a *api) deleteSchedule(w http.ResponseWriter, r *http.Request) {
 
 }
 
