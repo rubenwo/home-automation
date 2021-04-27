@@ -8,8 +8,8 @@ import (
 
 func main() {
 	router, err := registry.New(&registry.Config{
-		//DatabaseBackend: "postgres.default.svc.cluster.local:5432",
-		DatabaseBackend:  "192.168.2.135:5432",
+		DatabaseBackend: "postgres.default.svc.cluster.local:5432",
+		//DatabaseBackend:  "192.168.2.135:5432",
 		DatabaseUser:     "user",
 		DatabasePassword: "password",
 		DatabaseName:     "registry_database",
