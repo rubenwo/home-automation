@@ -1,11 +1,10 @@
 package registry
 
 type Config struct {
-	DatabaseBackend    string
-	PgDatabaseBackend  string
-	PgDatabaseUser     string
-	PgDatabasePassword string
-	PgDatabaseName     string
+	DatabaseBackend  string
+	DatabaseUser     string
+	DatabasePassword string
+	DatabaseName     string
 }
 
 func (c *Config) Validate() error {

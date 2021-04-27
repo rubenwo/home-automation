@@ -13,7 +13,7 @@
       <b-collapse is-nav id="nav_collapse">
         <b-navbar-nav>
           <b-nav-item href="#" to="/" exact>Home</b-nav-item>
-          <b-nav-item href="#" to="/schedules" exact>Schedules</b-nav-item>
+          <b-nav-item href="#" to="/routines" exact>Routines</b-nav-item>
           <b-nav-item href="#" to="/sensors" exact>Sensors</b-nav-item>
           <b-nav-item href="#" to="/recipes" exact>Recipes</b-nav-item>
           <b-nav-item href="#" to="/inventory" exact>Inventory</b-nav-item>
@@ -37,7 +37,7 @@
       </b-collapse>
     </b-container>
     <add-device-modal ref="deviceModal" />
-    <add-schedule-modal ref="scheduleModal" />
+    <add-routine-modal ref="routineModal" />
     <add-sensor-modal ref="sensorModal" />
     <add-recipe-modal ref="recipeModal" />
   </b-navbar>
@@ -46,7 +46,7 @@
 <script>
 import AddDeviceModal from "./AddDeviceModal";
 import AddRecipeModal from "./AddRecipeModal";
-import AddScheduleModal from "./AddScheduleModal";
+import AddRoutineModal from "./AddRoutineModal";
 import AddSensorModal from "./AddSensorModal";
 import { mapActions, mapState, mapGetters } from "vuex";
 
@@ -58,7 +58,7 @@ export default {
   components: {
     AddRecipeModal,
     AddDeviceModal,
-    AddScheduleModal,
+    AddRoutineModal,
     AddSensorModal
   },
   computed: {
@@ -79,8 +79,8 @@ export default {
         case "Recipes":
           this.$refs.recipeModal.$emit("add_recipe");
           break;
-        case "Schedules":
-          this.$refs.scheduleModal.$emit("add_schedule");
+        case "Routines":
+          this.$refs.routineModal.$emit("add_routine");
           break;
         case "Sensors":
           this.$refs.sensorModal.$emit("add_sensor");

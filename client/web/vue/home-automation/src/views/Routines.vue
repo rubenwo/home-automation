@@ -1,12 +1,12 @@
 <template>
   <div>
-    <p style="color: aliceblue">This is the schedules part</p>
+    <p style="color: aliceblue">This is the routines part</p>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Schedules"
+  name: "Routines"
 };
 </script>
 

@@ -1,15 +1,15 @@
 <template>
   <b-modal
     size="xl"
-    id="scheduleModal"
-    ref="scheduleModal"
+    id="routineModal"
+    ref="routineModal"
     @ok="handleOk"
     @cancel="handleCancel"
     @close="handleCancel"
   >
     <b-row>
       <div>
-        <p>Schedule:</p>
+        <p>Routine:</p>
       </div>
     </b-row>
     <b-form-group>
@@ -23,8 +23,8 @@
               <input
                 size="sm"
                 class="mx-1"
-                placeholder="Schedule Name"
-                v-model="schedule.name"
+                placeholder="Routine Name"
+                v-model="routine.name"
               />
             </b-col>
           </b-row>
@@ -36,11 +36,22 @@
 
 <script>
 export default {
-  name: "AddScheduleModal",
+  name: "AddRoutineModal",
   data() {
     return {
-      schedule: {
-        name: ""
+      routine: {
+        trigger: {
+          type: "",
+          repeat: true,
+          when: ""
+        },
+        actions: [
+          {
+            addr: "",
+            method: "",
+            data: {}
+          }
+        ]
       }
     };
   },
@@ -50,15 +61,30 @@ export default {
       this.handleSubmit();
     },
     handleSubmit() {
+      this.routine = {
+        trigger: {
+          type: "",
+          repeat: true,
+          when: ""
+        },
+        actions: [
+          {
+            addr: "",
+            method: "",
+            data: {}
+          }
+        ]
+      };
+
       this.$nextTick(() => {
-        this.$refs.scheduleModal.hide();
+        this.$refs.routineModal.hide();
       });
     }
   },
   created() {
-    this.$on("add_schedule", () => {
-      console.log("Got Event in Schedule");
-      this.$refs.scheduleModal.show();
+    this.$on("add_routine", () => {
+      console.log("Got Event in Routine");
+      this.$refs.routineModal.show();
     });
   }
 };

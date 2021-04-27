@@ -2,7 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
-import { MetaGuard } from "./guards";
+import {MetaGuard} from "./guards";
 import store from "@/store";
 
 Vue.use(VueRouter);
@@ -45,12 +45,12 @@ const routes = [
     }
   },
   {
-    path: "/schedules",
-    name: "Schedules",
-    component: () => import("../views/Schedules.vue"),
+    path: "/routines",
+    name: "Routines",
+    component: () => import("../views/Routines.vue"),
     meta: {
       requiresAuth: true,
-      title: "Schedules"
+      title: "Routines"
     }
   },
   {
@@ -107,18 +107,18 @@ router.afterEach((to, from) => {
 });
 
 store.watch(
-  (state, getters) => getters["auth/isLoggedIn"],
-  loggedIn => {
-    if (
-      !loggedIn &&
-      router.currentRoute.matched.some(record => record.meta.requiresAuth)
-    ) {
-      router.push({
-        name: "login",
-        query: { redirect: router.currentRoute.path }
-      });
+    (state, getters) => getters["auth/isLoggedIn"],
+    loggedIn => {
+      if (
+          !loggedIn &&
+          router.currentRoute.matched.some(record => record.meta.requiresAuth)
+      ) {
+        router.push({
+          name: "login",
+          query: {redirect: router.currentRoute.path}
+        });
+      }
     }
-  }
 );
 
 export default router;
