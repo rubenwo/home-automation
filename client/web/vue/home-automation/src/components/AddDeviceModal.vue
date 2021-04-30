@@ -111,18 +111,18 @@ export default {
       ip: "",
       email: "",
       password: "",
-      device_type: ""
+      device_type: "",
     },
     device_type_options: [
       { value: "L510E", text: "L510E" },
       { value: "P100", text: "P100" },
-      { value: "LED_STRIP", text: "LED Strip" }
-    ]
+      { value: "LED_STRIP", text: "LED Strip" },
+    ],
   }),
   computed: {
     ...mapState("devices", {
-      devices: state => state.devices
-    })
+      devices: (state) => state.devices,
+    }),
   },
   methods: {
     ...mapActions("devices", ["addNewDevice"]),
@@ -147,15 +147,15 @@ export default {
             ip_address: this.newItem.ip,
             email: this.newItem.email,
             password: this.newItem.password,
-            device_type: this.device_type
-          }
+            device_type: this.device_type,
+          },
         };
       } else if (this.isLEDStripDevice()) {
         input = {
           device_type: "LED_STRIP",
           data: {
-            ip_address: this.newItem.ip
-          }
+            ip_address: this.newItem.ip,
+          },
         };
       }
       await this.addNewDevice(input);
@@ -167,14 +167,14 @@ export default {
       this.$nextTick(() => {
         this.$refs.deviceModal.hide();
       });
-    }
+    },
   },
   created() {
     this.$on("add_device", () => {
       console.log("Got Event in Device");
       this.$refs.deviceModal.show();
     });
-  }
+  },
 };
 </script>
 

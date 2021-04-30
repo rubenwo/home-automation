@@ -2,31 +2,31 @@ import VuetableFieldHandle from "vuetable-2/src/components/VuetableFieldHandle.v
 
 export default [
   {
-    name: VuetableFieldHandle
+    name: VuetableFieldHandle,
   },
   {
     name: "id",
-    sortField: "id"
+    sortField: "id",
   },
   {
     name: "category",
-    sortField: "category"
+    sortField: "category",
   },
   {
     name: "product",
-    sortField: "product"
+    sortField: "product",
   },
   {
     name: "name",
-    sortField: "name"
+    sortField: "name",
   },
   {
     name: "description",
-    sortField: "description"
+    sortField: "description",
   },
   {
     name: "count",
-    sortField: "count"
+    sortField: "count",
   },
-  "actions"
+  "actions",
 ];

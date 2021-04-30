@@ -2,7 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
-import {MetaGuard} from "./guards";
+import { MetaGuard } from "./guards";
 import store from "@/store";
 
 Vue.use(VueRouter);
@@ -14,8 +14,8 @@ const routes = [
     component: Home,
     meta: {
       requiresAuth: true,
-      title: "Home"
-    }
+      title: "Home",
+    },
   },
   {
     path: "/device/:company/:id",
@@ -23,8 +23,8 @@ const routes = [
     component: () => import("../views/Device.vue"),
     meta: {
       requiresAuth: true,
-      title: "Device"
-    }
+      title: "Device",
+    },
   },
   {
     path: "/recipes",
@@ -32,8 +32,8 @@ const routes = [
     component: () => import("../views/Recipes.vue"),
     meta: {
       requiresAuth: true,
-      title: "Recipes"
-    }
+      title: "Recipes",
+    },
   },
   {
     path: "/sensors",
@@ -41,8 +41,8 @@ const routes = [
     component: () => import("../views/Sensors.vue"),
     meta: {
       requiresAuth: true,
-      title: "Sensors"
-    }
+      title: "Sensors",
+    },
   },
   {
     path: "/routines",
@@ -50,8 +50,8 @@ const routes = [
     component: () => import("../views/Routines.vue"),
     meta: {
       requiresAuth: true,
-      title: "Routines"
-    }
+      title: "Routines",
+    },
   },
   {
     path: "/recipe/:id",
@@ -59,8 +59,8 @@ const routes = [
     component: () => import("../views/Recipe"),
     meta: {
       requiresAuth: true,
-      title: "Recipe"
-    }
+      title: "Recipe",
+    },
   },
   {
     path: "/inventory",
@@ -68,8 +68,8 @@ const routes = [
     component: () => import("../views/Inventory"),
     meta: {
       requiresAuth: true,
-      title: "Inventory"
-    }
+      title: "Inventory",
+    },
   },
   {
     path: "/cameras",
@@ -77,21 +77,21 @@ const routes = [
     component: () => import("../views/Cameras"),
     meta: {
       requiresAuth: true,
-      title: "Cameras"
-    }
+      title: "Cameras",
+    },
   },
   {
     path: "/login",
     name: "login",
     component: Login,
     meta: {
-      title: "Login"
-    }
-  }
+      title: "Login",
+    },
+  },
 ];
 
 const router = new VueRouter({
-  routes
+  routes,
 });
 
 router.beforeEach(MetaGuard);
@@ -107,18 +107,18 @@ router.afterEach((to, from) => {
 });
 
 store.watch(
-    (state, getters) => getters["auth/isLoggedIn"],
-    loggedIn => {
-      if (
-          !loggedIn &&
-          router.currentRoute.matched.some(record => record.meta.requiresAuth)
-      ) {
-        router.push({
-          name: "login",
-          query: {redirect: router.currentRoute.path}
-        });
-      }
+  (state, getters) => getters["auth/isLoggedIn"],
+  (loggedIn) => {
+    if (
+      !loggedIn &&
+      router.currentRoute.matched.some((record) => record.meta.requiresAuth)
+    ) {
+      router.push({
+        name: "login",
+        query: { redirect: router.currentRoute.path },
+      });
     }
+  }
 );
 
 export default router;

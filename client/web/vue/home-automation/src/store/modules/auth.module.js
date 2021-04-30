@@ -8,7 +8,7 @@ export default {
     username: localStorage.getItem("username") || null,
     userid: localStorage.getItem("userid") || null,
     user: null,
-    error: null
+    error: null,
   },
   mutations: {
     SET_TOKEN(state, token) {
@@ -28,7 +28,7 @@ export default {
       state.id = null;
       state.user = null;
       state.username = null;
-    }
+    },
   },
   actions: {
     async login({ commit }, { username, password }) {
@@ -55,12 +55,12 @@ export default {
       localStorage.removeItem("userid");
       commit("CLEAR_ALL");
       commit("CLEAR_ERROR");
-    }
+    },
   },
   getters: {
-    isLoggedIn: state => {
+    isLoggedIn: (state) => {
       if (state.token == null) return false;
-      const parseJwt = token => {
+      const parseJwt = (token) => {
         try {
           return JSON.parse(atob(token.split(".")[1]));
         } catch (e) {
@@ -74,6 +74,6 @@ export default {
       }
       return parsedToken.exp > Math.floor(Date.now() / 1000);
     },
-    getBearerToken: state => state.token
-  }
+    getBearerToken: (state) => state.token,
+  },
 };

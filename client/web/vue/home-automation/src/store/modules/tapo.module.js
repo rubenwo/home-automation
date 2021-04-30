@@ -7,7 +7,7 @@ export default {
     error: null,
     tapoDevice: null,
     tapoDevices: [],
-    devs: {}
+    devs: {},
   },
   mutations: {
     REQUEST(state) {
@@ -31,10 +31,10 @@ export default {
       state.loading = false;
       state.devs[dev.device_id] = dev;
       console.log(state.devs);
-    }
+    },
   },
   getters: {
-    tapoDevice: state => state.tapoDevice
+    tapoDevice: (state) => state.tapoDevice,
   },
   actions: {
     async fetchTapoDevice({ commit }, deviceId) {
@@ -64,6 +64,6 @@ export default {
       commit("WAKE_DEVICE");
       const result = await TapoService.wakeTapoDevice(deviceId);
       console.log(result.devices);
-    }
-  }
+    },
+  },
 };

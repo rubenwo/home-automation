@@ -8,11 +8,11 @@ export default () => {
     withCredentials: true,
     headers: {
       ...(store.getters["auth/getBearerToken"] && {
-        Authorization: `Bearer ${store.getters["auth/getBearerToken"]}`
-      })
-    }
+        Authorization: `Bearer ${store.getters["auth/getBearerToken"]}`,
+      }),
+    },
   });
-  http.interceptors.response.use(undefined, async err => {
+  http.interceptors.response.use(undefined, async (err) => {
     console.log("Hi There", err.response.status);
     if (err.response.status === 401) {
       store.dispatch("auth/logout");

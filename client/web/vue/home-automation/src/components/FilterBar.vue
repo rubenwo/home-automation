@@ -21,7 +21,7 @@
 export default {
   data() {
     return {
-      filterText: ""
+      filterText: "",
     };
   },
   methods: {
@@ -31,7 +31,7 @@ export default {
     resetFilter() {
       this.filterText = ""; // clear the text in text input
       this.$events.fire("filter-reset");
-    }
-  }
+    },
+  },
 };
 </script>

@@ -16,7 +16,7 @@ export default {
       connection: null,
       bmp180_temperature: 0.0,
       bmp280_temperature: 0.0,
-      number_of_satellites: 0
+      number_of_satellites: 0,
     };
   },
   methods: {
@@ -37,7 +37,7 @@ export default {
           break;
         }
       }
-    }
+    },
   },
   async mounted() {},
   created() {
@@ -54,7 +54,7 @@ export default {
     this.connection = new WebSocket(url);
     this.connection.onmessage = this.onMessage;
 
-    this.connection.onopen = function(event) {
+    this.connection.onopen = function (event) {
       console.log(event);
       console.log("Successfully connected to the echo websocket server...");
     };
@@ -62,7 +62,7 @@ export default {
   destroyed() {
     console.log("closed websocket");
     this.connection.close();
-  }
+  },
 };
 </script>
 

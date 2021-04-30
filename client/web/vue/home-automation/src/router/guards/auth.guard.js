@@ -10,7 +10,7 @@ export default async (to, from, next) => {
 
   store.watch(
     () => store.getters["auth/isLoggedIn"],
-    loggedIn => {
+    (loggedIn) => {
       if (!loggedIn) {
         return next({ name: "login", query: { redirect: to.path } });
       }

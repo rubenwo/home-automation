@@ -17,7 +17,7 @@ export default {
   name: "LedStripDevice",
   id: {
     type: String,
-    default: ""
+    default: "",
   },
   components: { Verte },
   methods: {
@@ -30,15 +30,15 @@ export default {
         mode: "SINGLE_COLOR_RGB",
         red: parseInt(rgb[0]),
         green: parseInt(rgb[1]),
-        blue: parseInt(rgb[2])
+        blue: parseInt(rgb[2]),
       };
       LedStripService.commandLedStripDevice(this.id, command);
-    }
+    },
   },
   data() {
     return {
       color: "",
-      device: {}
+      device: {},
     };
   },
   async mounted() {
@@ -47,7 +47,7 @@ export default {
     const res = await LedStripService.fetchAllLedStripDevices();
     console.log(res);
     this.device = res;
-  }
+  },
 };
 </script>
 

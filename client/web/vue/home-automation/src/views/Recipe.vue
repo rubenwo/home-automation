@@ -1,5 +1,5 @@
 <template>
-  <div class="recipe" style="background-color: rgba(255, 255, 255, 0.7);">
+  <div class="recipe" style="background-color: rgba(255, 255, 255, 0.7)">
     <h3>{{ recipe.name }}</h3>
     <b-img v-bind:src="recipe.img" fluid center />
     <br />
@@ -34,16 +34,16 @@ export default {
           {
             id: 0,
             name: "",
-            amount: ""
-          }
+            amount: "",
+          },
         ],
         steps: [
           {
             id: 0,
-            instruction: ""
-          }
-        ]
-      }
+            instruction: "",
+          },
+        ],
+      },
     };
   },
   async created() {
@@ -53,7 +53,7 @@ export default {
     console.log(res);
     this.recipe = res.recipe;
   },
-  mounted() {}
+  mounted() {},
 };
 </script>
 

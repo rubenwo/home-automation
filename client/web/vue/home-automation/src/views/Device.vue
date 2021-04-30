@@ -22,12 +22,12 @@ export default {
   components: {
     LedStripDevice,
     HueDevice,
-    TapoDevice
+    TapoDevice,
   },
   created() {
     this.id = this.$route.params.id;
     this.company = this.$route.params.company;
-  }
+  },
 };
 </script>
 

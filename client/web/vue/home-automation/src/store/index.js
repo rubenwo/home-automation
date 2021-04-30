@@ -14,6 +14,6 @@ export default new Vuex.Store({
   modules: {
     devices: DeviceModule,
     tapo: TapoModule,
-    auth: AuthModule
-  }
+    auth: AuthModule,
+  },
 });

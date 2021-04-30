@@ -1,7 +1,13 @@
 <template>
   <b-card
     v-bind:sub-title="name"
-    style="max-width: 540px; min-width: 200px; min-height: 300px; max-height: 500px; background-color: rgba(255, 255, 255, 0.7)"
+    style="
+      max-width: 540px;
+      min-width: 200px;
+      min-height: 300px;
+      max-height: 500px;
+      background-color: rgba(255, 255, 255, 0.7);
+    "
     class="mb-2"
   >
     <b-card-img
@@ -13,7 +19,7 @@
     />
 
     <div slot="footer">
-      <b-button style="background-color: #4287f5;" v-bind:to="navigate()"
+      <b-button style="background-color: #4287f5" v-bind:to="navigate()"
         >Information
       </b-button>
       <b-button variant="danger" @click="deleteRecipe()">X</b-button>
@@ -29,16 +35,16 @@ export default {
   props: {
     id: {
       type: Number,
-      default: -1
+      default: -1,
     },
     name: {
       type: String,
-      default: ""
+      default: "",
     },
     img: {
       type: String,
-      default: ""
-    }
+      default: "",
+    },
   },
   methods: {
     navigate() {
@@ -47,12 +53,12 @@ export default {
     async deleteRecipe() {
       const res = await FoodService.deleteRecipe(this.id);
       console.log(res);
-    }
+    },
   },
   async mounted() {
     const recipes = await FoodService.fetchRecipes(this.id);
     console.log(recipes);
-  }
+  },
 };
 </script>
 

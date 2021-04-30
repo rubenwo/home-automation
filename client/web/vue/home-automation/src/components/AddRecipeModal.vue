@@ -138,21 +138,21 @@ export default {
         ingredients: [
           {
             name: "",
-            amount: ""
-          }
+            amount: "",
+          },
         ],
         steps: [
           {
-            instruction: ""
-          }
-        ]
-      }
+            instruction: "",
+          },
+        ],
+      },
     };
   },
   methods: {
     increaseSteps() {
       this.recipe.steps.push({
-        instruction: ""
+        instruction: "",
       });
     },
     decreaseSteps() {
@@ -161,7 +161,7 @@ export default {
     increaseIngredients() {
       this.recipe.ingredients.push({
         name: "",
-        amount: ""
+        amount: "",
       });
     },
     decreaseIngredients() {
@@ -184,26 +184,26 @@ export default {
         ingredients: [
           {
             name: "",
-            amount: ""
-          }
+            amount: "",
+          },
         ],
         steps: [
           {
-            instruction: ""
-          }
-        ]
+            instruction: "",
+          },
+        ],
       };
 
       this.$nextTick(() => {
         this.$refs.recipeModal.hide();
       });
-    }
+    },
   },
   created() {
     this.$on("add_recipe", () => {
       this.$refs.recipeModal.show();
     });
-  }
+  },
 };
 </script>
 

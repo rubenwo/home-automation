@@ -1,5 +1,5 @@
 <template>
-  <div class="inventory" style="background-color: rgba(255, 255, 255, 0.60);">
+  <div class="inventory" style="background-color: rgba(255, 255, 255, 0.6)">
     <b-modal
       size="xl"
       id="add_inventory_item"
@@ -205,7 +205,7 @@
         </b-button>
       </div>
     </vuetable>
-    <div style="padding-top:10px">
+    <div style="padding-top: 10px">
       <vuetable-pagination-info
         ref="paginationInfoTop"
       ></vuetable-pagination-info>
@@ -241,7 +241,7 @@ export default {
     // eslint-disable-next-line vue/no-unused-components
     FontAwesomeIcon,
     FilterBar,
-    VuetablePaginationInfo
+    VuetablePaginationInfo,
   },
   data() {
     return {
@@ -252,18 +252,18 @@ export default {
         product: "",
         name: "",
         description: "",
-        count: 0
+        count: 0,
       },
       perPage: 5,
       fields: InventoryFieldsDef,
-      css: VuetableBootstrap4Config
+      css: VuetableBootstrap4Config,
     };
   },
   watch: {
     // eslint-disable-next-line no-unused-vars
     inventory(newVal, oldVal) {
       this.$refs.vuetable.refresh();
-    }
+    },
   },
   methods: {
     onPaginationData(paginationData) {
@@ -310,7 +310,7 @@ export default {
 
       return {
         pagination: pagination,
-        data: _.slice(local, from, to)
+        data: _.slice(local, from, to),
       };
     },
     async removeItem(id) {
@@ -335,7 +335,7 @@ export default {
       this.addItemData = {
         name: "",
         description: "",
-        count: 0
+        count: 0,
       };
     },
     async handleSubmit() {
@@ -346,7 +346,7 @@ export default {
       this.addItemData = {
         name: "",
         description: "",
-        count: 0
+        count: 0,
       };
       this.$nextTick(() => {
         this.$refs.add_inventory_item.hide();
@@ -361,7 +361,7 @@ export default {
       this.addItemData = {
         name: "",
         description: "",
-        count: 0
+        count: 0,
       };
     },
     async handleEditSubmit() {
@@ -375,7 +375,7 @@ export default {
       this.addItemData = {
         name: "",
         description: "",
-        count: 0
+        count: 0,
       };
       this.$nextTick(() => {
         this.$refs.edit_inventory_item.hide();
@@ -383,7 +383,7 @@ export default {
     },
     async onFilterSet(filterText) {
       const res = await InventoryService.fetchInventory();
-      const filtered = res.filter(item => {
+      const filtered = res.filter((item) => {
         if (item.category.toLowerCase().includes(filterText)) return true;
         if (item.product.toLowerCase().includes(filterText)) return true;
         if (item.name.toLowerCase().includes(filterText)) return true;
@@ -403,16 +403,16 @@ export default {
       const res = await InventoryService.fetchInventory();
       this.fields = InventoryFieldsDef;
       this.inventory = res;
-    }
+    },
   },
   async mounted() {
     const res = await InventoryService.fetchInventory();
     console.log(res);
     this.inventory = res;
-    this.$events.$on("filter-set", eventData => this.onFilterSet(eventData));
+    this.$events.$on("filter-set", (eventData) => this.onFilterSet(eventData));
     // eslint-disable-next-line no-unused-vars
-    this.$events.$on("filter-reset", e => this.onFilterReset());
-  }
+    this.$events.$on("filter-reset", (e) => this.onFilterReset());
+  },
 };
 </script>
 

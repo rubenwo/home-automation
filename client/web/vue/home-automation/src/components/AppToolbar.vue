@@ -59,11 +59,11 @@ export default {
     AddRecipeModal,
     AddDeviceModal,
     AddRoutineModal,
-    AddSensorModal
+    AddSensorModal,
   },
   computed: {
     ...mapState("auth", ["username"]),
-    ...mapGetters("auth", ["isLoggedIn"])
+    ...mapGetters("auth", ["isLoggedIn"]),
   },
 
   methods: {
@@ -86,7 +86,7 @@ export default {
           this.$refs.sensorModal.$emit("add_sensor");
           break;
       }
-    }
-  }
+    },
+  },
 };
 </script>

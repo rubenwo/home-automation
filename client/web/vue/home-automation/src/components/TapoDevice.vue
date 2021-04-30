@@ -21,12 +21,12 @@ export default {
   name: "TapoDevice",
   id: {
     type: String,
-    default: ""
+    default: "",
   },
   computed: {
     ...mapState("tapo", {
-      tapoDevice: state => state.tapoDevice
-    })
+      tapoDevice: (state) => state.tapoDevice,
+    }),
   },
   methods: {
     ...mapActions("tapo", ["fetchTapoDevice"]),
@@ -39,13 +39,13 @@ export default {
           console.log("returning light");
           return require("../assets/light_icon.jpg");
       }
-    }
+    },
   },
   async mounted() {
     this.id = this.$route.params.id;
     await this.fetchTapoDevice(this.id);
     console.log(this.tapoDevice);
-  }
+  },
 };
 </script>
 

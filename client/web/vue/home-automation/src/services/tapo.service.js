@@ -43,5 +43,5 @@ export default {
   },
   async setDeviceBrightness(deviceId, brightness) {
     return await this.commandDevice(deviceId, "on", brightness);
-  }
+  },
 };

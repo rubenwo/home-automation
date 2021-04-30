@@ -5,7 +5,7 @@ export default {
   state: {
     loading: false,
     error: null,
-    devices: []
+    devices: [],
   },
   mutations: {
     REQUEST(state) {
@@ -19,10 +19,10 @@ export default {
     FAILED(state, message) {
       state.loading = false;
       state.error = message;
-    }
+    },
   },
   getters: {
-    devices: state => state.devices.filter(device => device.status)
+    devices: (state) => state.devices.filter((device) => device.status),
   },
   actions: {
     async fetchDevices({ commit }) {
@@ -46,6 +46,6 @@ export default {
         commit("FAILED", err.message);
         throw err;
       }
-    }
-  }
+    },
+  },
 };

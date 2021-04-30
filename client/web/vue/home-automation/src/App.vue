@@ -13,8 +13,8 @@ import AppToolbar from "./components/AppToolbar.vue";
 export default {
   name: "app",
   components: {
-    AppToolbar
-  }
+    AppToolbar,
+  },
 };
 </script>
 <style>

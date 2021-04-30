@@ -4,7 +4,7 @@ export default async (to, from, next) => {
   const loggedIn = store.getters["auth/isLoggedIn"];
   //  const user = store.getters['auth/getUser']
   //console.log(user)
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
   console.log("META GUARD");
   console.log(loggedIn);
@@ -16,7 +16,7 @@ export default async (to, from, next) => {
   if (!loggedIn && requiresAuth) {
     return next({
       name: "login",
-      query: { redirect: to.path }
+      query: { redirect: to.path },
     });
   }
 

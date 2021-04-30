@@ -6,7 +6,7 @@ export default {
     loading: false,
     error: null,
     ledStripDevices: [],
-    commandMessage: ""
+    commandMessage: "",
   },
   mutations: {
     REQUEST(state) {
@@ -24,10 +24,10 @@ export default {
     FAILED(state, message) {
       state.loading = false;
       state.error = message;
-    }
+    },
   },
   getters: {
-    tapoDevice: state => state.tapoDevice
+    tapoDevice: (state) => state.tapoDevice,
   },
   actions: {
     async fetchAllLedStripDevices({ commit }) {
@@ -54,6 +54,6 @@ export default {
         commit("FAILED", err.message);
         throw err;
       }
-    }
-  }
+    },
+  },
 };

@@ -5,11 +5,11 @@ export default {
     const res = await ApiService()
       .post("/auth/login", {
         username: username,
-        password: password
+        password: password,
       })
       .catch(() => {
         return null;
       });
     return res;
-  }
+  },
 };

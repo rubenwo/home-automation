@@ -43,16 +43,16 @@ export default {
         trigger: {
           type: "",
           repeat: true,
-          when: ""
+          when: "",
         },
         actions: [
           {
             addr: "",
             method: "",
-            data: {}
-          }
-        ]
-      }
+            data: {},
+          },
+        ],
+      },
     };
   },
   methods: {
@@ -65,28 +65,28 @@ export default {
         trigger: {
           type: "",
           repeat: true,
-          when: ""
+          when: "",
         },
         actions: [
           {
             addr: "",
             method: "",
-            data: {}
-          }
-        ]
+            data: {},
+          },
+        ],
       };
 
       this.$nextTick(() => {
         this.$refs.routineModal.hide();
       });
-    }
+    },
   },
   created() {
     this.$on("add_routine", () => {
       console.log("Got Event in Routine");
       this.$refs.routineModal.show();
     });
-  }
+  },
 };
 </script>
 

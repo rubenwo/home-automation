@@ -27,5 +27,5 @@ export default {
     const res = await ApiService().post(url, data.data);
     console.log(res);
     return res.data;
-  }
+  },
 };

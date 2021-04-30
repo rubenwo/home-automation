@@ -50,33 +50,35 @@
     <!--        </div>-->
   </div>
   <div v-else>
-    <loading :active.sync="authenticating" :is-full-page="true" />
+    <loading :active="authenticating" :is-full-page="true" />
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapState } from "vuex";
+
 import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
 
 export default {
   name: "Login",
   components: {
-    Loading
+    Loading,
   },
   data() {
     return {
       form: {
         username: "",
-        password: ""
+        password: "",
       },
       showRegisterSuccessAlert: false,
       showAuthError: false,
       context: { msg: "" },
-      authenticating: false
+      authenticating: false,
     };
   },
   computed: {
-    ...mapState("auth", ["error"])
+    ...mapState("auth", ["error"]),
   },
   methods: {
     ...mapActions("auth", ["login", "logout"]),
@@ -91,8 +93,8 @@ export default {
         return;
       }
       await this.$router.push(this.$route.query.redirect || "/");
-    }
-  }
+    },
+  },
 };
 </script>
 

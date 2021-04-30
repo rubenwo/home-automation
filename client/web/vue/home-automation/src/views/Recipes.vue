@@ -28,7 +28,7 @@ export default {
   components: { RecipeCard },
   data() {
     return {
-      recipes: []
+      recipes: [],
     };
   },
   methods: {},
@@ -36,7 +36,7 @@ export default {
     const recipes = await FoodService.fetchRecipes(this.id);
     console.log(recipes);
     this.recipes = recipes.recipes;
-  }
+  },
 };
 </script>
 

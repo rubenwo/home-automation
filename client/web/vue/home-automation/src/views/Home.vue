@@ -37,8 +37,8 @@ export default {
   },
   computed: {
     ...mapState("devices", {
-      devices: state => state.devices
-    })
+      devices: (state) => state.devices,
+    }),
   },
   methods: {
     ...mapActions("devices", ["fetchDevices"]),
@@ -54,14 +54,14 @@ export default {
           console.log("returning led-strip");
           return require("../assets/led_strip_icon.png");
       }
-    }
+    },
   },
   async mounted() {
     await this.fetchDevices();
   },
   components: {
-    AppCard
-  }
+    AppCard,
+  },
 };
 </script>
 <style>

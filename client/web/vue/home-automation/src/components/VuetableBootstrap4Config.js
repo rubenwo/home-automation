@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 export default {
   components: {
-    FontAwesomeIcon
+    FontAwesomeIcon,
   },
   table: {
     tableWrapper: "",
@@ -21,7 +21,7 @@ export default {
     // eslint-disable-next-line no-unused-vars
     renderIcon(classes, options) {
       return `<i class="${classes.join(" ")}"></span>`;
-    }
+    },
   },
   pagination: {
     wrapperClass: "pagination float-right",
@@ -36,7 +36,7 @@ export default {
       first: "fa fa-chevron-left",
       prev: "fa fa-chevron-left",
       next: "fa fa-chevron-right",
-      last: "fa fa-chevron-right"
-    }
-  }
+      last: "fa fa-chevron-right",
+    },
+  },
 };

@@ -10,7 +10,7 @@ import {
   faCoffee,
   faChevronDown,
   faChevronLeft,
-  faChevronUp
+  faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { faJs, faVuejs } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -27,5 +27,5 @@ Vue.use(VueEvents);
 new Vue({
   router,
   store,
-  render: h => h(App)
+  render: (h) => h(App),
 }).$mount("#app");
