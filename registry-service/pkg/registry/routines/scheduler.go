@@ -123,7 +123,10 @@ func (s *Scheduler) worker() {
 			s.results <- err
 			continue
 		}
-		resp.Body.Close()
+		if err := resp.Body.Close(); err != nil {
+			s.results <- err
+			continue
+		}
 		fmt.Println(string(raw))
 	}
 }
