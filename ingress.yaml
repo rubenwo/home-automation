@@ -16,12 +16,12 @@ spec:
           - GET
           - DELETE
         protocol: http
-      - path: "/schedules"
+      - path: "/routines"
         methods:
           - GET
           - POST
         protocol: http
-      - path: "/schedules/{id}"
+      - path: "/routines/{id}"
         methods:
           - GET
           - DELETE
