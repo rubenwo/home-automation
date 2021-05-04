@@ -27,7 +27,13 @@
                 v-model="routine.name"
               />
             </b-col>
+            <b-col sm="4"><label>Schedule:</label></b-col>
+            <b-col>
+              <VueCronEditorBuefy v-model="cronExpression" />
+              {{ cronExpression }}
+            </b-col>
           </b-row>
+          <b-row> </b-row>
         </b-container>
       </b-input-group>
     </b-form-group>
@@ -35,10 +41,16 @@
 </template>
 
 <script>
+import VueCronEditorBuefy from "vue-cron-editor-buefy";
+
 export default {
   name: "AddRoutineModal",
+  components: {
+    VueCronEditorBuefy,
+  },
   data() {
     return {
+      cronExpression: "*/1 * * * *",
       routine: {
         trigger: {
           type: "",
