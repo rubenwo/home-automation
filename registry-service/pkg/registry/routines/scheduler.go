@@ -40,12 +40,6 @@ func NewScheduler(db *pg.DB, maxConcurrentWorkers int) *Scheduler {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//routines = append(routines, models.Routine{
-	//	Trigger: models.Trigger{},
-	//	Actions: []models.Action{
-	//		{Addr: "https://google.com", Method: "GET", Data: nil},
-	//	},
-	//})
 
 	s := &Scheduler{routines: routines,
 		jobs:    make(chan models.Action, 100),
