@@ -15,18 +15,8 @@ const (
 
 type Trigger struct {
 	Type     TriggerType `json:"type"`
-	Schedule Schedule    `json:"schedule,omitempty"`
+	CronExpr string      `json:"cron_expr,omitempty"`
 	Webhook  string      `json:"webhook,omitempty"`
-}
-
-
-//Schedule supports from every month at a specific date and time to every minute of every day
-type Schedule struct {
-	DayOfWeek   DayOfWeek `json:"day_of_week"`
-	MonthOfYear string `json:"month_of_year"`
-
-	HourOfDay   string `json:"hour_of_day"`
-	MinuteOfDay string `json:"minute_of_day"`
 }
 
 type Action struct {

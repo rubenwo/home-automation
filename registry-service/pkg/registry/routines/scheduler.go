@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-pg/pg/v10"
+	"github.com/gorhill/cronexpr"
 	"github.com/rubenwo/home-automation/registry-service/pkg/registry/models"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"sync"
 	"time"
@@ -69,7 +71,8 @@ func (s *Scheduler) Run(interval time.Duration) {
 		currentTime := time.Now()
 		s.Lock()
 		for _, routine := range s.routines {
-			if checkIfRoutineShouldRun(routine.Trigger, currentTime, 1e+10) {
+
+			if checkIfRoutineShouldRun(routine.Trigger, currentTime, interval.Nanoseconds()) {
 				for _, action := range routine.Actions {
 					s.jobs <- action
 				}
@@ -79,26 +82,12 @@ func (s *Scheduler) Run(interval time.Duration) {
 	}
 }
 
-func checkIfTimerRoutineShouldRun(schedule models.Schedule, month, day, hour, minute int) bool {
-	if schedule.DayOfWeek != models.Star {
-		if schedule.DayOfWeek.Int() == day {
-
-		}
-	}
-
-	return false
-}
-
-func checkIfRoutineShouldRun(trigger models.Trigger, currentTime time.Time, diffTimeInNanoS float64) bool {
+func checkIfRoutineShouldRun(trigger models.Trigger, currentTime time.Time, diffTimeInNanoS int64) bool {
 	switch trigger.Type {
 	case models.TimerTriggerType:
-		//nextTime := cronexpr.MustParse("0 0 29 2 *").Next(time.Now())
-		//return  math.Abs(float64(time.Now().UnixNano() - nextTime.UnixNano())) < diffTimeInNanoS
-		//
+		nextTime := cronexpr.MustParse(trigger.CronExpr).Next(time.Now())
+		return math.Abs(float64(currentTime.UnixNano()-nextTime.UnixNano())) < float64(diffTimeInNanoS)
 
-		_, month, day := currentTime.Date()
-		hour, minute, _ := currentTime.Clock()
-		return checkIfTimerRoutineShouldRun(trigger.Schedule, int(month), day, hour, minute)
 	default:
 		return false
 	}
