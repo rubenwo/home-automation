@@ -62,16 +62,45 @@ func (s *Scheduler) UpdateRoutines() error {
 	return nil
 }
 
+//Run will periodically check at the specified interval rate if actions should run.
+//Let's say interval is 10 seconds, this means that every 10 seconds we'll check if an action should run.
 func (s *Scheduler) Run(interval time.Duration) {
 	for range time.Tick(interval) {
-		//currentTime := time.Now()
+		currentTime := time.Now()
 		s.Lock()
 		for _, routine := range s.routines {
-			for _, action := range routine.Actions {
-				s.jobs <- action
+			if checkIfRoutineShouldRun(routine.Trigger, currentTime, 1e+10) {
+				for _, action := range routine.Actions {
+					s.jobs <- action
+				}
 			}
 		}
 		s.Unlock()
+	}
+}
+
+func checkIfTimerRoutineShouldRun(schedule models.Schedule, month, day, hour, minute int) bool {
+	if schedule.DayOfWeek != models.Star {
+		if schedule.DayOfWeek.Int() == day {
+
+		}
+	}
+
+	return false
+}
+
+func checkIfRoutineShouldRun(trigger models.Trigger, currentTime time.Time, diffTimeInNanoS float64) bool {
+	switch trigger.Type {
+	case models.TimerTriggerType:
+		//nextTime := cronexpr.MustParse("0 0 29 2 *").Next(time.Now())
+		//return  math.Abs(float64(time.Now().UnixNano() - nextTime.UnixNano())) < diffTimeInNanoS
+		//
+
+		_, month, day := currentTime.Date()
+		hour, minute, _ := currentTime.Clock()
+		return checkIfTimerRoutineShouldRun(trigger.Schedule, int(month), day, hour, minute)
+	default:
+		return false
 	}
 }
 
