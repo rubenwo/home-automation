@@ -1,0 +1,69 @@
+<template>
+  <b-card
+    v-bind:sub-title="name"
+    style="
+      width: 500px;
+
+      min-height: 100px;
+      max-height: 500px;
+      background-color: rgba(255, 255, 255, 0.7);
+    "
+    class="mb-2"
+  >
+    <div>Type: {{ routine.trigger.type }}</div>
+    <div>Schedule: {{ routine.trigger.cron_expr }}</div>
+    <div># of actions: {{ routine.actions.length }}</div>
+
+    <div slot="footer">
+      <b-button style="background-color: #4287f5" v-bind:to="navigate()"
+        >Information
+      </b-button>
+      <b-button variant="danger" @click="deleteRoutine()">X</b-button>
+    </div>
+  </b-card>
+</template>
+
+<script>
+import RoutineService from "../services/routines.service";
+
+export default {
+  name: "RoutineCard",
+  props: {
+    id: {
+      type: Number,
+      default: -1,
+    },
+    name: {
+      type: String,
+      default: "No name provided",
+    },
+  },
+  data() {
+    return {
+      routine: {
+        trigger: {
+          type: -1,
+          cron_expr: "",
+        },
+        actions: [],
+      },
+    };
+  },
+  methods: {
+    navigate() {
+      return "routine/" + this.id;
+    },
+    async deleteRoutine() {
+      const res = await RoutineService.deleteRoutine(this.id);
+      console.log(res);
+    },
+  },
+  async mounted() {
+    const routine = await RoutineService.fetchRoutine(this.id);
+    console.log(routine);
+    this.routine = routine.routine;
+  },
+};
+</script>
+
+<style scoped></style>

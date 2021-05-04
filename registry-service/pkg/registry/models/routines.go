@@ -2,6 +2,7 @@ package models
 
 type Routine struct {
 	Id      int64    `json:"id"`
+	Name    string   `json:"name"`
 	Trigger Trigger  `json:"trigger"`
 	Actions []Action `json:"actions"`
 }
