@@ -31,4 +31,4 @@ jobs:
     - name: Run Buildx (push image)      
       if: success()      
       run: |        
-        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-web-client:${{ steps.prepare.outputs.version }} --file ./web/vue/home-automation/Dockerfile --output type=image,push=true ./web/vue/home-automation
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-web-client:${{ steps.prepare.outputs.version }} --file ./client/web/vue/home-automation/Dockerfile --output type=image,push=true ./client/web/vue/home-automation
