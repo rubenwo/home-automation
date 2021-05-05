@@ -31,4 +31,4 @@ jobs:
     - name: Run Buildx (push image)      
       if: success()      
       run: |        
-        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-actions-service:${{ steps.prepare.outputs.version }} --file ./actions-service/Dockerfile --output type=image,push=true .
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-actions-service:${{ steps.prepare.outputs.version }} --file ./actions-service/Dockerfile --output type=image,push=true ./actions-service
