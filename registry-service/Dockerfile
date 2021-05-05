@@ -16,5 +16,6 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 COPY --from=builder /go/registry-service/registry-service .
+COPY --from=builder /go/registry-service/config.json .
 
 CMD [ "./registry-service" ]
