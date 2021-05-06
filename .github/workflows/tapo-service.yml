@@ -1,65 +1,34 @@
-name: Build & Publish tapo-service
-on:
-  push:
-    branches: [main]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
+name: Docker Build/Publish Image 
+on:  
+  push:    
+    branches: [ main ]  
+jobs:   
+  build:    
+    runs-on: ubuntu-18.04    
+    env:      
+      DOCKER_IMAGE: rubenwo/home-automation-tapo-service      
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Prepare
-        id: prep
-        run: |
-          TAG=latest
-          IMAGE="rubenwo/home-automation-tapo-service"
-          echo ::set-output name=tagged_image::${IMAGE}:${TAG}
-          echo ::set-output name=tag::${TAG}
-
-      - name: Set up Docker Buildx
-        id: buildx
-        # Use the action from the master, as we've seen some inconsistencies with @v1
-        # Issue: https://github.com/docker/build-push-action/issues/286
-        uses: docker/setup-buildx-action@master
-        # Only worked for us with this option on 🤷‍♂️
-        with:
-          install: true
-
-      - name: Docker Login
-        if: success()
-        run: |
-          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          # Key is named differently to avoid collision
-          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-multi-buildx
-
-      - name: Build production image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./tapo-service
-          builder: ${{ steps.buildx.outputs.name }}
-          file: ./tapo-service/Dockerfile
-          platforms: linux/amd64,linux/arm/v7
-          # Set the desired build target here
-          push: true
-          tags: ${{ steps.prep.outputs.tagged_image }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          # Note the mode=max here
-          # More: https://github.com/moby/buildkit#--export-cache-options
-          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  
+      DOCKER_TARGET_PLATFORM: linux/arm/v7                 
+    steps:    
+    - name: Checkout the code       
+      uses: actions/checkout@v1          
+    - name: Set up Docker Buildx      
+      uses: crazy-max/ghaction-docker-buildx@v1      
+      with:        
+        version: latest    
+    - name: Prepare      
+      if: success()      
+      id: prepare      
+      run: |        
+        echo ::set-output name=docker_platform::${DOCKER_TARGET_PLATFORM}        
+        echo ::set-output name=docker_image::${DOCKER_REGISTRY}/${DOCKER_IMAGE}        
+        echo ::set-output name=version::${GITHUB_RUN_NUMBER}    
+    - name: Docker Login      
+      if: success()      
+      run: |        
+        echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin          
+    - name: Run Buildx (push image)      
+      if: success()      
+      run: |        
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-tapo-service:${{ steps.prepare.outputs.version }} --file ./tapo-service/Dockerfile --output type=image,push=true ./tapo-service

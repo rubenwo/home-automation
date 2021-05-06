@@ -2,7 +2,8 @@ version: "3"
 
 services:
   gateway.default.svc.cluster.local:
-    build: ./gateway-service
+    image: rubenwo/home-automation-gateway-service:latest
+    # build: ./gateway-service
     restart: on-failure
     environment:
       - JWT_KEY=$JWT_KEY
@@ -18,19 +19,22 @@ services:
       - redis.default.svc.cluster.local
 
   led-strip.default.svc.cluster.local:
-    build: ./led-strip-service
+    image: rubenwo/home-automation-led-strip-service:latest
+    # build: ./led-strip-service
     restart: on-failure
     depends_on:
       - redis.default.svc.cluster.local
 
   hue.default.svc.cluster.local:
-    build: ./hue-service
+    image: rubenwo/home-automation-hue-service:latest
+    # build: ./hue-service
     restart: on-failure
     depends_on:
       - redis.default.svc.cluster.local
 
   food.default.svc.cluster.local:
-    build: ./food-service
+    image: rubenwo/home-automation-food-service:latest
+    # build: ./food-service
     restart: on-failure
     depends_on:
       - redis.default.svc.cluster.local
@@ -42,29 +46,34 @@ services:
       - redis.default.svc.cluster.local
 
   registry.default.svc.cluster.local:
-    build: ./registry-service
+    image: rubenwo/home-automation-registry-service:latest
+    # build: ./registry-service
     restart: on-failure
     depends_on:
       - redis.default.svc.cluster.local
 
   inventory.default.svc.cluster.local:
-    build: ./inventory-service
+    image: rubenwo/home-automation-inventory-service:latest
+    # build: ./inventory-service
     restart: on-failure
     depends_on:
       - postgres.default.svc.cluster.local
 
   web.default.svc.cluster.local:
-    build: ./client/web/vue/home-automation
+    image: rubenwo/home-automation-web-client:latest
+    # build: ./client/web/vue/home-automation
     restart: on-failure
 
   video-streaming-hub.default.svc.cluster.local:
-    build: ./video-streaming-hub-service
+    image: rubenwo/home-automation-video-streaming-hub-service:latest
+    # build: ./video-streaming-hub-service
     restart: on-failure
     depends_on:
       - postgres.default.svc.cluster.local
 
   actions.default.svc.cluster.local:
-    build: ./actions-service
+    image: rubenwo/home-automation-actions-service:latest
+    # build: ./actions-service
     restart: on-failure
     depends_on:
       - postgres.default.svc.cluster.local
