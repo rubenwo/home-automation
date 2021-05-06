@@ -1,5 +1,27 @@
 package api
 
+import (
+	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg/v10/orm"
+	"github.com/rubenwo/home-automation/hue-service/pkg/hue"
+)
+
+func createSchema(db *pg.DB) error {
+	tables := []interface{}{
+		(*hue.Bridge)(nil),
+	}
+
+	for _, model := range tables {
+		err := db.Model(model).CreateTable(&orm.CreateTableOptions{
+			IfNotExists: true,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type HealthzModel struct {
 	IsHealthy    bool   `json:"is_healthy"`
 	ErrorMessage string `json:"error_message"`
