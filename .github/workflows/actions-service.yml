@@ -4,7 +4,7 @@ on:
     branches: [main]
 
 jobs:
-  fake_deploy_cache_multi:
+  Build & Publish actions-service:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -42,7 +42,6 @@ jobs:
           file: ./actions-service/Dockerfile
           platforms: linux/amd64,linux/arm/v7
           # Set the desired build target here
-          target: deploy
           push: true
           tags: ${{ steps.prep.outputs.tagged_image }}
           cache-from: type=local,src=/tmp/.buildx-cache
