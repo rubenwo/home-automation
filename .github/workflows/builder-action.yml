@@ -1,0 +1,41 @@
+name: Build & Publish Docker images for ARM
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_TARGET_PLATFORM: linux/arm/v7
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v1
+      - name: Set up Docker Buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+      - name: Prepare
+        if: success()
+        id: prepare
+        run: |
+          echo ::set-output name=docker_platform::${DOCKER_TARGET_PLATFORM}        
+          echo ::set-output name=version::${GITHUB_RUN_NUMBER}
+      - name: Docker Login
+        if: success()
+        run: |
+          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+      - name: Run Buildx (push image)
+        if: success()
+        run: |
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-actions-service:${{ steps.prepare.outputs.version }} --file ./actions-service/Dockerfile --output type=image,push=true ./actions-service
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-web-client:${{ steps.prepare.outputs.version }} --file ./client/web/vue/home-automation/Dockerfile --output type=image,push=true ./client/web/vue/home-automation
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-food-service:${{ steps.prepare.outputs.version }} --file ./food-service/Dockerfile --output type=image,push=true ./food-service
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-gateway-service:${{ steps.prepare.outputs.version }} --file ./gateway-service/Dockerfile --output type=image,push=true ./gateway-service
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-hue-service:${{ steps.prepare.outputs.version }} --file ./hue-service/Dockerfile --output type=image,push=true ./hue-service
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-inventory-service:${{ steps.prepare.outputs.version }} --file ./inventory-service/Dockerfile --output type=image,push=true ./inventory-service
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-led-strip-service:${{ steps.prepare.outputs.version }} --file ./led-strip-service/Dockerfile --output type=image,push=true ./led-strip-service
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-registry-service:${{ steps.prepare.outputs.version }} --file ./registry-service/Dockerfile --output type=image,push=true ./registry-service
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-tapo-service:${{ steps.prepare.outputs.version }} --file ./tapo-service/Dockerfile --output type=image,push=true ./tapo-service
+          docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-video-streaming-hub-service:${{ steps.prepare.outputs.version }} --file ./video-streaming-hub-service/Dockerfile --output type=image,push=true ./video-streaming-hub-service
