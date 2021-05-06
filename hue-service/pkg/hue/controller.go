@@ -57,3 +57,7 @@ func (c *Controller) AddBridge(bridge *huego.Bridge) error {
 	fmt.Println(result)
 	return nil
 }
+
+func (c *Controller) SetStateOnSpecificLight(bridgeId string, lightId int, state huego.State) error {
+	return nil
+}
