@@ -42,16 +42,16 @@ jobs:
       - name: Run Buildx (push image)
         if: success()
         run: |
-          docker pull rubenwo/home-automation-actions-service:latest
-          docker pull rubenwo/home-automation-web-client:latest
-          docker pull rubenwo/home-automation-food-service:latest
-          docker pull rubenwo/home-automation-gateway-service:latest
-          docker pull rubenwo/home-automation-hue-service:latest
-          docker pull rubenwo/home-automation-inventory-service:latest
-          docker pull rubenwo/home-automation-led-strip-service:latest
-          docker pull rubenwo/home-automation-registry-service:latest
-          docker pull rubenwo/home-automation-actions-service:latest
-          docker pull rubenwo/home-automation-video-streaming-hub-service:latest
+          docker pull rubenwo/home-automation-actions-service
+          docker pull rubenwo/home-automation-web-client
+          docker pull rubenwo/home-automation-food-service
+          docker pull rubenwo/home-automation-gateway-service
+          docker pull rubenwo/home-automation-hue-service
+          docker pull rubenwo/home-automation-inventory-service
+          docker pull rubenwo/home-automation-led-strip-service
+          docker pull rubenwo/home-automation-registry-service
+          docker pull rubenwo/home-automation-actions-service
+          docker pull rubenwo/home-automation-video-streaming-hub-service
 
           docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-actions-service:latest --file ./actions-service/Dockerfile --output type=image,push=true ./actions-service
           docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-web-client:latest --file ./client/web/vue/home-automation/Dockerfile --output type=image,push=true ./client/web/vue/home-automation
