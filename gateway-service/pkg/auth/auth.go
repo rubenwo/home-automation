@@ -1,23 +1,9 @@
 package auth
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"github.com/rubenwo/home-automation/gateway-service/pkg/auth/models"
 	"net/http"
 )
-
-//Claims contains the values for the claims part of the JWT
-type Claims struct {
-	Username      string        `json:"username"`
-	UserID        string        `json:"user_id"`
-	Authorization Authorization `json:"authorization"`
-	jwt.StandardClaims
-}
-
-//Authorization contains all the roles of the user
-type Authorization struct {
-	//Roles which is used for RBAc
-	Roles []string `json:"roles"`
-}
 
 //Authenticator is an interface that describes the functionality for authenticating http functions
 type Authenticator interface {
@@ -33,5 +19,5 @@ type Authenticator interface {
 
 //TokenExchanger is an interface that describes how an oauth token should be exchanged to our own claims
 type TokenExchanger interface {
-	ExchangeToken(r *http.Request) (Claims, error)
+	ExchangeToken(r *http.Request) (models.Claims, error)
 }

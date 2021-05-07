@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/rubenwo/home-automation/gateway-service/pkg/auth/models"
 	"log"
 	"net/http"
 	"os"
@@ -84,7 +85,7 @@ func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler 
 			tknStr := authHeader[len(BearerSchema):]
 
 			// Initialize a new instance of `Claims`
-			claims := &Claims{}
+			claims := &models.Claims{}
 
 			// Parse the JWT string and store the result in `claims`.
 			// Note that we are passing the key in this method as well. This method will return an error
@@ -121,7 +122,7 @@ func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler 
 }
 
 func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
-	var lr DefaultLoginRequest
+	var lr models.DefaultLoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&lr); err != nil {
 		http.Error(w, "invalid request body", http.StatusUnprocessableEntity)
 		return
@@ -157,10 +158,10 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Get claims from the database
 
-	claims := Claims{
+	claims := models.Claims{
 		Username:      "admin",
 		UserID:        "1",
-		Authorization: Authorization{Roles: []string{"admin"}},
+		Authorization: models.Authorization{Roles: []string{"admin"}},
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -183,7 +184,7 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 	c.refreshTokens[refreshTokenString] = time.Now().Add(c.refreshTokenExpiration)
 	c.refreshTokenLock.Unlock()
 
-	response := LoginResponse{
+	response := models.LoginResponse{
 		Username:           claims.Username,
 		UserID:             claims.UserID,
 		AuthorizationToken: tokenString,
@@ -200,7 +201,7 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 
 func (c *DefaultClient) Logout(w http.ResponseWriter, r *http.Request) {
 	// TODO: remove authorization and refresh tokens from the database
-	var lr LogoutRequest
+	var lr models.LogoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&lr); err != nil {
 		http.Error(w, "invalid request body", http.StatusUnprocessableEntity)
 		return
@@ -274,10 +275,10 @@ func (c *DefaultClient) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	expirationTime := time.Now().Add(c.authorizationTokenExpiration)
 
 	// TODO: Get claims from the database
-	claims := Claims{
+	claims := models.Claims{
 		Username:      "admin",
 		UserID:        "1",
-		Authorization: Authorization{Roles: []string{"admin"}},
+		Authorization: models.Authorization{Roles: []string{"admin"}},
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -300,7 +301,7 @@ func (c *DefaultClient) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	c.refreshTokens[newRefreshTokenString] = time.Now().Add(c.refreshTokenExpiration)
 	c.refreshTokenLock.Unlock()
 
-	response := LoginResponse{
+	response := models.LoginResponse{
 		Username:           claims.Username,
 		UserID:             claims.UserID,
 		AuthorizationToken: tokenString,

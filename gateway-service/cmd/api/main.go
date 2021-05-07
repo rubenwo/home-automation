@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -13,6 +14,9 @@ import (
 )
 
 func main() {
+	wordPtr := flag.String("word", "foo", "a string")
+
+	fmt.Println(*wordPtr)
 	jwtKey := os.Getenv("JWT_KEY")
 
 	if jwtKey == "" {
@@ -24,7 +28,7 @@ func main() {
 		adminEnabled = true
 	}
 	fmt.Println(adminEnabled)
-	cfg, err := ingress.ParseConfig("./ingress.yaml")
+	cfg, err := ingress.ParseConfig("./ingress.yml")
 	if err != nil {
 		log.Fatal(err)
 	}
