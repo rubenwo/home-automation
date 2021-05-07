@@ -36,7 +36,7 @@ public class GetDevices implements IRequest<JSONObject> {
     public JsonRequest<JSONObject> doRequest() {
         return new JsonObjectRequest(
                 Request.Method.GET,
-                Constants.BASE_API_URL + "/devices",
+                Constants.BASE_URL + "/api/v1/devices",
                 null,
                 (JSONObject response) -> {
                     try {

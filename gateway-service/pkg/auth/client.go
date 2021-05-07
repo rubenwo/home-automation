@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -16,13 +17,25 @@ const (
 )
 
 type DefaultClient struct {
-	key             []byte
-	adminEnabled    bool
-	tokenExpiration time.Duration
+	key                          []byte
+	adminEnabled                 bool
+	authorizationTokenExpiration time.Duration
+	refreshTokenExpiration       time.Duration
+
+	refreshTokenLock sync.Mutex
+	refreshTokens    map[string]time.Time
 }
 
-func NewDefaultClient(key []byte, tokenExpiration time.Duration, adminEnabled bool) *DefaultClient {
-	return &DefaultClient{key: key, tokenExpiration: tokenExpiration, adminEnabled: adminEnabled}
+//NewDefaultClient
+func NewDefaultClient(key []byte, authorizationTokenExpiration time.Duration, refreshTokenExpiration time.Duration, adminEnabled bool) *DefaultClient {
+	return &DefaultClient{
+		key:                          key,
+		authorizationTokenExpiration: authorizationTokenExpiration,
+		refreshTokenExpiration:       refreshTokenExpiration,
+		adminEnabled:                 adminEnabled,
+
+		refreshTokens: make(map[string]time.Time),
+	}
 }
 
 func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler {
@@ -134,13 +147,15 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "admin account is disabled", http.StatusUnauthorized)
 			return
 		}
-	}else{
+	} else {
 		log.Printf("'%s' is not a valid username", lr.Username)
 		http.Error(w, fmt.Sprintf("'%s' does not exist", lr.Username), http.StatusUnauthorized)
 		return
 	}
 
-	expirationTime := time.Now().Add(c.tokenExpiration)
+	expirationTime := time.Now().Add(c.authorizationTokenExpiration)
+
+	// TODO: Get claims from the database
 
 	claims := Claims{
 		Username:      "admin",
@@ -157,10 +172,22 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	refreshToken := jwt.New(jwt.SigningMethodHS256)
+	refreshTokenString, err := refreshToken.SignedString(c.key)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error signing refresh token"), http.StatusInternalServerError)
+		return
+	}
+
+	c.refreshTokenLock.Lock()
+	c.refreshTokens[refreshTokenString] = time.Now().Add(c.refreshTokenExpiration)
+	c.refreshTokenLock.Unlock()
+
 	response := LoginResponse{
-		Username: claims.Username,
-		UserID:   claims.UserID,
-		Token:    tokenString,
+		Username:           claims.Username,
+		UserID:             claims.UserID,
+		AuthorizationToken: tokenString,
+		RefreshToken:       refreshTokenString,
 	}
 
 	w.Header().Set("Authorization", "bearer "+tokenString)
@@ -172,13 +199,119 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *DefaultClient) Logout(w http.ResponseWriter, r *http.Request) {
+	// TODO: remove authorization and refresh tokens from the database
+	var lr LogoutRequest
+	if err := json.NewDecoder(r.Body).Decode(&lr); err != nil {
+		http.Error(w, "invalid request body", http.StatusUnprocessableEntity)
+		return
+	}
+
+	if lr.AuthorizationToken == "" {
+		http.Error(w, "username cannot be empty", http.StatusUnauthorized)
+		return
+	}
+	if lr.RefreshToken == "" {
+		http.Error(w, "password cannot be empty", http.StatusUnauthorized)
+		return
+	}
+
+	c.refreshTokenLock.Lock()
+	delete(c.refreshTokens, lr.RefreshToken)
+	c.refreshTokenLock.Unlock()
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (c *DefaultClient) Register(w http.ResponseWriter, r *http.Request) {
+	// TODO: add the option to create new accounts?
 	http.Error(w, "Registering a new user is disabled by the admins", http.StatusForbidden)
 }
 
 func (c *DefaultClient) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	refreshToken := r.URL.Query().Get("refresh-token")
+	log.Println(refreshToken)
+
+	// Validate the refresh token
+
+	tkn, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+		return c.key, nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			http.Error(w, "invalid jwt signature", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, fmt.Sprintf("error parsing token: %s", err.Error()), http.StatusUnauthorized)
+		return
+	}
+
+	if !tkn.Valid {
+		http.Error(w, "invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	//TODO: Check with database, but for now we just use an in-memory map
+
+	// Get the expiration time
+	c.refreshTokenLock.Lock()
+	expiration, exists := c.refreshTokens[refreshToken]
+	c.refreshTokenLock.Unlock()
+	if !exists {
+		http.Error(w, "token does not exist", http.StatusUnauthorized)
+		return
+	}
+	if time.Now().After(expiration) {
+		http.Error(w, "token is expired", http.StatusUnauthorized)
+		return
+	}
+
+	c.refreshTokenLock.Lock()
+	delete(c.refreshTokens, refreshToken)
+	c.refreshTokenLock.Unlock()
+
+	// If token is valid, generate a new authorization and refresh token
+	// Delete the token
+	expirationTime := time.Now().Add(c.authorizationTokenExpiration)
+
+	// TODO: Get claims from the database
+	claims := Claims{
+		Username:      "admin",
+		UserID:        "1",
+		Authorization: Authorization{Roles: []string{"admin"}},
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(c.key)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error signing token"), http.StatusInternalServerError)
+		return
+	}
+
+	newRefreshToken := jwt.New(jwt.SigningMethodHS256)
+	newRefreshTokenString, err := newRefreshToken.SignedString(c.key)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error signing refresh token"), http.StatusInternalServerError)
+		return
+	}
+
+	c.refreshTokenLock.Lock()
+	c.refreshTokens[newRefreshTokenString] = time.Now().Add(c.refreshTokenExpiration)
+	c.refreshTokenLock.Unlock()
+
+	response := LoginResponse{
+		Username:           claims.Username,
+		UserID:             claims.UserID,
+		AuthorizationToken: tokenString,
+		RefreshToken:       newRefreshTokenString,
+	}
+
+	w.Header().Set("Authorization", "bearer "+tokenString)
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&response); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }

@@ -36,7 +36,7 @@ public class WakeTapoDevice implements IRequest<JSONObject> {
     public JsonRequest<JSONObject> doRequest() {
         return new JsonObjectRequest(
                 Request.Method.GET,
-                Constants.BASE_API_URL + "/tapo/wake/" + deviceId,
+                Constants.BASE_URL + "/api/v1/tapo/wake/" + deviceId,
                 null,
                 (JSONObject response) -> {
                     wakeTapoListener.onWakeUp();

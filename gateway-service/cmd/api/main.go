@@ -29,7 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	authenticator := auth.NewDefaultClient([]byte(jwtKey), time.Hour*1, adminEnabled)
+	authenticator := auth.NewDefaultClient([]byte(jwtKey), time.Hour*1, time.Hour*24*7, adminEnabled)
 
 	globalMiddlewares := []mux.MiddlewareFunc{
 		ingress.LoggingMiddleware,

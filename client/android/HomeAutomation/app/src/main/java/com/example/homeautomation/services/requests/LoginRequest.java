@@ -43,7 +43,7 @@ public class LoginRequest implements IRequest<JSONObject> {
 
         return new JsonObjectRequest(
                 Request.Method.POST,
-                Constants.BASE_AUTH_URL + "/login",
+                Constants.BASE_URL + "/auth/login",
                 jsonObject,
                 (JSONObject response) -> {
                     try {

@@ -6,7 +6,13 @@ type DefaultLoginRequest struct {
 }
 
 type LoginResponse struct {
-	Username string `json:"username"`
-	UserID   string `json:"user_id"`
-	Token    string `json:"token"`
+	Username           string `json:"username"`
+	UserID             string `json:"user_id"`
+	AuthorizationToken string `json:"authorization_token"`
+	RefreshToken       string `json:"refresh_token"`
+}
+
+type LogoutRequest struct {
+	AuthorizationToken string `json:"authorization_token"`
+	RefreshToken       string `json:"refresh_token"`
 }
