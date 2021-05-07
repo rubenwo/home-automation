@@ -85,6 +85,7 @@ func (c *Client) SocketMQTTRequest(w http.ResponseWriter, r *http.Request) {
 			msg.Ack()
 			payload := msg.Payload()
 			fmt.Println(string(payload))
+			// Forward content of MQTT message to the websocket
 			if err := conn.WriteMessage(websocket.TextMessage, payload); err != nil {
 				log.Println(err)
 				client.Unsubscribe(path)
@@ -92,6 +93,7 @@ func (c *Client) SocketMQTTRequest(w http.ResponseWriter, r *http.Request) {
 		})
 	}()
 
+	// read from websocket connection to not block the client
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
