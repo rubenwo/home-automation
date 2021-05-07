@@ -14,9 +14,10 @@ import (
 )
 
 func main() {
-	wordPtr := flag.String("word", "foo", "a string")
+	ingressPathPtr := flag.String("file", "ingress.yml", "specifies the filepath for the ingress config")
+	flag.Parse()
 
-	fmt.Println(*wordPtr)
+	fmt.Println(*ingressPathPtr)
 	jwtKey := os.Getenv("JWT_KEY")
 
 	if jwtKey == "" {
@@ -28,7 +29,7 @@ func main() {
 		adminEnabled = true
 	}
 	fmt.Println(adminEnabled)
-	cfg, err := ingress.ParseConfig("./ingress.yml")
+	cfg, err := ingress.ParseConfig(*ingressPathPtr)
 	if err != nil {
 		log.Fatal(err)
 	}
