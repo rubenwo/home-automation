@@ -38,7 +38,7 @@ public class GetTapoDevice implements IRequest<JSONObject> {
     public JsonRequest<JSONObject> doRequest() {
         return new JsonObjectRequest(
                 Request.Method.GET,
-                Constants.BASE_API_URL + "/tapo/devices/" + deviceId,
+                Constants.BASE_URL + "/api/v1/tapo/devices/" + deviceId,
                 null,
                 (JSONObject response) -> {
                     try {

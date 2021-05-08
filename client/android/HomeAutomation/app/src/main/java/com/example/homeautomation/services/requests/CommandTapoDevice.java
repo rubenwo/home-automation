@@ -39,7 +39,7 @@ public class CommandTapoDevice implements IRequest<JSONObject> {
     public JsonRequest<JSONObject> doRequest() {
         return new JsonObjectRequest(
                 Request.Method.GET,
-                Constants.BASE_API_URL + "/tapo/lights/" + deviceId + "?command=" + command + "&brightness=" + brightness,
+                Constants.BASE_URL + "/api/v1/tapo/lights/" + deviceId + "?command=" + command + "&brightness=" + brightness,
                 null,
                 (JSONObject response) -> {
                     commandTapoListener.onCommandComplete();

@@ -1,12 +1,24 @@
 package auth
 
-type DefaultLoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
+import (
+	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg/v10/orm"
+	"github.com/rubenwo/home-automation/gateway-service/pkg/auth/models"
+)
 
-type LoginResponse struct {
-	Username string `json:"username"`
-	UserID   string `json:"user_id"`
-	Token    string `json:"token"`
+// createSchema creates database schema for the models
+func createSchema(db *pg.DB) error {
+	tables := []interface{}{
+		(*models.Claims)(nil),
+	}
+
+	for _, model := range tables {
+		err := db.Model(model).CreateTable(&orm.CreateTableOptions{
+			IfNotExists: true,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -109,7 +109,7 @@ func New(cfg *Config, authenticator auth.Authenticator, globalMiddleware []mux.M
 		serveReverseProxy(u, writer, request)
 	}).Methods("GET")
 
-	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+	_ = router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err1 := route.GetPathTemplate()
 		met, err2 := route.GetMethods()
 		log.Infof("%s, %v, %v, %v", tpl, err1, met, err2)

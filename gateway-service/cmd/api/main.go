@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -13,6 +14,10 @@ import (
 )
 
 func main() {
+	ingressPathPtr := flag.String("file", "ingress.yml", "specifies the filepath for the ingress config")
+	flag.Parse()
+
+	fmt.Println(*ingressPathPtr)
 	jwtKey := os.Getenv("JWT_KEY")
 
 	if jwtKey == "" {
@@ -24,12 +29,12 @@ func main() {
 		adminEnabled = true
 	}
 	fmt.Println(adminEnabled)
-	cfg, err := ingress.ParseConfig("./ingress.yaml")
+	cfg, err := ingress.ParseConfig(*ingressPathPtr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	authenticator := auth.NewDefaultClient([]byte(jwtKey), time.Hour*1, adminEnabled)
+	authenticator := auth.NewDefaultClient([]byte(jwtKey), time.Hour*1, time.Hour*24*7, adminEnabled)
 
 	globalMiddlewares := []mux.MiddlewareFunc{
 		ingress.LoggingMiddleware,
@@ -61,11 +66,13 @@ func main() {
 	// If certificate exists, host on 443
 	if _, err := os.Stat("/certs/fullchain.pem"); err == nil {
 		// path/to/whatever exists
+		log.Println("gateway-service is listening on port '443'")
 		if err := http.ListenAndServeTLS(":443", "/certs/fullchain.pem", "/certs/privkey.pem", handler); err != nil {
 			log.Fatal(err)
 		}
 		return
 	}
+	log.Println("gateway-service is listening on port '80'")
 	if err := http.ListenAndServe(":80", handler); err != nil {
 		log.Fatal(err)
 	}

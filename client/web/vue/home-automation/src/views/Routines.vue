@@ -8,7 +8,7 @@
       xl="2"
       v-bind:key="routine.id"
       v-for="routine in this.routines"
-      style="margin-right: 25px; margin-left: 25px"
+      style="margin-right: 5em; margin-left: 5em"
     >
       <routine-card v-bind:id="routine.id" v-bind:name="routine.name" />
     </b-col>
