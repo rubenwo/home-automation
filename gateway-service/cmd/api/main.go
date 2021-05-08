@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	ingressPathPtr := flag.String("file", "/root/ingress.yml", "specifies the filepath for the ingress config")
+	ingressPathPtr := flag.String("file", "/root/ingress.yaml", "specifies the filepath for the ingress config")
 	flag.Parse()
 
 	fmt.Println(*ingressPathPtr)
