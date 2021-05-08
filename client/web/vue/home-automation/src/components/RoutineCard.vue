@@ -2,10 +2,10 @@
   <b-card
     v-bind:sub-title="name"
     style="
-      width: 500px;
-
-      min-height: 100px;
-      max-height: 500px;
+      max-width: 300px;
+      min-width: 300px;
+      min-height: 200px;
+      max-height: 200px;
       background-color: rgba(255, 255, 255, 0.7);
     "
     class="mb-2"
