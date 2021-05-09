@@ -21,6 +21,8 @@ type Trigger struct {
 }
 
 type Action struct {
+	Script string `json:"script"`
+
 	Addr   string                 `json:"addr"`
 	Method string                 `json:"method"`
 	Data   map[string]interface{} `json:"data"`
