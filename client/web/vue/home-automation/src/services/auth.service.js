@@ -12,4 +12,12 @@ export default {
       });
     return res;
   },
+  async refreshToken(refresh_token) {
+    const res = await ApiService()
+      .get("/auth/refresh?refresh-token=" + refresh_token)
+      .catch(() => {
+        return null;
+      });
+    return res;
+  },
 };

@@ -69,6 +69,16 @@ export default {
       commit("CLEAR_ALL");
       commit("CLEAR_ERROR");
     },
+    async refreshToken({ commit }, { token }) {
+      console.log(token);
+      const resp = await AuthService.refreshToken(token);
+      console.log(resp);
+      const { authorization_token, refresh_token } = resp.data;
+      localStorage.setItem("authorization_token", authorization_token);
+      localStorage.setItem("refresh_token", refresh_token);
+      commit("SET_AUTHORIZATION_TOKEN", authorization_token);
+      commit("SET_REFRESH_TOKEN", refresh_token);
+    },
   },
   getters: {
     isLoggedIn: (state) => {
@@ -88,5 +98,6 @@ export default {
       return parsedToken.exp > Math.floor(Date.now() / 1000);
     },
     getBearerToken: (state) => state.authorization_token,
+    getRefreshToken: (state) => state.refresh_token,
   },
 };

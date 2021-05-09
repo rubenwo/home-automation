@@ -3,6 +3,13 @@
     <p style="color: aliceblue">BMP180 Temperature: {{ bmp180_temperature }}</p>
     <p style="color: aliceblue">BMP280 Temperature: {{ bmp280_temperature }}</p>
     <p style="color: aliceblue"># of Satellites: {{ number_of_satellites }}</p>
+    <div style="color: aliceblue">
+      <span>Lat: {{ position.lat }}</span>
+      <br />
+      <span>Lng: {{ position.lng }}</span>
+      <br />
+      <span>Altitude: {{ altitude }}</span>
+    </div>
   </div>
 </template>
 
@@ -17,6 +24,8 @@ export default {
       bmp180_temperature: 0.0,
       bmp280_temperature: 0.0,
       number_of_satellites: 0,
+      position: { lat: 0, lng: 0 },
+      altitude: 0,
     };
   },
   methods: {
@@ -34,6 +43,9 @@ export default {
         }
         case "GPS_DATA": {
           this.number_of_satellites = data.data.gps_sat_amount;
+          this.position.lat = data.data.gps_lat;
+          this.position.lng = data.data.gps_lon;
+          this.altitude = data.data.gps_altitude;
           break;
         }
       }
