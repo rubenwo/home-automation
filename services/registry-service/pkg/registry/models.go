@@ -3,7 +3,7 @@ package registry
 import (
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
-	"github.com/rubenwo/home-automation/registry-service/pkg/registry/models"
+	"github.com/rubenwo/home-automation/services/registry-service/pkg/registry/models"
 )
 
 // createSchema creates database schema for the models

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/rubenwo/home-automation/registry-service/pkg/registry/models"
+	"github.com/rubenwo/home-automation/services/registry-service/pkg/registry/models"
 	"io/ioutil"
 	"net/http"
 )

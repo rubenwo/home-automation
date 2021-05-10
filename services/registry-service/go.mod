@@ -1,4 +1,4 @@
-module github.com/rubenwo/home-automation/registry-service
+module github.com/rubenwo/home-automation/services/registry-service
 
 go 1.15
 
