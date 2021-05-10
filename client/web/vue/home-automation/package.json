@@ -17,6 +17,7 @@
     "@vue/composition-api": "^1.0.0-rc.8",
     "axios": "^0.21.0",
     "bootstrap-vue": "^2.20.0",
+    "brace": "latest",
     "core-js": "^3.11.1",
     "gmap-vue": "^1.5.0",
     "lodash": "^4.17.21",
@@ -25,6 +26,7 @@
     "verte": "^0.0.12",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.6",
+    "vue-codemirror": "^4.0.6",
     "vue-color": "^2.8.1",
     "vue-colour-picker": "^0.0.5",
     "vue-cron-editor-buefy": "^0.2.17",
@@ -37,6 +39,7 @@
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.2.0",
     "vue-spinners-css": "^1.1.5",
+    "vuejs-ace-editor": "^1.0.1",
     "vuetable-2": "^2.0.0-beta.4",
     "vuex": "^3.4.0",
     "x5-gmaps": "^0.5.2"

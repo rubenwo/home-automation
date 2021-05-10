@@ -1,5 +1,4 @@
 import ApiService from "./api.service";
-import axios from "axios";
 
 export default {
   async fetchRoutines() {
@@ -12,8 +11,8 @@ export default {
     return res.data;
   },
   async addRoutine(data) {
-    const res = await axios
-      .post("http://localhost/routines", data)
+    const res = await ApiService()
+      .post("/api/v1/routines", data)
       .catch(() => {
         return null;
       });

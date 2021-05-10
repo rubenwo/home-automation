@@ -50,8 +50,6 @@
                         placeholder="Cron expr"
                         v-model="routine.trigger.cron_expr"
                       />
-                      <!--                            <VueCronEditorBuefy v-model="cronExpression"/>-->
-                      <!--                            {{ cronExpression }}-->
                     </b-col>
                   </b-row>
                 </b-container>
@@ -126,11 +124,12 @@
                     <label>Action Script:</label>
                   </b-col>
                   <b-col sm="8">
-                    <b-form-textarea
-                      v-model="action.script"
-                      placeholder="Enter some code in javascript..."
-                      rows="7"
-                    ></b-form-textarea>
+                    <!--                                        <b-form-textarea-->
+                    <!--                                                v-model="action.script"-->
+                    <!--                                                placeholder="Enter some code in javascript..."-->
+                    <!--                                                rows="7"-->
+                    <!--                                        />-->
+                    <codemirror v-model="action.script" :options="cmOptions" />
                   </b-col>
                 </b-row>
               </b-container>
@@ -148,20 +147,35 @@
 // import VueCronEditorBuefy from "vue-cron-editor-buefy";
 import VJsoneditor from "v-jsoneditor/src/index";
 import RoutineService from "../services/routines.service";
+import { codemirror } from "vue-codemirror";
+// import language js
+import "codemirror/mode/javascript/javascript.js";
+
+// import theme style
+import "codemirror/theme/base16-dark.css";
+// import base style
+import "codemirror/lib/codemirror.css";
 
 export default {
   name: "AddRoutineModal",
   components: {
     // VueCronEditorBuefy,
     VJsoneditor,
+    codemirror,
   },
   data() {
     return {
-      cronExpression: "*/1 * * * *",
+      cmOptions: {
+        tabSize: 4,
+        mode: "text/javascript",
+        theme: "base16-dark",
+        lineNumbers: true,
+        line: true,
+        // more CodeMirror options...
+      },
       jsonEditorOptions: {
         mode: "code",
       },
-
       chosen_trigger_type: -1,
       trigger_type_options: [
         { value: 0, text: "TimerTriggerType" },
@@ -178,6 +192,7 @@ export default {
             addr: "",
             method: "",
             data: null,
+            script: "",
           },
         ],
       },
@@ -195,6 +210,7 @@ export default {
         addr: "",
         method: "",
         data: null,
+        script: "",
       });
     },
     decreaseActions() {
