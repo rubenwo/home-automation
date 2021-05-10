@@ -46,9 +46,9 @@ jobs:
       - name: Build production image
         uses: docker/build-push-action@v2
         with:
-          context: ./food-service
+          context: ./services/food-service
           builder: ${{ steps.buildx.outputs.name }}
-          file: ./food-service/Dockerfile
+          file: ./services/food-service/Dockerfile
           platforms: linux/amd64,linux/arm/v7
           # Set the desired build target here
           push: true

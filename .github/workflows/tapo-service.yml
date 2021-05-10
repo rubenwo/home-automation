@@ -31,4 +31,4 @@ jobs:
     - name: Run Buildx (push image)      
       if: success()      
       run: |        
-        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-tapo-service:latest --file ./tapo-service/Dockerfile --output type=image,push=true ./tapo-service
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag rubenwo/home-automation-tapo-service:latest --file ./services/tapo-service/Dockerfile --output type=image,push=true ./services/tapo-service

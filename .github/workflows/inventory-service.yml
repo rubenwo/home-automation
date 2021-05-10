@@ -46,9 +46,9 @@ jobs:
       - name: Build production image
         uses: docker/build-push-action@v2
         with:
-          context: ./inventory-service
+          context: ./services/inventory-service
           builder: ${{ steps.buildx.outputs.name }}
-          file: ./inventory-service/Dockerfile
+          file: ./services/inventory-service/Dockerfile
           platforms: linux/amd64,linux/arm/v7
           # Set the desired build target here
           push: true

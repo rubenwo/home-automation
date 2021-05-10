@@ -46,9 +46,9 @@ jobs:
       - name: Build production image
         uses: docker/build-push-action@v2
         with:
-          context: ./hue-service
+          context: ./services/hue-service
           builder: ${{ steps.buildx.outputs.name }}
-          file: ./hue-service/Dockerfile
+          file: ./services/hue-service/Dockerfile
           platforms: linux/amd64,linux/arm/v7
           # Set the desired build target here
           push: true
