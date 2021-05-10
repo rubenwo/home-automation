@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
-	"github.com/rubenwo/home-automation/hue-service/pkg/hue"
+	"github.com/rubenwo/home-automation/services/hue-service/pkg/hue"
 )
 
 func createSchema(db *pg.DB) error {

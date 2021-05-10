@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/rubenwo/home-automation/gateway-service/pkg/auth/models"
+	"github.com/rubenwo/home-automation/services/gateway-service/pkg/auth/models"
 	"net/http"
 )
 

@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/go-pg/pg/v10"
 	"github.com/gorhill/cronexpr"
-	"github.com/rubenwo/home-automation/registry-service/pkg/registry/models"
+	"github.com/robertkrimen/otto"
+	"github.com/rubenwo/home-automation/services/registry-service/pkg/registry/models"
+	"github.com/rubenwo/home-automation/services/registry-service/pkg/registry/routines/script"
 	"io/ioutil"
 	"log"
 	"math"
@@ -50,6 +52,7 @@ func NewScheduler(db *pg.DB, maxConcurrentWorkers int) *Scheduler {
 	for i := 0; i < maxConcurrentWorkers; i++ {
 		go s.worker()
 	}
+	go s.resultWorker()
 	return s
 }
 
@@ -71,7 +74,6 @@ func (s *Scheduler) Run(interval time.Duration) {
 		currentTime := time.Now()
 		s.Lock()
 		for _, routine := range s.routines {
-
 			if checkIfRoutineShouldRun(routine.Trigger, currentTime, interval.Nanoseconds()) {
 				for _, action := range routine.Actions {
 					s.jobs <- action
@@ -101,20 +103,33 @@ func (s *Scheduler) resultWorker() {
 
 func (s *Scheduler) worker() {
 	for action := range s.jobs {
-
-		fmt.Println(action)
 		client := &http.Client{}
 		var (
 			req *http.Request
 			err error
 		)
 
-		//vm := otto.New()
-		//_, err = vm.Run(action.Script)
-		//if err != nil {
-		//	s.results <- err
-		//	continue
-		//}
+		if action.Script != "" {
+			vm := otto.New()
+
+			_ = vm.Set("HttpGet", script.HttpGet)
+			_ = vm.Set("HttpPost", script.HttpPost)
+			_ = vm.Set("HttpDelete", script.HttpDelete)
+			_ = vm.Set("HttpPut", script.HttpPut)
+
+			_, err = vm.Run(action.Script)
+			if err != nil {
+				s.results <- err
+				continue
+			}
+		}
+
+		if action.Method == "" {
+			continue
+		}
+		if action.Addr == "" {
+			continue
+		}
 
 		if action.Data == nil {
 			req, err = http.NewRequest(action.Method, action.Addr, nil)

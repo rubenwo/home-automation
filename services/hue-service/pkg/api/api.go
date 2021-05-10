@@ -9,8 +9,9 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-pg/pg/v10"
 	"github.com/google/uuid"
-	"github.com/rubenwo/home-automation/hue-service/pkg/api/config"
-	"github.com/rubenwo/home-automation/hue-service/pkg/hue"
+	"github.com/rubenwo/home-automation/services/hue-service/pkg/api/config"
+	"github.com/rubenwo/home-automation/services/hue-service/pkg/hue"
+
 	"log"
 	"net/http"
 	"strconv"

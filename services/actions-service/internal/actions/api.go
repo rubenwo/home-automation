@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi"
-	"github.com/rubenwo/home-automation/actions-service/internal/actions/intentprocessor"
-	"github.com/rubenwo/home-automation/actions-service/internal/actions/models"
+	"github.com/rubenwo/home-automation/services/actions-service/internal/actions/intentprocessor"
+	"github.com/rubenwo/home-automation/services/actions-service/internal/actions/models"
 	"log"
 	"net/http"
 )

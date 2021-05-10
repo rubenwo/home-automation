@@ -1,4 +1,4 @@
-module github.com/rubenwo/home-automation/actions-service
+module github.com/rubenwo/home-automation/services/actions-service
 
 go 1.16
 

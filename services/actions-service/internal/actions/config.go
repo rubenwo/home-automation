@@ -1,6 +1,6 @@
 package actions
 
-import "github.com/rubenwo/home-automation/actions-service/internal/actions/intentprocessor"
+import "github.com/rubenwo/home-automation/services/actions-service/internal/actions/intentprocessor"
 
 type Config struct {
 	Addr             string

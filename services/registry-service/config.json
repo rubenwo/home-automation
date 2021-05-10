@@ -1,5 +1,5 @@
 {
-  "database_backend": "postgres.default.svc.cluster.local:5432",
+  "database_backend": "192.168.2.135:5432",
   "database_user": "user",
   "database_password": "password",
   "database_name": "registry_database"
