@@ -46,9 +46,9 @@ jobs:
       - name: Build production image
         uses: docker/build-push-action@v2
         with:
-          context: ./gateway-service
+          context: ./services/gateway-service
           builder: ${{ steps.buildx.outputs.name }}
-          file: ./gateway-service/Dockerfile
+          file: ./services/gateway-service/Dockerfile
           platforms: linux/amd64,linux/arm/v7
           # Set the desired build target here
           push: true

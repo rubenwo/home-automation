@@ -101,12 +101,21 @@ func (s *Scheduler) resultWorker() {
 
 func (s *Scheduler) worker() {
 	for action := range s.jobs {
+
 		fmt.Println(action)
 		client := &http.Client{}
 		var (
 			req *http.Request
 			err error
 		)
+
+		//vm := otto.New()
+		//_, err = vm.Run(action.Script)
+		//if err != nil {
+		//	s.results <- err
+		//	continue
+		//}
+
 		if action.Data == nil {
 			req, err = http.NewRequest(action.Method, action.Addr, nil)
 			if err != nil {
