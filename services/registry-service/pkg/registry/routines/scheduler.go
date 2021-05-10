@@ -52,6 +52,7 @@ func NewScheduler(db *pg.DB, maxConcurrentWorkers int) *Scheduler {
 	for i := 0; i < maxConcurrentWorkers; i++ {
 		go s.worker()
 	}
+	go s.resultWorker()
 	return s
 }
 
@@ -73,7 +74,6 @@ func (s *Scheduler) Run(interval time.Duration) {
 		currentTime := time.Now()
 		s.Lock()
 		for _, routine := range s.routines {
-
 			if checkIfRoutineShouldRun(routine.Trigger, currentTime, interval.Nanoseconds()) {
 				for _, action := range routine.Actions {
 					s.jobs <- action
@@ -122,6 +122,13 @@ func (s *Scheduler) worker() {
 				s.results <- err
 				continue
 			}
+		}
+
+		if action.Method == "" {
+			continue
+		}
+		if action.Addr == "" {
+			continue
 		}
 
 		if action.Data == nil {

@@ -2,7 +2,7 @@ package intentprocessor
 
 import (
 	"fmt"
-	"github.com/rubenwo/home-automation/actions-service/internal/actions/models"
+	"github.com/rubenwo/home-automation/services/actions-service/internal/actions/models"
 )
 
 type ProcessChangeColourRequest struct{}

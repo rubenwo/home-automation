@@ -1,4 +1,4 @@
-module github.com/rubenwo/home-automation/food-service
+module github.com/rubenwo/home-automation/services/food-service
 
 go 1.15
 
@@ -11,6 +11,7 @@ require (
 	github.com/onsi/gomega v1.10.5 // indirect
 	github.com/rubenwo/home-automation/libraries/go v0.0.0-20210422202217-0c226d149ec9
 	github.com/vmihailenco/msgpack/v5 v5.3.1 // indirect
-	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
-	golang.org/x/sys v0.0.0-20210423082822-04245dca01da // indirect
+	go.opentelemetry.io/otel v0.20.0 // indirect
+	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf // indirect
+	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 )

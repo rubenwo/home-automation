@@ -1,4 +1,4 @@
-module github.com/rubenwo/home-automation/gateway-service
+module github.com/rubenwo/home-automation/services/gateway-service
 
 go 1.15
 
@@ -16,7 +16,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.1 // indirect
 	go.opentelemetry.io/otel v0.20.0 // indirect
 	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf // indirect
-	golang.org/x/net v0.0.0-20210510095157-81045d8b478c // indirect
-	golang.org/x/sys v0.0.0-20210507161434-a76c4d0a0096 // indirect
+	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
+	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )

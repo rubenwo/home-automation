@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/rubenwo/home-automation/actions-service/internal/actions"
-	"github.com/rubenwo/home-automation/actions-service/internal/actions/intentprocessor"
+	"github.com/rubenwo/home-automation/services/actions-service/internal/actions"
+	"github.com/rubenwo/home-automation/services/actions-service/internal/actions/intentprocessor"
 	"log"
 )
 

@@ -112,9 +112,25 @@
                       v-model="action.data"
                       :options="jsonEditorOptions"
                       :plus="false"
-                      :height="'400'"
+                      :height="'300'"
                       @error="onError"
                     />
+                  </b-col>
+                </b-row>
+              </b-container>
+            </b-input-group>
+            <b-input-group>
+              <b-container fluid>
+                <b-row class="my-1">
+                  <b-col sm="4">
+                    <label>Action Script:</label>
+                  </b-col>
+                  <b-col sm="8">
+                    <b-form-textarea
+                      v-model="action.script"
+                      placeholder="Enter some code in javascript..."
+                      rows="7"
+                    ></b-form-textarea>
                   </b-col>
                 </b-row>
               </b-container>
@@ -145,6 +161,7 @@ export default {
       jsonEditorOptions: {
         mode: "code",
       },
+
       chosen_trigger_type: -1,
       trigger_type_options: [
         { value: 0, text: "TimerTriggerType" },
@@ -203,6 +220,7 @@ export default {
         },
         actions: [
           {
+            script: "",
             addr: "",
             method: "",
             data: null,

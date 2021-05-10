@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/rubenwo/home-automation/inventory-service/pkg/inventory"
+	"github.com/rubenwo/home-automation/services/inventory-service/pkg/inventory"
 	"log"
 	"net/http"
 )

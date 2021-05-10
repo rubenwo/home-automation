@@ -3,7 +3,7 @@ package auth
 import (
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
-	"github.com/rubenwo/home-automation/gateway-service/pkg/auth/models"
+	"github.com/rubenwo/home-automation/services/gateway-service/pkg/auth/models"
 )
 
 // createSchema creates database schema for the models

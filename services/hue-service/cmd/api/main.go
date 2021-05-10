@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/rubenwo/home-automation/hue-service/pkg/api"
-	"github.com/rubenwo/home-automation/hue-service/pkg/api/config"
+	"github.com/rubenwo/home-automation/services/hue-service/pkg/api"
+	"github.com/rubenwo/home-automation/services/hue-service/pkg/api/config"
 	"log"
 )
 

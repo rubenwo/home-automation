@@ -53,7 +53,7 @@ func New(cfg *Config) (*api, error) {
 		db:        db,
 		scheduler: routines.NewScheduler(db, runtime.NumCPU()),
 	}
-	go a.scheduler.Run(time.Second * 10)
+	go a.scheduler.Run(time.Second * 1)
 
 	// A good base middleware stack
 	a.router.Use(middleware.RequestID)
@@ -65,6 +65,14 @@ func New(cfg *Config) (*api, error) {
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
 	a.router.Use(middleware.Timeout(60 * time.Second))
+	//
+	//a.router.Use(cors.Handler(cors.Options{
+	//	// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+	//	AllowedOrigins:   []string{"*"},
+	//	// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+	//	AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	//	AllowCredentials: false,
+	//}))
 
 	a.router.Get("/healthz", a.healthz)
 	a.router.Get("/new_id", a.getNewID)

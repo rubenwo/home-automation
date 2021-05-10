@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/rubenwo/home-automation/gateway-service/pkg/auth/models"
+	"github.com/rubenwo/home-automation/services/gateway-service/pkg/auth/models"
 	"log"
 	"net/http"
 	"os"

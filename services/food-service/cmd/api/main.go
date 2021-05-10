@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/rubenwo/home-automation/food-service/pkg/cmd/foodservice"
+	"github.com/rubenwo/home-automation/services/food-service/pkg/cmd/foodservice"
 	"log"
 )
 
