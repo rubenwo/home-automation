@@ -90,6 +90,7 @@ func New(cfg *Config) (*api, error) {
 	a.router.Post("/routines", a.createRoutine)
 	a.router.Get("/routines/{id}", a.getRoutine)
 	a.router.Delete("/routines/{id}", a.deleteRoutine)
+	a.router.Put("/routines/{id}", a.updateRoutine)
 
 	a.router.Post("/group", a.createGroup)
 
@@ -319,6 +320,37 @@ func (a *api) deleteRoutine(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result, err := a.db.Model(&models.Routine{Id: int64(id)}).Where("routine.id = ?", id).Delete()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("an error occured when deleteing item with id: %d, error: %s", id, err.Error()), http.StatusInternalServerError)
+		return
+	}
+	if err := a.scheduler.UpdateRoutines(); err != nil {
+		log.Println(err)
+	}
+	fmt.Println(result)
+	a.getRoutines(w, r)
+}
+
+func (a *api) updateRoutine(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "provided id was not a number, thus couldn't be parsed", http.StatusBadRequest)
+		return
+	}
+
+	var routine models.Routine
+	if err := json.NewDecoder(r.Body).Decode(&routine); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't decode body: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	if int64(id) != routine.Id {
+		http.Error(w, fmt.Sprintf("id in url does not correspond to the provided body"), http.StatusBadRequest)
+		return
+	}
+
+	result, err := a.db.Model(&routine).Where("routine.id = ?", id).Update(&routine)
+
 	if err != nil {
 		http.Error(w, fmt.Sprintf("an error occured when deleteing item with id: %d, error: %s", id, err.Error()), http.StatusInternalServerError)
 		return

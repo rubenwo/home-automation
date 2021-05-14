@@ -14,6 +14,14 @@
     <div>Schedule: {{ routine.trigger.cron_expr }}</div>
     <div># of actions: {{ routine.actions.length }}</div>
 
+    <span>
+      Active:
+      <b-checkbox
+        v-model="routine.is_active"
+        @change="set_active()"
+      ></b-checkbox>
+    </span>
+
     <div slot="footer">
       <b-button style="background-color: #4287f5" v-bind:to="navigate()"
         >Information
@@ -41,6 +49,8 @@ export default {
   data() {
     return {
       routine: {
+        name: "",
+        is_active: true,
         trigger: {
           type: -1,
           cron_expr: "",
@@ -56,6 +66,16 @@ export default {
     async deleteRoutine() {
       const res = await RoutineService.deleteRoutine(this.id);
       console.log(res);
+    },
+    async set_active() {
+      console.log("clicked");
+      this.routine.is_active = !this.routine.is_active;
+      this.updateRoutine();
+    },
+    async updateRoutine() {
+      const res = await RoutineService.updateRoutine(this.id, this.routine);
+      console.log(res);
+      this.routine = res.routine;
     },
   },
   async mounted() {

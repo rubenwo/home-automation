@@ -1,10 +1,11 @@
 package models
 
 type Routine struct {
-	Id      int64    `json:"id"`
-	Name    string   `json:"name"`
-	Trigger Trigger  `json:"trigger"`
-	Actions []Action `json:"actions"`
+	Id       int64    `json:"id"`
+	Name     string   `json:"name"`
+	IsActive bool     `json:"is_active"`
+	Trigger  Trigger  `json:"trigger"`
+	Actions  []Action `json:"actions"`
 }
 
 type TriggerType uint8
