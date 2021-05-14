@@ -74,6 +74,9 @@ func (s *Scheduler) Run(interval time.Duration) {
 		currentTime := time.Now()
 		s.Lock()
 		for _, routine := range s.routines {
+			if !routine.IsActive {
+				continue
+			}
 			if checkIfRoutineShouldRun(routine.Trigger, currentTime, interval.Nanoseconds()) {
 				for _, action := range routine.Actions {
 					s.jobs <- action

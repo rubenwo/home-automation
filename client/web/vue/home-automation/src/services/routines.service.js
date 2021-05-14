@@ -19,6 +19,15 @@ export default {
     console.log(res);
     return res.data;
   },
+  async updateRoutine(id, data) {
+    const res = await ApiService()
+      .put("/api/v1/routines/" + id, data)
+      .catch(() => {
+        return null;
+      });
+    console.log(res);
+    return res.data;
+  },
   async fetchRoutine(routineId) {
     const res = await ApiService()
       .get("/api/v1/routines/" + routineId)
