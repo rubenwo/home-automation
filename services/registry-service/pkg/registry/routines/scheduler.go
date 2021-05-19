@@ -106,12 +106,6 @@ func (s *Scheduler) resultWorker() {
 
 func (s *Scheduler) worker() {
 	for action := range s.jobs {
-		client := &http.Client{}
-		var (
-			req *http.Request
-			err error
-		)
-
 		if action.Script != "" {
 			vm := otto.New()
 
@@ -120,7 +114,7 @@ func (s *Scheduler) worker() {
 			_ = vm.Set("HttpDelete", script.HttpDelete)
 			_ = vm.Set("HttpPut", script.HttpPut)
 
-			_, err = vm.Run(action.Script)
+			_, err := vm.Run(action.Script)
 			if err != nil {
 				s.results <- err
 				continue
@@ -133,6 +127,12 @@ func (s *Scheduler) worker() {
 		if action.Addr == "" {
 			continue
 		}
+
+		client := &http.Client{}
+		var (
+			req *http.Request
+			err error
+		)
 
 		if action.Data == nil {
 			req, err = http.NewRequest(action.Method, action.Addr, nil)

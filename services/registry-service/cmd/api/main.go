@@ -18,6 +18,8 @@ import (
 //
 //resp = HttpPost("https://homeautomation.rubenwoldhuis.nl/auth/login", data);
 //
+//console.log(resp);
+//
 //loginResp = JSON.parse(resp);
 //
 //console.log(loginResp.authorization_token);
@@ -28,9 +30,8 @@ import (
 //
 //resp = HttpGet("https://homeautomation.rubenwoldhuis.nl/api/v1/devices", headers);
 //console.log(resp);
-//
+//resp
 //`
-
 
 func main() {
 	//vm := otto.New()
@@ -45,7 +46,13 @@ func main() {
 	//	log.Fatal(err)
 	//}
 	//log.Println(res)
-
+	//i, err := res.Export()
+	//var m map[string]interface{}
+	//err = json.Unmarshal([]byte(i.(string)), &m)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println(m)
 
 	cfg, err := registry.LoadConfigFromPath("./config.json")
 	if err != nil {
