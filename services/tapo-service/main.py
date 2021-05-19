@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, status, Response
 
-from models import NewDevice, Device
+from models import Device, NewDevice
 from registry import Registry, TapoL510E
 
 app = FastAPI()

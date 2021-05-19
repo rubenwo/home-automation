@@ -8,7 +8,7 @@ class TapoDevice:
         self.password = password
         self.device_type = device_type
         self.device_name = ""
-        self.initialized = False
+        # self.initialized = False
 
     def turn_on(self):
         pass
