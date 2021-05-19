@@ -141,7 +141,7 @@ export default {
   },
   async mounted() {
     if (this.company === "tp-link") {
-      await TapoService.wakeTapoDevice(this.id);
+      // await TapoService.wakeTapoDevice(this.id);
       const deviceResult = await TapoService.fetchTapoDevice(this.id);
       this.dev = deviceResult.device;
       this.state = "loaded";
