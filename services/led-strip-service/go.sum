@@ -13,8 +13,12 @@ github.com/rubenwo/home-automation/libraries/go v0.0.0-20210128211535-72c13b2106
 github.com/rubenwo/home-automation/libraries/go v0.0.0-20210128211535-72c13b2106f8/go.mod h1:VibZf62ujNE3l8tV/5mKRVEQU4NxvI4Pp4OrfKAuBAw=
 github.com/rubenwo/home-automation/libraries/go v0.0.0-20210510115034-73499eb39800 h1:aBvDynSEtPGRhgL5+a/KWFwEYBn4I5qVfRyDjgcOaAY=
 github.com/rubenwo/home-automation/libraries/go v0.0.0-20210510115034-73499eb39800/go.mod h1:fykfCuzp8D/EH31IdJ0D095ZdcrXg2Ly84jskvjhmWQ=
+github.com/rubenwo/home-automation/libraries/go v0.0.0-20210519172639-4b8e541bf6f3 h1:Wk2VhtHsU/wzUuwseLZg1bm7sxohjOmPt6X7lFA/ohE=
+github.com/rubenwo/home-automation/libraries/go v0.0.0-20210519172639-4b8e541bf6f3/go.mod h1:fykfCuzp8D/EH31IdJ0D095ZdcrXg2Ly84jskvjhmWQ=
 golang.org/x/sys v0.0.0-20210123231150-1d476976d117 h1:M1sK0uTIn2x3HD5sySUPBg7ml5hmlQ/t7n7cIM6My9w=
 golang.org/x/sys v0.0.0-20210123231150-1d476976d117/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210510120138-977fb7262007 h1:gG67DSER+11cZvqIMb8S8bt0vZtiN6xWYARwirrOSfE=
 golang.org/x/sys v0.0.0-20210510120138-977fb7262007/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20210514084401-e8d321eab015 h1:hZR0X1kPW+nwyJ9xRxqZk1vx5RUObAPBdKVvXPDUH/E=
+golang.org/x/sys v0.0.0-20210514084401-e8d321eab015/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=

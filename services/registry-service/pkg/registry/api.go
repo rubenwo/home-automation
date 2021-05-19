@@ -359,7 +359,15 @@ func (a *api) updateRoutine(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	fmt.Println(result)
-	a.getRoutines(w, r)
+	var resp struct {
+		Routine models.Routine `json:"routine"`
+	}
+	resp.Routine = routine
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("error sending devices: %s\n", err.Error())
+	}
 }
 
 func (a *api) createGroup(w http.ResponseWriter, r *http.Request) {
