@@ -173,7 +173,7 @@ func (c *DefaultClient) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	refreshToken := jwt.New(jwt.SigningMethodHS256)
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{ExpiresAt: time.Now().Add(c.refreshTokenExpiration).Unix()})
 	refreshTokenString, err := refreshToken.SignedString(c.key)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error signing refresh token"), http.StatusInternalServerError)
@@ -290,7 +290,7 @@ func (c *DefaultClient) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newRefreshToken := jwt.New(jwt.SigningMethodHS256)
+	newRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{ExpiresAt: time.Now().Add(c.refreshTokenExpiration).Unix()})
 	newRefreshTokenString, err := newRefreshToken.SignedString(c.key)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error signing refresh token"), http.StatusInternalServerError)
