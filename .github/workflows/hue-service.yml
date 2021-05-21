@@ -2,7 +2,8 @@ name: Build & Publish hue-service
 on:
   push:
     branches: [main]
-
+    paths:
+      - "services/hue-service/**"
 jobs:
   build:
     runs-on: ubuntu-latest

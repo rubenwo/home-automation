@@ -2,7 +2,8 @@ name: Build & Publish led-strip-service
 on:
   push:
     branches: [main]
-
+    paths:
+      - "services/led-strip-service/**"
 jobs:
   build:
     runs-on: ubuntu-latest

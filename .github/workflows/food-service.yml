@@ -2,7 +2,8 @@ name: Build & Publish food-service
 on:
   push:
     branches: [main]
-
+    paths:
+      - "services/food-service/**"
 jobs:
   build:
     runs-on: ubuntu-latest

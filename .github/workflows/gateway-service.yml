@@ -2,7 +2,8 @@ name: Build & Publish gateway-service
 on:
   push:
     branches: [main]
-
+    paths:
+      - "services/gateway-service/**"
 jobs:
   build:
     runs-on: ubuntu-latest

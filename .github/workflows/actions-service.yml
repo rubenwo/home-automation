@@ -2,6 +2,8 @@ name: Build & Publish actions-service
 on:
   push:
     branches: [main]
+    paths:
+      - "services/actions-service/**"
 
 jobs:
   build:

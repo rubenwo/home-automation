@@ -2,7 +2,8 @@ name: Build & Publish web-client
 on:
   push:
     branches: [main]
-
+    paths:
+      - "client/web/vue/home-automation/**"
 jobs:
   build:
     runs-on: ubuntu-latest
