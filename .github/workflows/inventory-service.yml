@@ -2,7 +2,8 @@ name: Build & Publish inventory-service
 on:
   push:
     branches: [main]
-
+    paths:
+      - "services/inventory-service/**"
 jobs:
   build:
     runs-on: ubuntu-latest

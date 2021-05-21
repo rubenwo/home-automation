@@ -2,7 +2,8 @@ name: Build & Publish registry-service
 on:
   push:
     branches: [main]
-
+    paths:
+      - "services/registry-service/**"
 jobs:
   build:
     runs-on: ubuntu-latest

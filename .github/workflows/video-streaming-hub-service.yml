@@ -2,7 +2,8 @@ name: Build & Publish video-streaming-hub-service
 on:
   push:
     branches: [main]
-
+    paths:
+      - "services/video-streaming-hub-service/**"
 jobs:
   build:
     runs-on: ubuntu-latest
