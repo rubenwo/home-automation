@@ -21,17 +21,31 @@ public class UserPreferencesService {
         return instance;
     }
 
-    public void saveAuthToken(String token) {
-        Log.d(TAG, "saveAuthToken: " + token);
+    public void saveAuthorizationToken(String authorizationToken) {
+        Log.d(TAG, "saveAuthorizationToken: " + authorizationToken);
         SharedPreferences.Editor editor = this.preferences.edit();
-        editor.putString("auth_key", token);
+        editor.putString("authorizationToken", authorizationToken);
         editor.apply();
     }
 
-    public String getAuthToken() {
-        String token = this.preferences.getString("auth_key", "ERROR");
-        Log.d(TAG, "getAuthToken: " + token);
+    public void saveRefreshToken(String refreshToken) {
+        Log.d(TAG, "saveRefreshToken: " + refreshToken);
+        SharedPreferences.Editor editor = this.preferences.edit();
+        editor.putString("refreshToken", refreshToken);
+        editor.apply();
+    }
+
+    public String getAuthorizationToken() {
+        String token = this.preferences.getString("authorizationToken", "ERROR");
+        Log.d(TAG, "getAuthorizationToken: " + token);
         return token;
     }
+
+    public String getRefreshToken() {
+        String token = this.preferences.getString("refreshToken", "ERROR");
+        Log.d(TAG, "getRefreshToken: " + token);
+        return token;
+    }
+
 
 }

@@ -43,10 +43,12 @@ public class GetTapoDevice implements IRequest<JSONObject> {
                 (JSONObject response) -> {
                     try {
                         JSONObject obj = response.getJSONObject("device");
+                        JSONObject deviceInfo = obj.getJSONObject("device_info");
                         TapoDevice dev = new TapoDevice(
                                 obj.getString("device_name"),
                                 obj.getString("device_id"),
                                 obj.getString("device_type"),
+                                deviceInfo.getString("device_on").equals("True"),
                                 null
                         );
                         tapo.onTapoDevices(dev);

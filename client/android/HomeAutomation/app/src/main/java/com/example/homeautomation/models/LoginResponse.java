@@ -3,36 +3,30 @@ package com.example.homeautomation.models;
 public class LoginResponse {
     private String username;
     private String userId;
-    private String token;
+    private String authorization_token;
+    private String refresh_token;
 
-    public LoginResponse(String username, String userId, String token) {
+    public LoginResponse(String username, String userId, String authorization_token, String refresh_token) {
         this.username = username;
         this.userId = userId;
-        this.token = token;
+        this.authorization_token = authorization_token;
+        this.refresh_token = refresh_token;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public String getAuthorization_token() {
+        return authorization_token;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
+    public String getRefresh_token() {
+        return refresh_token;
     }
 
     @Override
@@ -40,7 +34,8 @@ public class LoginResponse {
         return "LoginResponse{" +
                 "username='" + username + '\'' +
                 ", userId='" + userId + '\'' +
-                ", token='" + token + '\'' +
+                ", authorization_token='" + authorization_token + '\'' +
+                ", refresh_token='" + refresh_token + '\'' +
                 '}';
     }
 }

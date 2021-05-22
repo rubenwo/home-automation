@@ -50,7 +50,8 @@ public class LoginRequest implements IRequest<JSONObject> {
                         LoginResponse resp = new LoginResponse(
                                 response.getString("username"),
                                 response.getString("user_id"),
-                                response.getString("token")
+                                response.getString("authorization_token"),
+                                response.getString("refresh_token")
                         );
                         loginListener.onLogin(resp);
                     } catch (JSONException e) {
