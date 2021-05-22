@@ -61,7 +61,7 @@ services:
 
   web.default.svc.cluster.local:
     image: rubenwo/home-automation-web-client:latest
-    # build: ./client/web/vue/home-automation
+    # build: ./client/web/home-automation
     restart: on-failure
 
   video-streaming-hub.default.svc.cluster.local:
