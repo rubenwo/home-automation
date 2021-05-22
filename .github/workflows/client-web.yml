@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "client/web/vue/home-automation/**"
+      - "client/web/home-automation/**"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -47,9 +47,9 @@ jobs:
       - name: Build production image
         uses: docker/build-push-action@v2
         with:
-          context: ./client/web/vue/home-automation
+          context: ./client/web/home-automation
           builder: ${{ steps.buildx.outputs.name }}
-          file: ./client/web/vue/home-automation/Dockerfile
+          file: ./client/web/home-automation/Dockerfile
           platforms: linux/amd64,linux/arm/v7
           # Set the desired build target here
           push: true
