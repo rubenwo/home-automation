@@ -319,6 +319,15 @@ func (c *Client) SetState(deviceOn bool, brightness int) error {
 	return nil
 }
 
+func (c *Client) Name() string {
+	info, err := c.DeviceInfo()
+	if err != nil {
+		return ""
+	}
+	name, _ := base64.StdEncoding.DecodeString(info["nickname"].(string))
+	return string(name)
+}
+
 func (c *Client) checkTokenState() error {
 	if c.cookieToken == "" {
 		return ErrNoCookieToken

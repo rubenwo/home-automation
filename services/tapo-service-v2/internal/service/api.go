@@ -94,7 +94,27 @@ func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
+	var devices []models.Device
 
+	for id, client := range a.registry {
+		device := models.Device{
+			DeviceId:   id,
+			DeviceName: client.Name(),
+			DeviceType: "",
+			DeviceInfo: nil,
+		}
+		devices = append(devices, device)
+	}
+
+	var resp struct {
+		Devices []models.Device `json:"devices"`
+	}
+	resp.Devices = devices
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("error sending healthz: %s\n", err.Error())
+	}
 }
 
 func (a *api) getDevice(w http.ResponseWriter, r *http.Request) {

@@ -9,11 +9,12 @@ type NewDevice struct {
 }
 
 type DatabaseDevice struct {
-	Id        int64  `json:"id"`
-	IpAddress string `json:"ip_address"`
-	DeviceId  string `json:"device_id"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
+	Id         int64  `json:"id"`
+	IpAddress  string `json:"ip_address"`
+	DeviceId   string `json:"device_id"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	DeviceType string `json:"device_type"`
 }
 
 type Device struct {
