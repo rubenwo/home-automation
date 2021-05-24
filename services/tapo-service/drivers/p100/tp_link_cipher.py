@@ -1,7 +1,9 @@
-from Crypto.Cipher import AES
-import drivers.p100.helpers as helpers
-import pkcs7
 import base64
+
+import pkcs7
+from Crypto.Cipher import AES
+
+import drivers.p100.helpers as helpers
 
 
 class TpLinkCipher:
