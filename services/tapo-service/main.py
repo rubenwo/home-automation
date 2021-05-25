@@ -3,6 +3,7 @@ from fastapi import FastAPI, status, Response
 from models import Device, NewDevice
 from registry import Registry, TapoL510E
 
+# logger.info(f"Will change state of plug at '{args.address}' to '{args.new_state}'")
 app = FastAPI()
 
 registry = Registry()

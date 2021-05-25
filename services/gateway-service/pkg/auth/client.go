@@ -25,6 +25,9 @@ type DefaultClient struct {
 
 	refreshTokenLock sync.Mutex
 	refreshTokens    map[string]time.Time
+
+	requiresAuthorizationRoutes map[string]bool
+	allowedRolesRoutes          map[string][]string
 }
 
 //NewDefaultClient
@@ -35,13 +38,16 @@ func NewDefaultClient(key []byte, authorizationTokenExpiration time.Duration, re
 		refreshTokenExpiration:       refreshTokenExpiration,
 		adminEnabled:                 adminEnabled,
 
-		refreshTokens: make(map[string]time.Time),
+		refreshTokens:               make(map[string]time.Time),
+		requiresAuthorizationRoutes: make(map[string]bool),
+		allowedRolesRoutes:          make(map[string][]string),
 	}
 }
 
 func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("AuthorizationMiddleware => checking permissions...")
+
 		for _, header := range r.Header["Upgrade"] {
 			if header == "websocket" {
 				fmt.Println("websocket connection")
@@ -114,7 +120,11 @@ func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler 
 			}
 
 		}
+
 		log.Println("AuthorizationMiddleware => All OK!")
+		//if requiresAuthz, exists := c.requiresAuthorizationRoutes[r.RequestURI]; exists {
+		//	if requiresAuthz
+		//}
 
 		next.ServeHTTP(w, r)
 		return

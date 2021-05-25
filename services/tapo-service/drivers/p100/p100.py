@@ -20,7 +20,6 @@ from drivers.p100.tp_link_cipher import TpLinkCipher
 
 logger = logging.getLogger('root')
 
-
 class P100:
     def __init__(self, address: str):
 
@@ -139,6 +138,7 @@ class P100:
 
         l_ldp = jsons.dumps(login_device_params).replace(helpers.mime_encoder(password.encode("UTF-8")),
                                                          "PASSWORD_REMOVED")
+
         logger.debug(f"Login device params: {l_ldp}")
 
         login_device_method = LoginDeviceMethod(login_device_params)
