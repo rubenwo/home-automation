@@ -17,16 +17,18 @@ type Client struct {
 }
 
 func New() *Client {
-	return &Client{clients: make(map[string]mqtt.Client), upgrader: websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}}
+	return &Client{
+		clients: make(map[string]mqtt.Client),
+		upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		}}
 }
 
 func (c *Client) Register(path, host string, retry int) error {
 	if _, ok := c.clients[path]; !ok {
-		fmt.Println("registering:", path, host)
+		log.Println("registering:", path, host)
 		opts := mqtt.NewClientOptions()
 		opts.AddBroker(fmt.Sprintf("%s:1883", host))
 		opts.SetClientID(uuid.New().String())

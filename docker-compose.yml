@@ -2,13 +2,15 @@ version: "3"
 
 services:
   gateway.default.svc.cluster.local:
-    image: rubenwo/home-automation-gateway-service:latest
-    # build: ./services/gateway-service
+    # image: rubenwo/home-automation-gateway-service:latest
+    build: ./services/gateway-service
     restart: on-failure
     environment:
       - JWT_KEY=$JWT_KEY
       - ENABLE_ADMIN=true
       - ADMIN_PWD=$ADMIN_PWD
+      - PRODUCTION=false
+      - DOMAINS=
     ports:
       - 443:443
       - 80:80
