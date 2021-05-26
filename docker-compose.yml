@@ -45,6 +45,13 @@ services:
     depends_on:
       - redis.default.svc.cluster.local
 
+  tapo-v2.default.svc.cluster.local:
+    # image: rubenwo/home-automation-tapo-service-v2:latest
+    build: ./services/tapo-service-v2
+    restart: on-failure
+    depends_on:
+      - postgres.default.svc.cluster.local
+
   registry.default.svc.cluster.local:
     image: rubenwo/home-automation-registry-service:latest
     # build: ./services/registry-service
