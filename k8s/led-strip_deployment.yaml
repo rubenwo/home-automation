@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: led-strip
+  namespace: default
+  labels:
+    app: led-strip
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+  selector:
+    app: led-strip
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: led-strip
+  labels:
+    app: led-strip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: led-strip
+  template:
+    metadata:
+      labels:
+        app: led-strip
+    spec:
+      containers:
+        - name: led-strip
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          image: rubenwo/home-automation-led-strip-service:latest

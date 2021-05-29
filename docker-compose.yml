@@ -98,7 +98,47 @@ services:
     environment:
       # ALLOW_EMPTY_PASSWORD is recommended only for development.
       - ALLOW_EMPTY_PASSWORD=yes
-      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALLapiVersion: v1
+      kind: Service
+      metadata:
+        name: actions
+        namespace: default
+        labels:
+          app: actions
+      spec:
+        type: ClusterIP
+        ports:
+          - name: http
+            port: 80
+        selector:
+          app: actions
+      ---
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: actions
+        labels:
+          app: actions
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: actions
+        template:
+          metadata:
+            labels:
+              app: actions
+          spec:
+            containers:
+              - name: actions
+                resources:
+                  requests:
+                    memory: "64Mi"
+                    cpu: "250m"
+                  limits:
+                    memory: "128Mi"
+                    cpu: "500m"
+                image: rubenwo/home-automation-actions-service:latest
     ports:
       - 6379:6379
     volumes:
