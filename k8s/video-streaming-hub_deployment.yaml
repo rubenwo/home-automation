@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: video-streaming-hub
+  namespace: default
+  labels:
+    app: video-streaming-hub
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+  selector:
+    app: video-streaming-hub
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-streaming-hub
+  labels:
+    app: video-streaming-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: video-streaming-hub
+  template:
+    metadata:
+      labels:
+        app: video-streaming-hub
+    spec:
+      containers:
+        - name: video-streaming-hub
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          image: rubenwo/home-automation-video-streaming-hub-service:latest
