@@ -39,7 +39,7 @@ export default {
     return await this.commandDevice(deviceId, "on", 100);
   },
   async turnOffDevice(deviceId) {
-    return await this.commandDevice(deviceId, "off", 0);
+    return await this.commandDevice(deviceId, "off", 1);
   },
   async setDeviceBrightness(deviceId, brightness) {
     return await this.commandDevice(deviceId, "on", brightness);

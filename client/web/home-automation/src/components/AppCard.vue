@@ -34,7 +34,7 @@
                         @change="brightnessChanged()"
                 />
                 <p>
-                    Status: {{ this.dev.device_info.device_on === "True" ? "On" : "Off" }}
+                    Status: {{ this.dev.device_info.device_on ? "On" : "Off" }}
                 </p>
             </div>
             <div v-if="device_type === 'RGB_LED_STRIP'" style="text-align: center">
@@ -118,7 +118,7 @@
           } else await TapoService.turnOnDevice(this.id);
           const deviceResult = await TapoService.fetchTapoDevice(this.id);
           this.dev = deviceResult.device;
-          this.device_on = this.dev.device_info.device_on === "True";
+          this.device_on = this.dev.device_info.device_on;
         }
       },
       onRGBClick() {
@@ -137,7 +137,7 @@
           await TapoService.turnOffDevice(this.id);
           const deviceResult = await TapoService.fetchTapoDevice(this.id);
           this.dev = deviceResult.device;
-          this.device_on = this.dev.device_info.device_on === "True";
+          this.device_on = this.dev.device_info.device_on;
         }
       },
       async deleteDevice() {
@@ -154,7 +154,7 @@
         // await TapoService.wakeTapoDevice(this.id);
         const deviceResult = await TapoService.fetchTapoDevice(this.id);
         this.dev = deviceResult.device;
-        this.device_on = this.dev.device_info.device_on === "True";
+        this.device_on = this.dev.device_info.device_on;
         this.state = "loaded";
       } else {
         this.state = "loaded";
