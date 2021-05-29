@@ -16,5 +16,6 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 COPY --from=builder /go/led-strip-service/led-strip-service .
+COPY --from=builder /go/led-strip-service/config.json .
 
 CMD [ "./led-strip-service" ]
