@@ -30,7 +30,9 @@ data:
     \   routes:\r\n      - path: \"/hue/devices\"\r\n        methods:\r\n          -
     GET\r\n        protocol: http\r\n\r\n  - host: actions.default.svc.cluster.local\r\n
     \   routes:\r\n      - path: \"/webhook/request\"\r\n        methods:\r\n          -
-    POST\r\n        protocol: http\r\n\r\n  - host: inventory.default.svc.cluster.local\r\n
+    POST\r\n        protocol: http\r\n\r\n  - host: mqtt-broker.default.svc.cluster.local\r\n
+    \   routes:\r\n      - path: \"/esp32/toggle\"\r\n        methods:\r\n          -
+    POST\r\n          - GET\r\n        protocol: mqtt\r\n\r\n  - host: inventory.default.svc.cluster.local\r\n
     \   routes:\r\n      - path: \"/inventory\"\r\n        methods:\r\n          -
     POST\r\n          - GET\r\n        protocol: http\r\n      - path: \"/inventory/{id}\"\r\n
     \       methods:\r\n          - DELETE\r\n          - PUT\r\n        protocol:
