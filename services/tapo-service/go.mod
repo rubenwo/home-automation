@@ -6,6 +6,7 @@ require (
 	github.com/fullsailor/pkcs7 v0.0.0-20190404230743-d7302db945fa // indirect
 	github.com/go-chi/chi v1.5.4
 	github.com/go-pg/pg/v10 v10.9.3
+	github.com/google/uuid v1.2.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.2 // indirect
 	go.mozilla.org/pkcs7 v0.0.0-20200128120323-432b2356ecb1 // indirect
 	go.opentelemetry.io/otel v0.20.0 // indirect

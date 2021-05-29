@@ -9,7 +9,7 @@ import (
 // createSchema creates database schema for the models
 func createSchema(db *pg.DB) error {
 	tables := []interface{}{
-		(*models.DatabaseDevice)(nil),
+		(*models.DeviceConnectionInfo)(nil),
 	}
 
 	for _, model := range tables {
