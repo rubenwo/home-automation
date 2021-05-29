@@ -2,5 +2,7 @@
   "database_backend": "postgres.default.svc.cluster.local:5432",
   "database_user": "user",
   "database_password": "password",
-  "database_name": "tapo_database"
+  "database_name": "tapo_database",
+
+  "registry_base_url": "http://registry.default.svc.cluster.local/devices"
 }

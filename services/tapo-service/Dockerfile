@@ -1,10 +1,21 @@
-FROM python:3.7
+FROM golang:1.15 AS builder
 
-COPY ./req.txt /
-RUN pip install -r req.txt
+WORKDIR /go/tapo-service
 
-EXPOSE 80
+COPY go.mod .
+COPY go.sum .
 
-COPY . /
+RUN go mod download
 
-ENTRYPOINT  ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o tapo-service ./cmd/api
+
+FROM alpine:3.12
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+COPY --from=builder /go/tapo-service/tapo-service .
+COPY --from=builder /go/tapo-service/config.json .
+
+CMD [ "./tapo-service" ]

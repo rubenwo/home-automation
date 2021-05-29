@@ -11,6 +11,7 @@ type Config struct {
 	DatabaseUser     string `json:"database_user"`
 	DatabasePassword string `json:"database_password"`
 	DatabaseName     string `json:"database_name"`
+	RegistryBaseUrl  string `json:"registry_base_url"`
 }
 
 func (c Config) Validate() error {
@@ -25,6 +26,9 @@ func (c Config) Validate() error {
 	}
 	if c.DatabasePassword == "" {
 		return fmt.Errorf("c.DatabasePassword can't be empty")
+	}
+	if c.RegistryBaseUrl == "" {
+		return fmt.Errorf("c.RegistryBaseUrl can't be empty")
 	}
 
 	return nil
