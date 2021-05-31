@@ -6,10 +6,19 @@
 #include <Adafruit_NeoPixel.h>
 #include <array>
 #include <vector>
+#include "color.hpp"
+#include "RGB12V.hpp"
 
 #define HTTP_PORT 80
 #define LED_COUNT 150
 #define LED_STRIP_DATA_PIN 4
+
+#define RED_12V_PIN 12
+#define GREEN_12V_PIN 13
+#define BLUE_12V_PIN 14
+#define RED_12V_PWM_CHANNEL 0
+#define GREEN_12V_PWM_CHANNEL 1
+#define BLUE_12V_PWM_CHANNEL 2
 
 const char *ssid = "";
 const char *password = "";
@@ -18,16 +27,9 @@ String device_name = "rgb esp32 led-strip";
 
 WebServer server(HTTP_PORT);
 
-Adafruit_NeoPixel led_strip(LED_COUNT, LED_STRIP_DATA_PIN, NEO_GRB + NEO_KHZ800);
+RGB12V led_strip_12v({RED_12V_PIN, GREEN_12V_PIN, BLUE_12V_PIN, RED_12V_PWM_CHANNEL, GREEN_12V_PWM_CHANNEL, BLUE_12V_PWM_CHANNEL});
 
-struct rgb
-{
-  int r, g, b;
-};
-struct hsv
-{
-  int h, s, v;
-};
+Adafruit_NeoPixel led_strip(LED_COUNT, LED_STRIP_DATA_PIN, NEO_GRB + NEO_KHZ800);
 
 int red, green, blue;
 int hue, value, saturation;
@@ -109,219 +111,229 @@ void setup()
   Serial.printf(" Connected. IP: %s\n", WiFi.localIP().toString().c_str());
 
   // setup routing web server
-  server.on("/healthz", HTTP_GET, []() {
-    Serial.println("/healthz");
-    jsonDocument.clear();
-    jsonDocument["is_healthy"] = true;
-    jsonDocument["error_message"] = "";
-    serializeJson(jsonDocument, buffer);
-    server.send(200, "application/json", buffer);
-  });
-  server.on("/led", HTTP_POST, []() {
-    Serial.println("/led");
-    if (server.hasArg("plain") == false)
-    {
-      Serial.println("ERROR in /led");
-      jsonDocument.clear();
-      jsonDocument["error_message"] = "body is not valid";
-      serializeJson(jsonDocument, buffer);
-      server.send(422, "application/json", buffer);
-      return;
-    }
+  server.on("/healthz", HTTP_GET, []()
+            {
+              Serial.println("/healthz");
+              jsonDocument.clear();
+              jsonDocument["is_healthy"] = true;
+              jsonDocument["error_message"] = "";
+              serializeJson(jsonDocument, buffer);
+              server.send(200, "application/json", buffer);
+            });
+  server.on("/led", HTTP_POST, []()
+            {
+              Serial.println("/led");
+              if (server.hasArg("plain") == false)
+              {
+                Serial.println("ERROR in /led");
+                jsonDocument.clear();
+                jsonDocument["error_message"] = "body is not valid";
+                serializeJson(jsonDocument, buffer);
+                server.send(422, "application/json", buffer);
+                return;
+              }
 
-    String body = server.arg("plain");
-    deserializeJson(jsonDocument, body);
+              String body = server.arg("plain");
+              deserializeJson(jsonDocument, body);
 
-    // Get RGB components
-    String json_mode = jsonDocument["mode"];
-    mode = from_string(json_mode);
-    JsonArray json_config;
+              // Get RGB components
+              String json_mode = jsonDocument["mode"];
+              mode = from_string(json_mode);
+              JsonArray json_config;
 
-    switch (mode)
-    {
-    case Mode::SINGLE_COLOR_RGB:
-      red = jsonDocument["red"];
-      green = jsonDocument["green"];
-      blue = jsonDocument["blue"];
+              switch (mode)
+              {
+              case Mode::SINGLE_COLOR_RGB:
+                red = jsonDocument["red"];
+                green = jsonDocument["green"];
+                blue = jsonDocument["blue"];
 
-      led_strip.fill(led_strip.gamma32(led_strip.Color(red, green, blue)), 0, led_strip.numPixels() - 1);
-      led_strip.show();
-      break;
-    case Mode::SINGLE_COLOR_HSV:
-      hue = jsonDocument["hue"];
-      saturation = jsonDocument["saturation"];
-      value = jsonDocument["value"];
+                led_strip.fill(led_strip.gamma32(led_strip.Color(red, green, blue)), 0, led_strip.numPixels() - 1);
+                led_strip.show();
 
-      led_strip.fill(led_strip.gamma32(led_strip.ColorHSV(hue, saturation, value)), 0, led_strip.numPixels() - 1);
-      led_strip.show();
-      break;
-    case Mode::GRADIENT_RGB:
-    {
-      json_config = jsonDocument["config"];
-      gradient_rgb_config.clear();
-      for (auto i = 0; i < json_config.size(); i++)
-      {
-        gradient_rgb_config.push_back(rgb{
-            json_config[i]["red"],
-            json_config[i]["green"],
-            json_config[i]["blue"],
-        });
-      }
-      int step_size = LED_COUNT / gradient_rgb_config.size();
-      int rgb_index = 0;
-      for (auto i = 0; i < led_strip.numPixels(); i++)
-      {
-        if (i / (rgb_index + 1) >= step_size)
-          rgb_index++;
-        uint32_t col = led_strip.gamma32(led_strip.Color(
-            gradient_rgb_config[rgb_index].r,
-            gradient_rgb_config[rgb_index].g,
-            gradient_rgb_config[rgb_index].b));
-        led_strip.setPixelColor(i, col);
+                led_strip_12v.set_color_rgb(red, green, blue);
+                led_strip_12v.show();
 
-        // Serial.printf("Index: %d, RGB_INDEX: %d, Step Size: %d, R: %d, G: %d, B: %d\n", i, rgb_index, step_size, gradient_rgb_config[rgb_index].r, gradient_rgb_config[rgb_index].g, gradient_rgb_config[rgb_index].b);
-      }
-      led_strip.show();
-    }
-    break;
-    case Mode::GRADIENT_HSV:
-    {
-      json_config = jsonDocument["config"];
-      gradient_hsv_config.clear();
-      for (auto i = 0; i < json_config.size(); i++)
-      {
-        gradient_hsv_config.push_back(hsv{
-            json_config[i]["hue"],
-            json_config[i]["saturation"],
-            json_config[i]["value"],
-        });
-      }
-      int step_size = LED_COUNT / gradient_hsv_config.size();
-      int hsv_index = 0;
+                break;
+              case Mode::SINGLE_COLOR_HSV:
+                hue = jsonDocument["hue"];
+                saturation = jsonDocument["saturation"];
+                value = jsonDocument["value"];
 
-      for (auto i = 0; i < led_strip.numPixels(); i++)
-      {
-        if (i / (hsv_index + 1) >= step_size)
-          hsv_index++;
-        uint32_t col = led_strip.gamma32(led_strip.ColorHSV(
-            gradient_hsv_config[hsv_index].h,
-            gradient_hsv_config[hsv_index].s,
-            gradient_hsv_config[hsv_index].v));
-        led_strip.setPixelColor(i, col);
-      }
-      led_strip.show();
-    }
-    break;
-    case Mode::ANIMATION_RGB:
-      red = jsonDocument["red"];
-      green = jsonDocument["green"];
-      blue = jsonDocument["blue"];
-      animation_speed = jsonDocument["animation_speed"];
-      break;
-    case Mode::ANIMATION_HSV:
-      hue = jsonDocument["hue"];
-      saturation = jsonDocument["saturation"];
-      value = jsonDocument["value"];
-      animation_speed = jsonDocument["animation_speed"];
-      break;
-    case Mode::INVALID:
-      Serial.println("ERROR in /led");
-      jsonDocument.clear();
-      jsonDocument["error_message"] = "mode is not valid";
-      serializeJson(jsonDocument, buffer);
-      server.send(422, "application/json", buffer);
-      return;
-    default:
-      Serial.println("ERROR in /led");
-      jsonDocument.clear();
-      jsonDocument["error_message"] = "mode is not valid";
-      serializeJson(jsonDocument, buffer);
-      server.send(422, "application/json", buffer);
-      return;
-    }
+                led_strip.fill(led_strip.gamma32(led_strip.ColorHSV(hue, saturation, value)), 0, led_strip.numPixels() - 1);
+                led_strip.show();
 
-    jsonDocument.clear();
-    jsonDocument["message"] = "successfully changed colour of the led";
-    serializeJson(jsonDocument, buffer);
-    server.send(200, "application/json", buffer);
-  });
+                led_strip_12v.set_color_hsv(hue, saturation, value);
+                led_strip_12v.show();
+                break;
+              case Mode::GRADIENT_RGB:
+              {
+                json_config = jsonDocument["config"];
+                gradient_rgb_config.clear();
+                for (auto i = 0; i < json_config.size(); i++)
+                {
+                  gradient_rgb_config.push_back(rgb{
+                      json_config[i]["red"],
+                      json_config[i]["green"],
+                      json_config[i]["blue"],
+                  });
+                }
+                int step_size = LED_COUNT / gradient_rgb_config.size();
+                int rgb_index = 0;
+                for (auto i = 0; i < led_strip.numPixels(); i++)
+                {
+                  if (i / (rgb_index + 1) >= step_size)
+                    rgb_index++;
+                  uint32_t col = led_strip.gamma32(led_strip.Color(
+                      gradient_rgb_config[rgb_index].r,
+                      gradient_rgb_config[rgb_index].g,
+                      gradient_rgb_config[rgb_index].b));
+                  led_strip.setPixelColor(i, col);
 
-  server.on("/info", HTTP_GET, []() {
-    jsonDocument.clear();
-    jsonDocument["device_name"] = device_name.c_str();
-    jsonDocument["device_type"] = "RGB_LED_STRIP";
-    jsonDocument["device_info"] = jsonDocument.createNestedObject();
-    jsonDocument["device_info"]["current_mode"] = mode_to_string(mode);
-    jsonDocument["device_info"]["supported_modes"] = jsonDocument.createNestedArray();
-    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::SINGLE_COLOR_RGB));
-    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::SINGLE_COLOR_HSV));
-    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::GRADIENT_RGB));
-    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::GRADIENT_HSV));
-    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::ANIMATION_RGB));
-    jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::ANIMATION_HSV));
-    jsonDocument["device_info"]["data"] = jsonDocument.createNestedObject();
-    switch (mode)
-    {
-    case SINGLE_COLOR_RGB:
-    {
-      jsonDocument["device_info"]["data"]["red"] = red;
-      jsonDocument["device_info"]["data"]["green"] = green;
-      jsonDocument["device_info"]["data"]["blue"] = blue;
-    }
-    break;
-    case SINGLE_COLOR_HSV:
-    {
-      jsonDocument["device_info"]["data"]["hue"] = hue;
-      jsonDocument["device_info"]["data"]["saturation"] = saturation;
-      jsonDocument["device_info"]["data"]["value"] = value;
-    }
-    break;
-    case ANIMATION_RGB:
-    {
-      jsonDocument["device_info"]["data"]["red"] = red;
-      jsonDocument["device_info"]["data"]["green"] = green;
-      jsonDocument["device_info"]["data"]["blue"] = blue;
-      jsonDocument["device_info"]["data"]["animation_speed"] = animation_speed;
-    }
-    break;
-    case ANIMATION_HSV:
-    {
-      jsonDocument["device_info"]["data"]["hue"] = hue;
-      jsonDocument["device_info"]["data"]["saturation"] = saturation;
-      jsonDocument["device_info"]["data"]["value"] = value;
-      jsonDocument["device_info"]["data"]["animation_speed"] = animation_speed;
-    }
-    break;
-    case GRADIENT_RGB:
-    {
-      jsonDocument["device_info"]["data"]["gradients"] = jsonDocument.createNestedArray();
-      for (auto c : gradient_rgb_config)
-      {
-        auto obj = jsonDocument["device_info"]["data"]["gradients"].createNestedObject();
-        obj["red"] = c.r;
-        obj["green"] = c.g;
-        obj["blue"] = c.b;
-      }
-    }
-    break;
-    case GRADIENT_HSV:
-    {
-      jsonDocument["device_info"]["data"]["gradients"] = jsonDocument.createNestedArray();
-      for (auto c : gradient_hsv_config)
-      {
-        auto obj = jsonDocument["device_info"]["data"]["gradients"].createNestedObject();
-        obj["hue"] = c.h;
-        obj["saturation"] = c.s;
-        obj["value"] = c.v;
-      }
-    }
-    break;
-    default:
-      break;
-    }
-    serializeJson(jsonDocument, buffer);
-    server.send(200, "application/json", buffer);
-  });
+                  // Serial.printf("Index: %d, RGB_INDEX: %d, Step Size: %d, R: %d, G: %d, B: %d\n", i, rgb_index, step_size, gradient_rgb_config[rgb_index].r, gradient_rgb_config[rgb_index].g, gradient_rgb_config[rgb_index].b);
+                }
+                led_strip.show();
+              }
+              break;
+              case Mode::GRADIENT_HSV:
+              {
+                json_config = jsonDocument["config"];
+                gradient_hsv_config.clear();
+                for (auto i = 0; i < json_config.size(); i++)
+                {
+                  gradient_hsv_config.push_back(hsv{
+                      json_config[i]["hue"],
+                      json_config[i]["saturation"],
+                      json_config[i]["value"],
+                  });
+                }
+                int step_size = LED_COUNT / gradient_hsv_config.size();
+                int hsv_index = 0;
+
+                for (auto i = 0; i < led_strip.numPixels(); i++)
+                {
+                  if (i / (hsv_index + 1) >= step_size)
+                    hsv_index++;
+                  uint32_t col = led_strip.gamma32(led_strip.ColorHSV(
+                      gradient_hsv_config[hsv_index].h,
+                      gradient_hsv_config[hsv_index].s,
+                      gradient_hsv_config[hsv_index].v));
+                  led_strip.setPixelColor(i, col);
+                }
+                led_strip.show();
+              }
+              break;
+              case Mode::ANIMATION_RGB:
+                red = jsonDocument["red"];
+                green = jsonDocument["green"];
+                blue = jsonDocument["blue"];
+                animation_speed = jsonDocument["animation_speed"];
+                break;
+              case Mode::ANIMATION_HSV:
+                hue = jsonDocument["hue"];
+                saturation = jsonDocument["saturation"];
+                value = jsonDocument["value"];
+                animation_speed = jsonDocument["animation_speed"];
+                break;
+              case Mode::INVALID:
+                Serial.println("ERROR in /led");
+                jsonDocument.clear();
+                jsonDocument["error_message"] = "mode is not valid";
+                serializeJson(jsonDocument, buffer);
+                server.send(422, "application/json", buffer);
+                return;
+              default:
+                Serial.println("ERROR in /led");
+                jsonDocument.clear();
+                jsonDocument["error_message"] = "mode is not valid";
+                serializeJson(jsonDocument, buffer);
+                server.send(422, "application/json", buffer);
+                return;
+              }
+
+              jsonDocument.clear();
+              jsonDocument["message"] = "successfully changed colour of the led";
+              serializeJson(jsonDocument, buffer);
+              server.send(200, "application/json", buffer);
+            });
+
+  server.on("/info", HTTP_GET, []()
+            {
+              jsonDocument.clear();
+              jsonDocument["device_name"] = device_name.c_str();
+              jsonDocument["device_type"] = "RGB_LED_STRIP";
+              jsonDocument["device_info"] = jsonDocument.createNestedObject();
+              jsonDocument["device_info"]["current_mode"] = mode_to_string(mode);
+              jsonDocument["device_info"]["supported_modes"] = jsonDocument.createNestedArray();
+              jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::SINGLE_COLOR_RGB));
+              jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::SINGLE_COLOR_HSV));
+              jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::GRADIENT_RGB));
+              jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::GRADIENT_HSV));
+              jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::ANIMATION_RGB));
+              jsonDocument["device_info"]["supported_modes"].add(mode_to_string(Mode::ANIMATION_HSV));
+              jsonDocument["device_info"]["data"] = jsonDocument.createNestedObject();
+              switch (mode)
+              {
+              case SINGLE_COLOR_RGB:
+              {
+                jsonDocument["device_info"]["data"]["red"] = red;
+                jsonDocument["device_info"]["data"]["green"] = green;
+                jsonDocument["device_info"]["data"]["blue"] = blue;
+              }
+              break;
+              case SINGLE_COLOR_HSV:
+              {
+                jsonDocument["device_info"]["data"]["hue"] = hue;
+                jsonDocument["device_info"]["data"]["saturation"] = saturation;
+                jsonDocument["device_info"]["data"]["value"] = value;
+              }
+              break;
+              case ANIMATION_RGB:
+              {
+                jsonDocument["device_info"]["data"]["red"] = red;
+                jsonDocument["device_info"]["data"]["green"] = green;
+                jsonDocument["device_info"]["data"]["blue"] = blue;
+                jsonDocument["device_info"]["data"]["animation_speed"] = animation_speed;
+              }
+              break;
+              case ANIMATION_HSV:
+              {
+                jsonDocument["device_info"]["data"]["hue"] = hue;
+                jsonDocument["device_info"]["data"]["saturation"] = saturation;
+                jsonDocument["device_info"]["data"]["value"] = value;
+                jsonDocument["device_info"]["data"]["animation_speed"] = animation_speed;
+              }
+              break;
+              case GRADIENT_RGB:
+              {
+                jsonDocument["device_info"]["data"]["gradients"] = jsonDocument.createNestedArray();
+                for (auto c : gradient_rgb_config)
+                {
+                  auto obj = jsonDocument["device_info"]["data"]["gradients"].createNestedObject();
+                  obj["red"] = c.r;
+                  obj["green"] = c.g;
+                  obj["blue"] = c.b;
+                }
+              }
+              break;
+              case GRADIENT_HSV:
+              {
+                jsonDocument["device_info"]["data"]["gradients"] = jsonDocument.createNestedArray();
+                for (auto c : gradient_hsv_config)
+                {
+                  auto obj = jsonDocument["device_info"]["data"]["gradients"].createNestedObject();
+                  obj["hue"] = c.h;
+                  obj["saturation"] = c.s;
+                  obj["value"] = c.v;
+                }
+              }
+              break;
+              default:
+                break;
+              }
+              serializeJson(jsonDocument, buffer);
+              server.send(200, "application/json", buffer);
+            });
 
   server.begin();
   // init led strip
