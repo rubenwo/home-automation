@@ -43,7 +43,7 @@ type LedDeviceModel struct {
 	SupportedModes []string    `json:"supported_modes"`
 	CurrentMode    string      `json:"current_mode"`
 	IPAddress      string      `json:"ip_address"`
-	Data           interface{} `json:"data"`
+	//Data           interface{} `json:"data"`
 }
 
 type JsonError struct {
@@ -57,7 +57,7 @@ type LedControllerInfo struct {
 	DeviceInfo struct {
 		SupportedModes []string    `json:"supported_modes"`
 		CurrentMode    string      `json:"current_mode"`
-		Data           interface{} `json:"data"`
+		//Data           interface{} `json:"data"`
 	}
 }
 

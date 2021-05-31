@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tapo
+  namespace: default
+  labels:
+    app: tapo
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+  selector:
+    app: tapo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tapo
+  labels:
+    app: tapo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tapo
+  template:
+    metadata:
+      labels:
+        app: tapo
+    spec:
+      containers:
+        - name: tapo
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          image: rubenwo/home-automation-tapo-service:latest

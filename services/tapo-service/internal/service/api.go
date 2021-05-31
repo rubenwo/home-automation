@@ -127,12 +127,31 @@ func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("couldn't retrieve tapo device info"), http.StatusBadRequest)
 			return
 		}
-		devices = append(devices, models.TapoDevice{
+		d := models.TapoDevice{
 			DeviceId:   connectionInfo.DeviceId,
 			DeviceName: device.Name(),
 			DeviceType: connectionInfo.DeviceType,
 			DeviceInfo: deviceInfo,
-		})
+		}
+		if r := recover(); r != nil {
+			err = device.Handshake()
+			if err != nil {
+				http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
+				return
+			}
+			err = device.Login(connectionInfo.Email, connectionInfo.Password)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
+				return
+			}
+			d = models.TapoDevice{
+				DeviceId:   connectionInfo.DeviceId,
+				DeviceName: device.Name(),
+				DeviceType: connectionInfo.DeviceType,
+				DeviceInfo: deviceInfo,
+			}
+		}
+		devices = append(devices, d)
 	}
 
 	var resp struct {
@@ -169,6 +188,23 @@ func (a *api) getDevice(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, fmt.Sprintf("couldn't retrieve tapo device info"), http.StatusBadRequest)
 		return
+	}
+	if r := recover(); r != nil {
+		err = p100Device.Handshake()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
+			return
+		}
+		err = p100Device.Login(connectionInfo.Email, connectionInfo.Password)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
+			return
+		}
+		deviceInfo, err = p100Device.DeviceInfo()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	var resp struct {
@@ -321,16 +357,14 @@ func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("couldn't convert brightness to integer: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
+	var connectionInfo models.DeviceConnectionInfo
+	if err := a.db.Model(&connectionInfo).Where("device_id = ?", id).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't retrieve model from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
 
-	// TODO: command device to do something
 	device, exists := a.registry[id]
 	if !exists {
-		var connectionInfo models.DeviceConnectionInfo
-		if err := a.db.Model(&connectionInfo).Where("device_id = ?", id).Select(); err != nil {
-			http.Error(w, fmt.Sprintf("couldn't retrieve model from database: %s", err.Error()), http.StatusInternalServerError)
-			return
-		}
-
 		p, err := p100.New(connectionInfo.IpAddress, connectionInfo.Email, connectionInfo.Password)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("couldn't connect to the tapo device"), http.StatusInternalServerError)
@@ -343,6 +377,22 @@ func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 	if err := device.SetState(command == "on", brightness); err != nil {
 		http.Error(w, fmt.Sprintf("couldn't command to the tapo device: %s", err.Error()), http.StatusInternalServerError)
 		return
+	}
+	if r := recover(); r != nil {
+		err = device.Handshake()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
+			return
+		}
+		err = device.Login(connectionInfo.Email, connectionInfo.Password)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
+			return
+		}
+		if err := device.SetState(command == "on", brightness); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't command to the tapo device: %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
 	}
 	w.WriteHeader(http.StatusOK)
 }
