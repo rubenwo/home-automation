@@ -24,6 +24,9 @@ type Client struct {
 
 	cookieToken  string
 	requestToken string
+
+	username string
+	password string
 }
 
 func New(host, username, password string) (*Client, error) {
@@ -40,7 +43,9 @@ func New(host, username, password string) (*Client, error) {
 	}
 
 	c := &Client{
-		URL: uri,
+		URL:      uri,
+		username: username,
+		password: password,
 	}
 
 	if err := c.Handshake(); err != nil {
@@ -98,8 +103,10 @@ func (c *Client) Login(username, password string) error {
 	if err != nil {
 		return err
 	}
-	encrypted := c.encryptor.Encrypt(data)
-
+	encrypted, err := c.encryptor.Encrypt(data)
+	if err != nil {
+		return err
+	}
 	var secureBody struct {
 		Method string `json:"method"`
 		Params struct {
@@ -140,7 +147,15 @@ func (c *Client) Login(username, password string) error {
 	if err != nil {
 		return err
 	}
-	decryptedInnerResponse := c.encryptor.Decrypt(decodeString)
+	decryptedInnerResponse, err := c.encryptor.Decrypt(decodeString)
+	if err != nil {
+		if err := c.Handshake(); err != nil {
+			return err
+		}
+		if err := c.Login(c.username, c.password); err != nil {
+			return err
+		}
+	}
 
 	var innerResponse struct {
 		ErrorCode int `json:"error_code"`
@@ -172,8 +187,10 @@ func (c *Client) DeviceInfo() (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	encrypted := c.encryptor.Encrypt(data)
-
+	encrypted, err := c.encryptor.Encrypt(data)
+	if err != nil {
+		return nil, err
+	}
 	var secureBody struct {
 		Method string `json:"method"`
 		Params struct {
@@ -223,8 +240,18 @@ func (c *Client) DeviceInfo() (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	decryptedInnerResponse := c.encryptor.Decrypt(decodeString)
-
+	decryptedInnerResponse, err := c.encryptor.Decrypt(decodeString)
+	if err != nil {
+		if err := c.Handshake(); err != nil {
+			return nil, err
+		}
+		if err := c.Login(c.username, c.password); err != nil {
+			return nil, err
+		}
+		if _, err := c.DeviceInfo(); err != nil {
+			return nil, err
+		}
+	}
 	var innerResponse struct {
 		ErrorCode int                    `json:"error_code"`
 		Result    map[string]interface{} `json:"result"`
@@ -255,8 +282,10 @@ func (c *Client) SetState(deviceOn bool, brightness int) error {
 	if err != nil {
 		return err
 	}
-	encrypted := c.encryptor.Encrypt(data)
-
+	encrypted, err := c.encryptor.Encrypt(data)
+	if err != nil {
+		return err
+	}
 	var secureBody struct {
 		Method string `json:"method"`
 		Params struct {
@@ -306,8 +335,18 @@ func (c *Client) SetState(deviceOn bool, brightness int) error {
 	if err != nil {
 		return err
 	}
-	decryptedInnerResponse := c.encryptor.Decrypt(decodeString)
-
+	decryptedInnerResponse, err := c.encryptor.Decrypt(decodeString)
+	if err != nil {
+		if err := c.Handshake(); err != nil {
+			return err
+		}
+		if err := c.Login(c.username, c.password); err != nil {
+			return err
+		}
+		if err := c.SetState(deviceOn, brightness); err != nil {
+			return err
+		}
+	}
 	var innerResponse struct {
 		ErrorCode int                    `json:"error_code"`
 		Result    map[string]interface{} `json:"result"`
