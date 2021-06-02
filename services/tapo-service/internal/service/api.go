@@ -127,31 +127,12 @@ func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("couldn't retrieve tapo device info"), http.StatusBadRequest)
 			return
 		}
-		d := models.TapoDevice{
+		devices = append(devices, models.TapoDevice{
 			DeviceId:   connectionInfo.DeviceId,
 			DeviceName: device.Name(),
 			DeviceType: connectionInfo.DeviceType,
 			DeviceInfo: deviceInfo,
-		}
-		if r := recover(); r != nil {
-			err = device.Handshake()
-			if err != nil {
-				http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
-				return
-			}
-			err = device.Login(connectionInfo.Email, connectionInfo.Password)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
-				return
-			}
-			d = models.TapoDevice{
-				DeviceId:   connectionInfo.DeviceId,
-				DeviceName: device.Name(),
-				DeviceType: connectionInfo.DeviceType,
-				DeviceInfo: deviceInfo,
-			}
-		}
-		devices = append(devices, d)
+		})
 	}
 
 	var resp struct {
@@ -189,24 +170,6 @@ func (a *api) getDevice(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("couldn't retrieve tapo device info"), http.StatusBadRequest)
 		return
 	}
-	if r := recover(); r != nil {
-		err = p100Device.Handshake()
-		if err != nil {
-			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
-			return
-		}
-		err = p100Device.Login(connectionInfo.Email, connectionInfo.Password)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
-			return
-		}
-		deviceInfo, err = p100Device.DeviceInfo()
-		if err != nil {
-			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
-			return
-		}
-	}
-
 	var resp struct {
 		Device models.TapoDevice `json:"device"`
 	}
@@ -378,21 +341,6 @@ func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("couldn't command to the tapo device: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
-	if r := recover(); r != nil {
-		err = device.Handshake()
-		if err != nil {
-			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
-			return
-		}
-		err = device.Login(connectionInfo.Email, connectionInfo.Password)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("error recovering..."), http.StatusInternalServerError)
-			return
-		}
-		if err := device.SetState(command == "on", brightness); err != nil {
-			http.Error(w, fmt.Sprintf("couldn't command to the tapo device: %s", err.Error()), http.StatusInternalServerError)
-			return
-		}
-	}
+
 	w.WriteHeader(http.StatusOK)
 }
