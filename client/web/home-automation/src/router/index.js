@@ -2,7 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
-import { MetaGuard } from "./guards";
+import {MetaGuard} from "./guards";
 import store from "@/store";
 
 Vue.use(VueRouter);
@@ -63,6 +63,15 @@ const routes = [
     },
   },
   {
+    path: "/routine/:id",
+    name: "Routine",
+    component: () => import("../views/Routine"),
+    meta: {
+      requiresAuth: true,
+      title: "Routine",
+    },
+  },
+  {
     path: "/inventory",
     name: "Inventory",
     component: () => import("../views/Inventory"),
@@ -107,18 +116,18 @@ router.afterEach((to, from) => {
 });
 
 store.watch(
-  (state, getters) => getters["auth/isLoggedIn"],
-  (loggedIn) => {
-    if (
-      !loggedIn &&
-      router.currentRoute.matched.some((record) => record.meta.requiresAuth)
-    ) {
-      router.push({
-        name: "login",
-        query: { redirect: router.currentRoute.path },
-      });
+    (state, getters) => getters["auth/isLoggedIn"],
+    (loggedIn) => {
+      if (
+          !loggedIn &&
+          router.currentRoute.matched.some((record) => record.meta.requiresAuth)
+      ) {
+        router.push({
+          name: "login",
+          query: {redirect: router.currentRoute.path},
+        });
+      }
     }
-  }
 );
 
 export default router;

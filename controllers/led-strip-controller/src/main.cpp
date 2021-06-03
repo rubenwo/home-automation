@@ -340,6 +340,9 @@ void setup()
   led_strip.begin();
   led_strip.fill(led_strip.gamma32(led_strip.Color(200, 100, 0)), 0, led_strip.numPixels() - 1);
   led_strip.show();
+  led_strip_12v.set_color_rgb(200,100,0);
+  led_strip_12v.show();
+  
   timer = millis();
 }
 
