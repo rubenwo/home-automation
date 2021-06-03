@@ -3,7 +3,6 @@ package routines
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/go-pg/pg/v10"
 	"github.com/gorhill/cronexpr"
 	"github.com/robertkrimen/otto"
@@ -99,12 +98,15 @@ func checkIfRoutineShouldRun(trigger models.Trigger, currentTime time.Time, diff
 }
 
 func (s *Scheduler) resultWorker() {
+	log.Println("Scheduler()->resultWorker() started")
 	for err := range s.results {
-		log.Println(err)
+		log.Printf("Scheduler()->resultWorker() received an error in channel: %s\n", err.Error())
 	}
+	log.Println("Scheduler()->resultWorker() finished")
 }
 
 func (s *Scheduler) worker() {
+	log.Println("Scheduler()->worker() started")
 	for action := range s.jobs {
 		if action.Script != "" {
 			vm := otto.New()
@@ -119,6 +121,7 @@ func (s *Scheduler) worker() {
 				s.results <- err
 				continue
 			}
+			log.Printf("Scheduler()->worker() finished executing script: [%s]\n", action.Script)
 		}
 
 		if action.Method == "" {
@@ -157,7 +160,7 @@ func (s *Scheduler) worker() {
 			s.results <- err
 			continue
 		}
-		raw, err := ioutil.ReadAll(resp.Body)
+		_, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			s.results <- err
 			continue
@@ -166,6 +169,8 @@ func (s *Scheduler) worker() {
 			s.results <- err
 			continue
 		}
-		fmt.Println(string(raw))
+
+		log.Printf("Scheduler()->worker() finished executing request: [%s] - [%s]\n", action.Method, action.Addr)
 	}
+	log.Println("Scheduler()->worker() finished")
 }
