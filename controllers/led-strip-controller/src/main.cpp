@@ -27,7 +27,7 @@ String device_name = "rgb esp32 led-strip";
 
 WebServer server(HTTP_PORT);
 
-RGB12V led_strip_12v({RED_12V_PIN, GREEN_12V_PIN, BLUE_12V_PIN, RED_12V_PWM_CHANNEL, GREEN_12V_PWM_CHANNEL, BLUE_12V_PWM_CHANNEL});
+RGB12V *led_strip_12v;
 
 Adafruit_NeoPixel led_strip(LED_COUNT, LED_STRIP_DATA_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -100,6 +100,8 @@ void setup()
   Serial.begin(460800);
   Serial.printf("Connecting to: %s\n", ssid);
 
+  led_strip_12v = new RGB12V(12, 13, 14, 0, 1, 2);
+
   // setup wifi
   WiFi.begin(ssid, password);
 
@@ -151,8 +153,8 @@ void setup()
                 led_strip.fill(led_strip.gamma32(led_strip.Color(red, green, blue)), 0, led_strip.numPixels() - 1);
                 led_strip.show();
 
-                led_strip_12v.set_color_rgb(red, green, blue);
-                led_strip_12v.show();
+                led_strip_12v->set_color(red, green, blue);
+                led_strip_12v->show();
 
                 break;
               case Mode::SINGLE_COLOR_HSV:
@@ -162,9 +164,6 @@ void setup()
 
                 led_strip.fill(led_strip.gamma32(led_strip.ColorHSV(hue, saturation, value)), 0, led_strip.numPixels() - 1);
                 led_strip.show();
-
-                led_strip_12v.set_color_hsv(hue, saturation, value);
-                led_strip_12v.show();
                 break;
               case Mode::GRADIENT_RGB:
               {
@@ -340,9 +339,9 @@ void setup()
   led_strip.begin();
   led_strip.fill(led_strip.gamma32(led_strip.Color(200, 100, 0)), 0, led_strip.numPixels() - 1);
   led_strip.show();
-  led_strip_12v.set_color_rgb(200,100,0);
-  led_strip_12v.show();
-  
+  led_strip_12v->set_color(200, 0, 0);
+  led_strip_12v->show();
+
   timer = millis();
 }
 
