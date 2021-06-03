@@ -120,20 +120,31 @@ func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// fan out
+	results := make(chan models.TapoDevice, len(connectionInfos))
 	for _, connectionInfo := range connectionInfos {
-		device := a.registry[connectionInfo.DeviceId]
-		deviceInfo, err := device.DeviceInfo()
-		if err != nil {
-			http.Error(w, fmt.Sprintf("couldn't retrieve tapo device info"), http.StatusBadRequest)
-			return
-		}
-		devices = append(devices, models.TapoDevice{
-			DeviceId:   connectionInfo.DeviceId,
-			DeviceName: device.Name(),
-			DeviceType: connectionInfo.DeviceType,
-			DeviceInfo: deviceInfo,
-		})
+		go func(ci models.DeviceConnectionInfo, result chan models.TapoDevice) {
+			device := a.registry[ci.DeviceId]
+			deviceInfo, err := device.DeviceInfo()
+			if err != nil {
+				log.Println(err)
+				http.Error(w, fmt.Sprintf("couldn't retrieve tapo device info"), http.StatusBadRequest)
+				return
+			}
+			results <- models.TapoDevice{
+				DeviceId:   ci.DeviceId,
+				DeviceName: device.Name(),
+				DeviceType: ci.DeviceType,
+				DeviceInfo: deviceInfo,
+			}
+		}(connectionInfo, results)
 	}
+
+	// fan in
+	for i := 0; i < len(connectionInfos); i++ {
+		devices = append(devices, <-results)
+	}
+	close(results) // We can close here since all routines should have returned by now
 
 	var resp struct {
 		Devices []models.TapoDevice `json:"devices"`
