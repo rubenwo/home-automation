@@ -17,11 +17,16 @@ import (
 	"time"
 )
 
+type job struct {
+	RoutineId int64
+	Action    models.Action
+}
+
 //Scheduler holds the routines and their triggers. When a trigger event is raised
 type Scheduler struct {
 	sync.Mutex
 	routines []models.Routine
-	jobs     chan models.Action
+	jobs     chan job
 	results  chan error
 	db       *pg.DB
 }
@@ -46,7 +51,7 @@ func NewScheduler(db *pg.DB, maxConcurrentWorkers int) *Scheduler {
 	}
 
 	s := &Scheduler{routines: routines,
-		jobs:    make(chan models.Action, 100),
+		jobs:    make(chan job, 100),
 		results: make(chan error, 100),
 		db:      db}
 	for i := 0; i < maxConcurrentWorkers; i++ {
@@ -79,7 +84,10 @@ func (s *Scheduler) Run(interval time.Duration) {
 			}
 			if checkIfRoutineShouldRun(routine.Trigger, currentTime, interval.Nanoseconds()) {
 				for _, action := range routine.Actions {
-					s.jobs <- action
+					s.jobs <- job{
+						RoutineId: routine.Id,
+						Action:    action,
+					}
 				}
 			}
 		}
@@ -108,7 +116,8 @@ func (s *Scheduler) resultWorker() {
 
 func (s *Scheduler) worker() {
 	log.Println("Scheduler()->worker() started")
-	for action := range s.jobs {
+	for job := range s.jobs {
+		action := job.Action
 		if action.Script != "" {
 			vm := otto.New()
 
@@ -128,7 +137,7 @@ func (s *Scheduler) worker() {
 				s.results <- err
 				continue
 			}
-			if err := vm.Set("__log__", script.Log(s.db)); err != nil {
+			if err := vm.Set("__log__", script.Log(job.RoutineId, s.db)); err != nil {
 				s.results <- err
 				continue
 			}
@@ -141,8 +150,9 @@ func (s *Scheduler) worker() {
 				continue
 			}
 			_, _ = s.db.Model(&models.RoutineLog{
-				LoggedAt: time.Now(),
-				Message:  result.String(),
+				RoutineId: job.RoutineId
+				LoggedAt:  time.Now(),
+				Message:   result.String(),
 			}).Insert()
 
 			log.Printf("Scheduler()->worker() finished executing script: [%s]\n", action.Script)
@@ -195,6 +205,11 @@ func (s *Scheduler) worker() {
 		}
 
 		log.Printf("Scheduler()->worker() finished executing request: [%s] - [%s]\n", action.Method, action.Addr)
+		_, _ = s.db.Model(&models.RoutineLog{
+			RoutineId: job.RoutineId,
+			LoggedAt:  time.Now(),
+			Message:   fmt.Sprintf("Scheduler()->worker() finished executing request: [%s] - [%s]\n", action.Method, action.Addr),
+		}).Insert()
 	}
 	log.Println("Scheduler()->worker() finished")
 }
