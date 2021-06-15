@@ -22,9 +22,7 @@ func NewTapoEncryptor(key, iv []byte) *TapoEncryptor {
 }
 
 func (t *TapoEncryptor) Encrypt(data []byte) ([]byte, error) {
-	plaintext := data
-
-	plaintext, err := pkcs7Padding(plaintext)
+	plaintext, err := pkcs7Padding(data)
 	if err != nil {
 		return nil, err
 	}
