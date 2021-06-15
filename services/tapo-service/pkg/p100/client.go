@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/rubenwo/home-automation/services/tapo-service/pkg/p100/encryption"
 	"github.com/rubenwo/home-automation/services/tapo-service/pkg/p100/helpers"
@@ -39,7 +38,7 @@ func New(host, username, password string) (*Client, error) {
 
 	uri, err := url.Parse(u)
 	if err != nil {
-		return nil, errors.New("invalid host")
+		return nil, ErrInvalidUrl
 	}
 
 	c := &Client{
@@ -94,7 +93,7 @@ func (c *Client) Login(username, password string) error {
 		RequestTimeMils int `json:"requestTimeMils"`
 	}
 
-	body.Method = "login_device"
+	body.Method = helpers.LoginDevice
 	body.Params.Username = base64.StdEncoding.EncodeToString([]byte(digestUsername))
 	body.Params.Password = base64.StdEncoding.EncodeToString([]byte(password))
 	body.RequestTimeMils = 0
@@ -113,7 +112,7 @@ func (c *Client) Login(username, password string) error {
 			Request string `json:"request"`
 		} `json:"params"`
 	}
-	secureBody.Method = "securePassthrough"
+	secureBody.Method = helpers.SecurePassthrough
 	secureBody.Params.Request = string(encrypted)
 
 	data, err = json.Marshal(&secureBody)
@@ -181,7 +180,7 @@ func (c *Client) DeviceInfo() (map[string]interface{}, error) {
 		Method string   `json:"method"`
 		Params struct{} `json:"params"`
 	}
-	body.Method = "get_device_info"
+	body.Method = helpers.GetDeviceInfo
 	data, err := json.Marshal(&body)
 	if err != nil {
 		return nil, err
@@ -197,7 +196,7 @@ func (c *Client) DeviceInfo() (map[string]interface{}, error) {
 			Request string `json:"request"`
 		} `json:"params"`
 	}
-	secureBody.Method = "securePassthrough"
+	secureBody.Method = helpers.SecurePassthrough
 	secureBody.Params.Request = string(encrypted)
 
 	data, err = json.Marshal(&secureBody)
@@ -274,7 +273,7 @@ func (c *Client) SetState(deviceOn bool, brightness int) error {
 			Brightness int  `json:"brightness"`
 		} `json:"params"`
 	}
-	body.Method = "set_device_info"
+	body.Method = helpers.SetDeviceInfo
 	body.Params.DeviceOn = deviceOn
 	body.Params.Brightness = brightness
 
@@ -292,7 +291,7 @@ func (c *Client) SetState(deviceOn bool, brightness int) error {
 			Request string `json:"request"`
 		} `json:"params"`
 	}
-	secureBody.Method = "securePassthrough"
+	secureBody.Method = helpers.SecurePassthrough
 	secureBody.Params.Request = string(encrypted)
 
 	data, err = json.Marshal(&secureBody)
