@@ -150,7 +150,7 @@ func (s *Scheduler) worker() {
 				continue
 			}
 			_, _ = s.db.Model(&models.RoutineLog{
-				RoutineId: job.RoutineId
+				RoutineId: job.RoutineId,
 				LoggedAt:  time.Now(),
 				Message:   result.String(),
 			}).Insert()
