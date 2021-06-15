@@ -16,6 +16,7 @@ func createSchema(db *pg.DB) error {
 		(*models.Routine)(nil),
 		(*models.Trigger)(nil),
 		(*models.Action)(nil),
+		(*models.RoutineLog)(nil),
 	}
 
 	for _, model := range tables {

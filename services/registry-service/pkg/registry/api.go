@@ -91,6 +91,8 @@ func New(cfg *Config) (*api, error) {
 	a.router.Get("/routines/{id}", a.getRoutine)
 	a.router.Delete("/routines/{id}", a.deleteRoutine)
 	a.router.Put("/routines/{id}", a.updateRoutine)
+	a.router.Get("/routines/logs", a.getRoutinesLogs)
+	a.router.Get("/routines/logs/{id}", a.getRoutineLogs)
 
 	a.router.Post("/group", a.createGroup)
 
@@ -363,6 +365,49 @@ func (a *api) updateRoutine(w http.ResponseWriter, r *http.Request) {
 		Routine models.Routine `json:"routine"`
 	}
 	resp.Routine = routine
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("error sending devices: %s\n", err.Error())
+	}
+}
+
+func (a *api) getRoutinesLogs(w http.ResponseWriter, r *http.Request) {
+	var logs []models.RoutineLog
+	if err := a.db.Model(&logs).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	var resp struct {
+		Logs []models.RoutineLog `json:"logs"`
+	}
+	resp.Logs = logs
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("error sending devices: %s\n", err.Error())
+	}
+}
+
+func (a *api) getRoutineLogs(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "provided id was not a number, thus couldn't be parsed", http.StatusBadRequest)
+		return
+	}
+	log.Println(id)
+
+	var logs []models.RoutineLog
+	if err := a.db.Model(&logs).Where("routine_log.routine_id = ?", id).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	var resp struct {
+		Logs []models.RoutineLog `json:"logs"`
+	}
+	resp.Logs = logs
 
 	w.Header().Set("content-type", "application/json")
 	if err := json.NewEncoder(w).Encode(&resp); err != nil {
