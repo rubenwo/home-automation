@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func Log(db *pg.DB) func(call otto.FunctionCall) otto.Value {
+func Log(routineId int64, db *pg.DB) func(call otto.FunctionCall) otto.Value {
 	return func(call otto.FunctionCall) otto.Value {
 		m := ""
 		for _, v := range call.ArgumentList {
@@ -16,8 +16,9 @@ func Log(db *pg.DB) func(call otto.FunctionCall) otto.Value {
 		}
 
 		_, _ = db.Model(&models.RoutineLog{
-			LoggedAt: time.Now(),
-			Message:  m,
+			RoutineId: routineId,
+			LoggedAt:  time.Now(),
+			Message:   m,
 		}).Insert()
 
 		fmt.Println(m)
