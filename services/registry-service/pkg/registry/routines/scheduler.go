@@ -3,6 +3,7 @@ package routines
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/go-pg/pg/v10"
 	"github.com/gorhill/cronexpr"
 	"github.com/robertkrimen/otto"
@@ -111,16 +112,39 @@ func (s *Scheduler) worker() {
 		if action.Script != "" {
 			vm := otto.New()
 
-			_ = vm.Set("HttpGet", script.HttpGet)
-			_ = vm.Set("HttpPost", script.HttpPost)
-			_ = vm.Set("HttpDelete", script.HttpDelete)
-			_ = vm.Set("HttpPut", script.HttpPut)
+			if err := vm.Set("HttpGet", script.HttpGet); err != nil {
+				s.results <- err
+				continue
+			}
+			if err := vm.Set("HttpPost", script.HttpPost); err != nil {
+				s.results <- err
+				continue
+			}
+			if err := vm.Set("HttpDelete", script.HttpDelete); err != nil {
+				s.results <- err
+				continue
+			}
+			if err := vm.Set("HttpPut", script.HttpPut); err != nil {
+				s.results <- err
+				continue
+			}
+			if err := vm.Set("__log__", script.Log(s.db)); err != nil {
+				s.results <- err
+				continue
+			}
 
-			_, err := vm.Run(action.Script)
+			sc := fmt.Sprintf("console.log = __log__;\n%s", action.Script)
+
+			result, err := vm.Run(sc)
 			if err != nil {
 				s.results <- err
 				continue
 			}
+			_, _ = s.db.Model(&models.RoutineLog{
+				LoggedAt: time.Now(),
+				Message:  result.String(),
+			}).Insert()
+
 			log.Printf("Scheduler()->worker() finished executing script: [%s]\n", action.Script)
 		}
 
