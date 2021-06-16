@@ -27,6 +27,14 @@ spec:
           - DELETE
           - PUT
         protocol: http
+      - path: "/routines/logs"
+        methods:
+          - GET
+        protocol: http
+      - path: "/routines/logs/{id}"
+        methods:
+          - GET
+        protocol: http
       - path: "/sensors"
         methods:
           - GET

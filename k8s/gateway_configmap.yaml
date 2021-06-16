@@ -8,25 +8,28 @@ data:
     http\r\n      - path: \"/routines\"\r\n        methods:\r\n          - GET\r\n
     \         - POST\r\n        protocol: http\r\n      - path: \"/routines/{id}\"\r\n
     \       methods:\r\n          - GET\r\n          - DELETE\r\n          - PUT\r\n
-    \       protocol: http\r\n      - path: \"/sensors\"\r\n        methods:\r\n          -
-    GET\r\n          - POST\r\n        protocol: http\r\n      - path: \"/sensors/{id}\"\r\n
-    \       methods:\r\n          - DELETE\r\n        protocol: http\r\n\r\n  - host:
-    food.default.svc.cluster.local\r\n    routes:\r\n      - path: \"/recipes\"\r\n
-    \       methods:\r\n          - GET\r\n          - POST\r\n        protocol: http\r\n
-    \     - path: \"/recipes/{id}\"\r\n        methods:\r\n          - GET\r\n          -
-    PUT\r\n          - DELETE\r\n        protocol: http\r\n\r\n  - host: led-strip.default.svc.cluster.local\r\n
-    \   routes:\r\n      - path: \"/leds/devices\"\r\n        methods:\r\n          -
-    GET\r\n        protocol: http\r\n      - path: \"/leds/devices/register\"\r\n
+    \       protocol: http\r\n      - path: \"/routines/logs\"\r\n        methods:\r\n
+    \         - GET\r\n        protocol: http\r\n      - path: \"/routines/logs/{id}\"\r\n
+    \       methods:\r\n          - GET\r\n        protocol: http\r\n      - path:
+    \"/sensors\"\r\n        methods:\r\n          - GET\r\n          - POST\r\n        protocol:
+    http\r\n      - path: \"/sensors/{id}\"\r\n        methods:\r\n          - DELETE\r\n
+    \       protocol: http\r\n\r\n  - host: food.default.svc.cluster.local\r\n    routes:\r\n
+    \     - path: \"/recipes\"\r\n        methods:\r\n          - GET\r\n          -
+    POST\r\n        protocol: http\r\n      - path: \"/recipes/{id}\"\r\n        methods:\r\n
+    \         - GET\r\n          - PUT\r\n          - DELETE\r\n        protocol:
+    http\r\n\r\n  - host: led-strip.default.svc.cluster.local\r\n    routes:\r\n      -
+    path: \"/leds/devices\"\r\n        methods:\r\n          - GET\r\n        protocol:
+    http\r\n      - path: \"/leds/devices/register\"\r\n        methods:\r\n          -
+    POST\r\n        protocol: http\r\n      - path: \"/leds/devices/{id}/command\"\r\n
+    \       methods:\r\n          - POST\r\n        protocol: http\r\n\r\n  - host:
+    tapo.default.svc.cluster.local\r\n    routes:\r\n      - path: /tapo/wake/{device_id}\r\n
+    \       methods:\r\n          - GET\r\n        protocol: http\r\n      - path:
+    \"/tapo/devices/{device_id}\"\r\n        methods:\r\n          - GET\r\n          -
+    PUT\r\n          - DELETE\r\n        protocol: http\r\n      - path: \"/tapo/devices/register\"\r\n
     \       methods:\r\n          - POST\r\n        protocol: http\r\n      - path:
-    \"/leds/devices/{id}/command\"\r\n        methods:\r\n          - POST\r\n        protocol:
-    http\r\n\r\n  - host: tapo.default.svc.cluster.local\r\n    routes:\r\n      -
-    path: /tapo/wake/{device_id}\r\n        methods:\r\n          - GET\r\n        protocol:
-    http\r\n      - path: \"/tapo/devices/{device_id}\"\r\n        methods:\r\n          -
-    GET\r\n          - PUT\r\n          - DELETE\r\n        protocol: http\r\n      -
-    path: \"/tapo/devices/register\"\r\n        methods:\r\n          - POST\r\n        protocol:
-    http\r\n      - path: \"/tapo/devices\"\r\n        methods:\r\n          - GET\r\n
-    \       protocol: http\r\n      - path: \"/tapo/lights/{device_id}\"\r\n        methods:\r\n
-    \         - GET\r\n        protocol: http\r\n\r\n  - host: hue.default.svc.cluster.local\r\n
+    \"/tapo/devices\"\r\n        methods:\r\n          - GET\r\n        protocol:
+    http\r\n      - path: \"/tapo/lights/{device_id}\"\r\n        methods:\r\n          -
+    GET\r\n        protocol: http\r\n\r\n  - host: hue.default.svc.cluster.local\r\n
     \   routes:\r\n      - path: \"/hue/devices\"\r\n        methods:\r\n          -
     GET\r\n        protocol: http\r\n\r\n  - host: actions.default.svc.cluster.local\r\n
     \   routes:\r\n      - path: \"/webhook/request\"\r\n        methods:\r\n          -
