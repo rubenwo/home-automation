@@ -18,28 +18,28 @@ services:
       - /mnt/gateway/certs:/certs
       - ./ingress.yaml:/root/ingress.yaml
     depends_on:
-      - redis.default.svc.cluster.local
+      - postgres.default.svc.cluster.local
 
   led-strip.default.svc.cluster.local:
     image: rubenwo/home-automation-led-strip-service:latest
     # build: ./services/led-strip-service
     restart: on-failure
     depends_on:
-      - redis.default.svc.cluster.local
+      - postgres.default.svc.cluster.local
 
   hue.default.svc.cluster.local:
     image: rubenwo/home-automation-hue-service:latest
     # build: ./services/hue-service
     restart: on-failure
     depends_on:
-      - redis.default.svc.cluster.local
+      - postgres.default.svc.cluster.local
 
   food.default.svc.cluster.local:
     image: rubenwo/home-automation-food-service:latest
     # build: ./services/food-service
     restart: on-failure
     depends_on:
-      - redis.default.svc.cluster.local
+      - postgres.default.svc.cluster.local
 
   tapo.default.svc.cluster.local:
     image: rubenwo/home-automation-tapo-service:latest
@@ -53,7 +53,7 @@ services:
     # build: ./services/registry-service
     restart: on-failure
     depends_on:
-      - redis.default.svc.cluster.local
+      - postgres.default.svc.cluster.local
 
   inventory.default.svc.cluster.local:
     image: rubenwo/home-automation-inventory-service:latest
