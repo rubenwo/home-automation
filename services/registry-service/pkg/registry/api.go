@@ -326,6 +326,13 @@ func (a *api) deleteRoutine(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("an error occured when deleteing item with id: %d, error: %s", id, err.Error()), http.StatusInternalServerError)
 		return
 	}
+
+	result, err = a.db.Model(&models.RoutineLog{RoutineId: int64(id)}).Where("routine_log.routine_id = ?", id).Delete()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("an error occured when deleteing item with id: %d, error: %s", id, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
 	if err := a.scheduler.UpdateRoutines(); err != nil {
 		log.Println(err)
 	}
