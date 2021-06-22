@@ -186,10 +186,10 @@ func (a *api) deleteCamera(w http.ResponseWriter, r *http.Request) {
 	a.getCameras(w, r)
 }
 
-func (a *api) createImageStream(u *url.URL) (chan image.Image, error) {
+func createImageStream(u *url.URL, cancellation chan bool) (chan image.Image, error) {
 	client := &http.Client{}
 
-	resp, err := client.Get("http://192.168.2.27")
+	resp, err := client.Get(u.String())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -201,13 +201,20 @@ func (a *api) createImageStream(u *url.URL) (chan image.Image, error) {
 	c := make(chan image.Image)
 	go func(c chan image.Image) {
 		for {
-			start := time.Now()
-			img, err := decoder.Decode()
-			if err != nil {
-				log.Fatal(err)
+			select {
+			case <-cancellation:
+				fmt.Println("cancelling image stream")
+				close(c)
+				return
+			default:
+				start := time.Now()
+				img, err := decoder.Decode()
+				if err != nil {
+					close(c)
+				}
+				fmt.Printf("FPS: %f\n", float64(1000)/float64(time.Since(start).Milliseconds()))
+				c <- img
 			}
-			fmt.Printf("FPS: %f\n", float64(1000)/float64(time.Since(start).Milliseconds()))
-			c <- img
 		}
 	}(c)
 	return c, nil
@@ -219,46 +226,33 @@ func (a *api) streamVideoMultipart(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("couldn't convert id: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
-	fmt.Println(id)
 
-	u, err := url.Parse("http://192.168.2.27")
+	var camera Camera
+	if err := a.db.Model(&camera).Where("camera.id = ?", id).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	u, err := url.Parse(camera.Host)
 	if err != nil {
 		log.Fatal(err)
 	}
-	c, err := a.createImageStream(u)
+
+	cancellation := make(chan bool, 1)
+
+	c, err := createImageStream(u, cancellation)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	/*
-		void handle_jpg_stream(void)
-		{
-		    WiFiClient client = server.client();
-		    String response = "HTTP/1.1 200 OK\r\n";
-		    response += "Content-Type: multipart/x-mixed-replace; boundary=frame\r\n\r\n";
-		    server.sendContent(response);
-
-		    while (1)
-		    {
-		        cam.run();
-		        if (!client.connected())
-		            break;
-		        response = "--frame\r\n";
-		        response += "Content-Type: image/jpeg\r\n\r\n";
-		        server.sendContent(response);
-
-		        client.write((char *)cam.getfb(), cam.getSize());
-		        server.sendContent("\r\n");
-		        if (!client.connected())
-		            break;
-		    }
-		}
-	*/
 
 	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
 	w.WriteHeader(http.StatusOK)
 	for img := range c {
-		jpeg.Encode(w, img, nil)
+		if err := jpeg.Encode(w, img, nil); err != nil {
+			log.Printf("error encoding jpeg: %s\n", err.Error())
+			cancellation <- true
+			close(cancellation)
+		}
 	}
 }
 
@@ -301,7 +295,6 @@ func (a *api) streamVideoWS(w http.ResponseWriter, r *http.Request) {
 			return true
 		},
 	}
-
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
