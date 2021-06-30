@@ -5,9 +5,9 @@
             type="dark"
             style="background-color: rgba(70, 70, 70, 0.7)"
     >
-        <b-container>
-            <b-navbar-brand href="#" to="/">Home Automation</b-navbar-brand>
 
+        <b-container>
+            <b-button v-b-toggle.sidebar-1>Toggle Sidebar</b-button>
             <b-navbar-toggle target="nav_collapse"/>
 
             <b-collapse is-nav id="nav_collapse">
@@ -27,7 +27,7 @@
                             variant="primary"
                             title="Click here to add a new"
                             @click="onClickAdd"
-                    ><img src="../assets/add.png" width="25" height="25" alt="Add button using a + sign"/>
+                    ><img src="../assets/add.png" width="25" height="25"/>
                     </b-button>
                     <b-nav-item-dropdown right v-if="isLoggedIn">
                         <template slot="button-content">{{ username }}</template>
@@ -44,49 +44,49 @@
 </template>
 
 <script>
-    import AddDeviceModal from "./AddDeviceModal";
-    import AddRecipeModal from "./AddRecipeModal";
-    import AddRoutineModal from "./AddRoutineModal";
-    import AddSensorModal from "./AddSensorModal";
-    import {mapActions, mapState, mapGetters} from "vuex";
+  import AddDeviceModal from "./AddDeviceModal";
+  import AddRecipeModal from "./AddRecipeModal";
+  import AddRoutineModal from "./AddRoutineModal";
+  import AddSensorModal from "./AddSensorModal";
+  import {mapActions, mapState, mapGetters} from "vuex";
 
-    export default {
-        name: "app-toolbar",
-        data() {
-            return {};
-        },
-        components: {
-            AddRecipeModal,
-            AddDeviceModal,
-            AddRoutineModal,
-            AddSensorModal,
-        },
-        computed: {
-            ...mapState("auth", ["username"]),
-            ...mapGetters("auth", ["isLoggedIn"]),
-        },
+  export default {
+    name: "app-toolbar",
+    data() {
+      return {};
+    },
+    components: {
+      AddRecipeModal,
+      AddDeviceModal,
+      AddRoutineModal,
+      AddSensorModal,
+    },
+    computed: {
+      ...mapState("auth", ["username"]),
+      ...mapGetters("auth", ["isLoggedIn"]),
+    },
 
-        methods: {
-            ...mapActions("auth", ["logout"]),
-            getAddButtonHint() {
-                return "test";
-            },
-            onClickAdd() {
-                switch (this.$route.name) {
-                    case "Home":
-                        this.$refs.deviceModal.$emit("add_device");
-                        break;
-                    case "Recipes":
-                        this.$refs.recipeModal.$emit("add_recipe");
-                        break;
-                    case "Routines":
-                        this.$refs.routineModal.$emit("add_routine");
-                        break;
-                    case "Sensors":
-                        this.$refs.sensorModal.$emit("add_sensor");
-                        break;
-                }
-            },
-        },
-    };
+    methods: {
+      ...mapActions("auth", ["logout"]),
+      getAddButtonHint() {
+        return "test";
+      },
+      onClickAdd() {
+        switch (this.$route.name) {
+          case "Home":
+            this.$refs.deviceModal.$emit("add_device");
+            break;
+          case "Recipes":
+            this.$refs.recipeModal.$emit("add_recipe");
+            break;
+          case "Routines":
+            this.$refs.routineModal.$emit("add_routine");
+            break;
+          case "Sensors":
+            this.$refs.sensorModal.$emit("add_sensor");
+            break;
+        }
+      },
+    },
+  };
 </script>
