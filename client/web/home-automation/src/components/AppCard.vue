@@ -1,13 +1,14 @@
 <template>
     <div v-if="this.state === 'loaded'">
         <b-card
-                v-bind:sub-title="name"
+                v-bind:title="name"
                 style="
         max-width: 540px;
         min-width: 200px;
         min-height: 425px;
         max-height: 500px;
-        background-color: rgba(255, 255, 255, 0.7);
+        background-color: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(5px);
       "
                 class="mb-2"
         >

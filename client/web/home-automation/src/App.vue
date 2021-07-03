@@ -21,8 +21,8 @@
     data() {
       return {
         angle: '50',
-        color1: '#0D324D',
-        color2: '#7F5A83'
+        color1: '#304352',
+        color2: '#d7d2cc'
       }
     },
     computed: {

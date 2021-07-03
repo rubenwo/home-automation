@@ -6,8 +6,8 @@
       min-width: 300px;
       min-height: 250px;
       max-height: 250px;
-      background-color: rgba(255, 255, 255, 0.7);
-    "
+        background-color: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(5px);    "
             class="mb-2"
     >
         <div>Type: {{ routine.trigger.type }}</div>
