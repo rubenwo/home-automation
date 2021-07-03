@@ -2,8 +2,9 @@
     <b-navbar
             :sticky="true"
             toggleable="lg"
-            type="dark"
-            style="background-color: rgba(70, 70, 70, 0.7)"
+            type="light"
+            style="background-color: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(5px);"
     >
 
         <b-container>

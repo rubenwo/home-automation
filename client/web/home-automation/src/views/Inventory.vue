@@ -1,5 +1,6 @@
 <template>
-    <div class="inventory" style="background-color: rgba(255, 255, 255, 0.6)">
+    <div class="inventory" style="        background-color: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(5px);">
         <b-modal
                 size="xl"
                 id="add_inventory_item"

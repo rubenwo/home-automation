@@ -23,59 +23,60 @@
 </template>
 
 <script>
-    import RoutinesService from "../services/routines.service";
+  import RoutinesService from "../services/routines.service";
 
-    export default {
-        name: "Routine",
-        data() {
-            return {
-                routine: {
-                    id: 0,
-                    name: "",
-                    is_active: false,
-                    trigger: {
-                        cron_expr: "",
-                        type: 0
-                    },
-                    actions: [
-                        {
-                            script: "",
-                            data: null,
-                            method: "",
-                            addr: ""
-                        }
-                    ]
-                },
-                logs: [
-                    {
-                        logged_at: "",
-                        message: ""
-                    }
-                ]
+  export default {
+    name: "Routine",
+    data() {
+      return {
+        routine: {
+          id: 0,
+          name: "",
+          is_active: false,
+          trigger: {
+            cron_expr: "",
+            type: 0
+          },
+          actions: [
+            {
+              script: "",
+              data: null,
+              method: "",
+              addr: ""
             }
+          ]
         },
-        async created() {
-            this.id = this.$route.params.id;
+        logs: [
+          {
+            logged_at: "",
+            message: ""
+          }
+        ]
+      }
+    },
+    async created() {
+      this.id = this.$route.params.id;
 
-            const res = await RoutinesService.fetchRoutine(this.id);
-            console.log(res);
-            this.routine = res.routine;
-            console.log(this.routine);
+      const res = await RoutinesService.fetchRoutine(this.id);
+      console.log(res);
+      this.routine = res.routine;
+      console.log(this.routine);
 
-            const logsRes = await RoutinesService.fetchLogsForId(this.id);
-            console.log(logsRes);
-            this.logs = logsRes.logs;
-            console.log(this.logs);
-        },
-        mounted() {
-        },
-    }
+      const logsRes = await RoutinesService.fetchLogsForId(this.id);
+      console.log(logsRes);
+      this.logs = logsRes.logs;
+      console.log(this.logs);
+    },
+    mounted() {
+    },
+  }
 </script>
 
 <style scoped>
     .routine {
         margin-top: 10px;
         text-align: center;
-        background-color: rgba(255, 255, 255, 0.7);
+        background-color: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(5px);
     }
 </style>

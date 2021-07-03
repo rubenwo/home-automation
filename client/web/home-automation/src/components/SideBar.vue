@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-sidebar id="sidebar-1" title="Sidebar" bg-variant="dark" text-variant="light" visible="true">
+        <b-sidebar id="sidebar-1" bg-variant="dark" text-variant="light">
             <div>
                 <b-button href="#" to="/" class="nav-button">Home</b-button>
                 <b-button href="#" to="/routines" class="nav-button">Routines</b-button>
@@ -23,6 +23,7 @@
     .nav-button {
         width: 320px;
         margin-top: 10px;
-
+        background-color: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(5px);
     }
 </style>
