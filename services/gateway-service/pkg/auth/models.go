@@ -10,6 +10,7 @@ import (
 func createSchema(db *pg.DB) error {
 	tables := []interface{}{
 		(*models.Claims)(nil),
+		(*models.Authorization)(nil),
 	}
 
 	for _, model := range tables {

@@ -111,6 +111,7 @@ func main() {
 		}
 		return
 	}
+
 	// else host on port 80
 	log.Println("gateway-service is listening on port '80'")
 	if err := http.ListenAndServe(":80", handler); err != nil {
