@@ -9,8 +9,8 @@ import (
 func main() {
 	if err := app.Run(
 		app.Config{
-			//DatabaseAddr: "192.168.2.135:5432",
-			DatabaseAddr: "postgres.default.svc.cluster.local:5432",
+			DatabaseAddr: "192.168.2.135:5432",
+			//DatabaseAddr: "postgres.default.svc.cluster.local:5432",
 			//DatabaseAddr:     "localhost:5432",
 			DatabaseUser:     "user",
 			DatabasePassword: "password",

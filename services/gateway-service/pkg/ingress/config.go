@@ -11,11 +11,11 @@ type Config struct {
 	Spec       []struct {
 		Host   string `yaml:"host"`
 		Routes []struct {
-			Path                  string   `yaml:"path"`
-			Methods               []string `yaml:"methods"`
-			Protocol              string   `yaml:"protocol"`
-			RequiresAuthorization bool     `yaml:"required_authorization"`
-			AllowedRoles          []string `yaml:"allowed_roles"`
+			Path           string   `yaml:"path"`
+			Methods        []string `yaml:"methods"`
+			Protocol       string   `yaml:"protocol"`
+			AllowAnonymous bool     `yaml:"allow_anonymous"`
+			AllowedRoles   []string `yaml:"allowed_roles"`
 		} `yaml:"routes"`
 	} `yaml:"spec"`
 }

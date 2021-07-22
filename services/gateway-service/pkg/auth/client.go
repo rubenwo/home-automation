@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -26,21 +27,21 @@ type DefaultClient struct {
 	refreshTokenLock sync.Mutex
 	refreshTokens    map[string]time.Time
 
-	requiresAuthorizationRoutes map[string]bool
-	allowedRolesRoutes          map[string][]string
+	isAllowedAnonymous map[string]bool
+	allowedRolesRoutes map[string][]string
 }
 
 //NewDefaultClient
-func NewDefaultClient(key []byte, authorizationTokenExpiration time.Duration, refreshTokenExpiration time.Duration, adminEnabled bool) *DefaultClient {
+func NewDefaultClient(key []byte, authorizationTokenExpiration time.Duration, refreshTokenExpiration time.Duration, adminEnabled bool, isAllowedAnonymous map[string]bool) *DefaultClient {
 	return &DefaultClient{
 		key:                          key,
 		authorizationTokenExpiration: authorizationTokenExpiration,
 		refreshTokenExpiration:       refreshTokenExpiration,
 		adminEnabled:                 adminEnabled,
 
-		refreshTokens:               make(map[string]time.Time),
-		requiresAuthorizationRoutes: make(map[string]bool),
-		allowedRolesRoutes:          make(map[string][]string),
+		refreshTokens:      make(map[string]time.Time),
+		isAllowedAnonymous: isAllowedAnonymous,
+		allowedRolesRoutes: make(map[string][]string),
 	}
 }
 
@@ -48,9 +49,42 @@ func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("AuthorizationMiddleware => checking permissions...")
 
+		// Skip authorization if websocket
+		// TODO: this should be secured
 		for _, header := range r.Header["Upgrade"] {
 			if header == "websocket" {
 				fmt.Println("websocket connection")
+				next.ServeHTTP(w, r)
+				return
+			}
+		}
+
+		fmt.Println(r.RequestURI)
+		fmt.Println(c.isAllowedAnonymous)
+
+		s := strings.Split(r.RequestURI, "/")
+
+		for k, value := range c.isAllowedAnonymous {
+			if !value {
+				continue
+			}
+
+			ks := strings.Split(k, "/")
+			if len(ks) != len(s) {
+				continue
+			}
+
+			matches := true
+			for i := 0; i < len(ks); i++ {
+				if strings.Contains(ks[i], "{") {
+					continue
+				}
+				if ks[i] != s[i] {
+					matches = false
+					break
+				}
+			}
+			if matches && value {
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -122,9 +156,6 @@ func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler 
 		}
 
 		log.Println("AuthorizationMiddleware => All OK!")
-		//if requiresAuthz, exists := c.requiresAuthorizationRoutes[r.RequestURI]; exists {
-		//	if requiresAuthz
-		//}
 
 		next.ServeHTTP(w, r)
 		return

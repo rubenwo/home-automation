@@ -33,7 +33,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	authenticator := auth.NewDefaultClient([]byte(jwtKey), time.Hour*1, time.Hour*24*7, adminEnabled)
+	isAllowedAnonymous := make(map[string]bool)
+
+	for _, spec := range cfg.Spec {
+		for _, route := range spec.Routes {
+			isAllowedAnonymous["/api/"+cfg.ApiVersion+route.Path] = route.AllowAnonymous
+		}
+	}
+
+	authenticator := auth.NewDefaultClient([]byte(jwtKey), time.Hour*1, time.Hour*24*7, adminEnabled, isAllowedAnonymous)
 
 	globalMiddlewares := []mux.MiddlewareFunc{
 		ingress.LoggingMiddleware,
@@ -82,7 +90,7 @@ func main() {
 
 		// Create the http server
 		server := &http.Server{
-			Addr: ":443",
+			Addr:    ":443",
 			Handler: handler,
 			TLSConfig: &tls.Config{
 				GetCertificate: certManager.GetCertificate,
