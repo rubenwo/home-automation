@@ -40,10 +40,16 @@ void setup_wifi()
   Serial.println(WiFi.localIP());
 }
 
+#define LED 2
+
 void setup()
 {
   Serial.begin(460800);
   delay(1000);
+
+  pinMode(LED, OUTPUT);
+
+  digitalWrite(LED, HIGH);
 
   //Increment boot number and print it every reboot
   ++bootCount;
@@ -58,13 +64,22 @@ void setup()
   write_to_mqtt();
 
   //Configure GPIO33 as ext0 wake up source for HIGH logic level
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, HIGH);
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 1);
+
+  delay(4000);
+
+  digitalWrite(LED, LOW);
 
   //Go to sleep now
   esp_deep_sleep_start();
 }
 
-void loop() {}
+void loop()
+{
+  // int signal = digitalRead(GPIO_NUM_33);
+  // Serial.printf("Input: %d\n", signal);
+  // delay(2000);
+}
 
 // JSON data buffer
 StaticJsonDocument<1000> jsonDocument;

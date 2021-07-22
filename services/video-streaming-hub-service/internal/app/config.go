@@ -1,6 +1,9 @@
 package app
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Config struct {
 	DatabaseAddr     string
@@ -8,7 +11,8 @@ type Config struct {
 	DatabasePassword string
 	DatabaseName     string
 
-	ApiAddr string
+	ApiAddr        string
+	StreamInterval time.Duration
 }
 
 func (c Config) Validate() error {

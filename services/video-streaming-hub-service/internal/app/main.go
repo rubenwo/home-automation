@@ -1,29 +1,29 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-pg/pg/v10"
-	"github.com/gorilla/websocket"
 	"github.com/rubenwo/home-automation/services/video-streaming-hub-service/pkg/mjpeg"
-	"github.com/rubenwo/home-automation/services/video-streaming-hub-service/pkg/rtsp"
-	"image"
 	"image/jpeg"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
+	"sync"
 	"time"
 )
 
 type api struct {
-	db          *pg.DB
-	rtspClients []*rtsp.Client
+	db *pg.DB
 
-	imageStreams map[string][]chan image.Image
+	streams           map[int64]*mjpeg.Stream
+	streamSubscribers map[int64]int
+	streamLock        sync.Mutex
+	streamInterval    time.Duration
 }
 
 func Run(cfg Config) error {
@@ -46,9 +46,10 @@ func Run(cfg Config) error {
 	}
 
 	a := &api{
-		db:           db,
-		rtspClients:  []*rtsp.Client{},
-		imageStreams: make(map[string][]chan image.Image),
+		db:                db,
+		streams:           make(map[int64]*mjpeg.Stream),
+		streamSubscribers: make(map[int64]int),
+		streamInterval:    cfg.StreamInterval,
 	}
 
 	router := chi.NewRouter()
@@ -73,12 +74,13 @@ func Run(cfg Config) error {
 	router.Put("/camera/{id}", a.updateCamera)
 	router.Get("/camera/{id}", a.getCamera)
 
-	router.Get("/stream/http/{id}", a.streamVideoMultipart)
-	router.Get("/stream/ws/{id}", a.streamVideoWS)
+	router.Get("/stream/{id}", a.streamVideo)
 
+	log.Println("video-streaming hub is online")
 	if err := http.ListenAndServe(cfg.ApiAddr, router); err != nil {
 		return fmt.Errorf("http.ListenAndServe error: %w", err)
 	}
+	log.Println("video-streaming hub is offline")
 
 	return nil
 }
@@ -186,127 +188,67 @@ func (a *api) deleteCamera(w http.ResponseWriter, r *http.Request) {
 	a.getCameras(w, r)
 }
 
-func createImageStream(u *url.URL, cancellation chan bool) (chan image.Image, error) {
-	client := &http.Client{}
-
-	resp, err := client.Get(u.String())
-	if err != nil {
-		log.Fatal(err)
-	}
-	decoder, err := mjpeg.NewDecoderFromResponse(resp)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	c := make(chan image.Image)
-	go func(c chan image.Image) {
-		for {
-			select {
-			case <-cancellation:
-				fmt.Println("cancelling image stream")
-				close(c)
-				return
-			default:
-				start := time.Now()
-				img, err := decoder.Decode()
-				if err != nil {
-					close(c)
-				}
-				fmt.Printf("FPS: %f\n", float64(1000)/float64(time.Since(start).Milliseconds()))
-				c <- img
-			}
-		}
-	}(c)
-	return c, nil
-}
-
-func (a *api) streamVideoMultipart(w http.ResponseWriter, r *http.Request) {
+func (a *api) streamVideo(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("couldn't convert id: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
-	var camera Camera
-	if err := a.db.Model(&camera).Where("camera.id = ?", id).Select(); err != nil {
-		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
-		return
-	}
+	a.streamLock.Lock()
+	stream, ok := a.streams[id]
+	a.streamLock.Unlock()
 
-	u, err := url.Parse(camera.Host)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cancellation := make(chan bool, 1)
-
-	c, err := createImageStream(u, cancellation)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
-	w.WriteHeader(http.StatusOK)
-	for img := range c {
-		if err := jpeg.Encode(w, img, nil); err != nil {
-			log.Printf("error encoding jpeg: %s\n", err.Error())
-			cancellation <- true
-			close(cancellation)
+	if !ok {
+		a.streamLock.Lock()
+		stream = mjpeg.NewStreamWithInterval(a.streamInterval)
+		var camera Camera
+		if err := a.db.Model(&camera).Where("camera.Id = ?", id).Select(); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+			return
 		}
+		go proxy(camera.Host, stream)
+		a.streams[id] = stream
+		a.streamLock.Unlock()
+		a.streamSubscribers[id] = 1
+	} else {
+		a.streamSubscribers[id] += 1
+	}
+
+	stream.ServeHTTP(w, r)
+	a.streamSubscribers[id] -= 1
+
+	if a.streamSubscribers[id] == 0 {
+		_ = a.streams[id].Close()
+		a.streamLock.Lock()
+		delete(a.streams, id)
+		a.streamLock.Unlock()
 	}
 }
 
-func (a *api) streamVideoWS(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+func proxy(url string, stream *mjpeg.Stream) {
+	dec, err := mjpeg.NewDecoderFromURL(url)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("couldn't convert id: %s", err.Error()), http.StatusBadRequest)
-		return
+		log.Fatal(err)
 	}
 
-	var client *rtsp.Client
-	found := false
-	for _, c := range a.rtspClients {
-		if c.Id == id {
-			found = true
-			client = c
+	log.Printf("Started streaming from %s\n", url)
+
+	var buf bytes.Buffer
+	for {
+		img, err := dec.Decode()
+		if err != nil {
+			break
+		}
+		buf.Reset()
+		err = jpeg.Encode(&buf, img, nil)
+		if err != nil {
+			break
+		}
+		err = stream.Update(buf.Bytes())
+		if err != nil {
 			break
 		}
 	}
-	if !found {
-		var camera Camera
-		if err := a.db.Model(&camera).Where("camera.id = ?", id).Select(); err != nil {
-			http.Error(w, fmt.Sprintf("couldn't find camera with id: %d", id), http.StatusNotFound)
-			return
-		}
-		client, err = rtsp.NewClient(rtsp.Config{Host: camera.Host, Id: camera.Id})
-		if err != nil {
-			http.Error(w, fmt.Sprintf("couldn't create rtsp client: %s", err.Error()), http.StatusNotFound)
-			return
-		}
-	}
-	if client == nil {
-		http.Error(w, fmt.Sprintf("camera is nil"), http.StatusInternalServerError)
-		return
-	}
-
-	// Upgrade connection
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		return
-	}
-	// Read messages from socket
-	for {
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
-			conn.Close()
-			return
-		}
-		log.Printf("msg: %s", string(msg))
-	}
+	log.Printf("Stopped streaming from %s\n", url)
 }
