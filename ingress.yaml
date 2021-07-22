@@ -147,11 +147,7 @@ spec:
           - GET
           - PUT
         protocol: http
-      - path: "/stream/ws/{id}"
-        methods:
-          - GET
-        protocol: http
-      - path: "/stream/http/{id}"
+      - path: "/stream/{id}"
         methods:
           - GET
         protocol: http
