@@ -13,7 +13,7 @@
                     style="margin-right: 25px; margin-left: 25px"
             >
                 <p>{{camera}}</p>
-                <img :src="getStreamUrl(camera.id)">
+                <img :src="getStreamUrl(camera.id)" alt="video streaming from the camera">
             </b-col>
         </div>
     </div>
@@ -31,7 +31,11 @@
     },
     methods: {
       getStreamUrl(cameraId) {
-        return "https://" + process.env.VUE_APP_BACKEND_URL + "/api/v1/stream/" + cameraId;
+        if (process.env.VUE_APP_BACKEND_URL !== "") {
+          return "https://" + process.env.VUE_APP_BACKEND_URL + "/api/v1/stream/" + cameraId;
+        } else {
+          return "/api/v1/stream/" + cameraId;
+        }
       }
     },
     async mounted() {

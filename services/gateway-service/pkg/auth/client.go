@@ -59,9 +59,6 @@ func (c *DefaultClient) AuthorizationMiddleware(next http.Handler) http.Handler 
 			}
 		}
 
-		fmt.Println(r.RequestURI)
-		fmt.Println(c.isAllowedAnonymous)
-
 		s := strings.Split(r.RequestURI, "/")
 
 		for k, value := range c.isAllowedAnonymous {
