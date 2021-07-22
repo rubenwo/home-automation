@@ -34,7 +34,7 @@
         if (process.env.VUE_APP_BACKEND_URL !== "") {
           return "https://" + process.env.VUE_APP_BACKEND_URL + "/api/v1/stream/" + cameraId;
         } else {
-          return "/api/v1/stream/" + cameraId;
+          return window.location.origin + "/api/v1/stream/" + cameraId;
         }
       }
     },
