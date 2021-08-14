@@ -3,7 +3,9 @@ package com.example.homeautomation.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Device implements Parcelable {
+import java.io.Serializable;
+
+public class Device implements Parcelable, Serializable {
     private String category;
     private String id;
     private String name;

@@ -1,17 +1,10 @@
 <template>
     <div class="row" v-if="!this.devices.length <= 0">
         <div v-bind:key="groupName" v-for="group, groupName in groups">
-            <h2 style="color:rgba(255, 255, 255, 0.45); text-align:center; border-bottom: 1px solid rgba(255, 255, 255, 0.45);">{{groupName}}</h2>
-            <b-row
-                    cols="5"
-                    sm="3"
-                    md="3"
-                    lg="2"
-                    xl="2"
-            >
-                <div v-bind:key="device.id" v-for="device in group" style="margin-right: 25px; margin-left: 25px"
-
-                >
+            <h2 style="color:rgba(255, 255, 255, 0.45); text-align:center; border-bottom: 1px solid rgba(255, 255, 255, 0.45);">
+                {{groupName}}</h2>
+            <b-row>
+                <b-col v-bind:key="device.id" v-for="device in group">
                     <app-card
                             v-bind:height="10"
                             v-bind:name="device.name"
@@ -21,33 +14,10 @@
                             v-bind:img="getImgUrl(device)"
                             v-bind:id="device.id"
                     >
-                        >
                     </app-card>
-                </div>
+                </b-col>
             </b-row>
         </div>
-        <!--        <b-col-->
-        <!--                cols="4"-->
-        <!--                sm="3"-->
-        <!--                md="3"-->
-        <!--                lg="2"-->
-        <!--                xl="2"-->
-        <!--                v-bind:key="device.id"-->
-        <!--                v-for="device in this.devices"-->
-        <!--                style="margin-right: 25px; margin-left: 25px"-->
-        <!--        >-->
-        <!--            <app-card-->
-        <!--                    v-bind:height="10"-->
-        <!--                    v-bind:name="device.name"-->
-        <!--                    v-bind:category="device.category"-->
-        <!--                    v-bind:company="device.product.company"-->
-        <!--                    v-bind:device_type="device.product.type"-->
-        <!--                    v-bind:img="getImgUrl(device)"-->
-        <!--                    v-bind:id="device.id"-->
-        <!--            >-->
-        <!--                >-->
-        <!--            </app-card>-->
-        <!--        </b-col>-->
     </div>
 </template>
 
@@ -86,13 +56,10 @@
       getImgUrl(device) {
         switch (device.category) {
           case "plug":
-            console.log("returning plug");
             return require("../assets/smart_plug_icon.png");
           case "light":
-            console.log("returning light");
-            return require("../assets/light_icon.jpg");
+            return require("../assets/light_icon.png");
           case "led-strip":
-            console.log("returning led-strip");
             return require("../assets/led_strip_icon.png");
         }
       },

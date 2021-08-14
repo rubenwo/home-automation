@@ -2,6 +2,7 @@ package com.example.homeautomation;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,5 +18,7 @@ public class DetailedDeviceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detailed_device);
         Intent intent = getIntent();
         device = (Device) intent.getSerializableExtra("DEVICE");
+
+        Log.d("TAG", "onCreate: "+device.toString());
     }
 }

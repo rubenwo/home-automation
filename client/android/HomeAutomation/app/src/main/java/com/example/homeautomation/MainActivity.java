@@ -2,6 +2,7 @@ package com.example.homeautomation;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewAdapter.setOnItemClickListener(((position, v) -> {
             Log.d(TAG, "onClick: " + position);
             Intent intent = new Intent(this, DetailedDeviceActivity.class);
-            intent.putExtra("DEVICE", mDevicesList.get(position));
+            intent.putExtra("DEVICE", (Parcelable) mDevicesList.get(position));
             startActivity(intent);
         }));
 

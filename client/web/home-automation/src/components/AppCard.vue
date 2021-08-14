@@ -24,11 +24,8 @@
                 <p>{{ company }} : {{ device_type }}</p>
                 <div v-if="company === 'tp-link'">
                     <toggle-button v-model="device_on" @change="onChangeEventHandler"/>
-
-                    <!--                <b-button variant="success" @click="turnOnDevice">On</b-button>-->
-                    <!--                <b-button @click="turnOffDevice()">Off</b-button>-->
                     <input
-                            v-if="device_type == 'L510E'"
+                            v-if="device_type === 'L510E'"
                             type="range"
                             min="1"
                             max="100"
@@ -56,9 +53,9 @@
             <b-card
                     v-bind:title="name"
                     style="
-        max-width: 540px;
+        max-width: 200px;
         min-width: 200px;
-        min-height: 425px;
+        min-height: 500px;
         max-height: 500px;
         background-color: rgba(255, 255, 255, 0.25);
         backdrop-filter: blur(5px);

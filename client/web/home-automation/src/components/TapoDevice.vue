@@ -37,7 +37,7 @@ export default {
           return require("../assets/smart_plug_icon.png");
         case "L510E":
           console.log("returning light");
-          return require("../assets/light_icon.jpg");
+          return require("../assets/light_icon.png");
       }
     },
   },

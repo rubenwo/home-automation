@@ -6,10 +6,15 @@ export default {
     console.log(res);
     return res.data;
   },
+  // async fetchLedStripDevice(deviceId) {
+  //   const res = await ApiService().get("/api/v1/leds/devices/" + deviceId);
+  //   console.log(res);
+  //   return res.data;
+  // },
   async commandLedStripDevice(deviceId, data) {
     const res = await ApiService().post(
-      "/api/v1/leds/devices/" + deviceId + "/command",
-      data
+        "/api/v1/leds/devices/" + deviceId + "/command",
+        data
     );
     console.log(res);
     return res.data;

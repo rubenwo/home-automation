@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.homeautomation.R;
@@ -45,41 +46,21 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
 
     @Override
     public DevicesViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-
         Context context = viewGroup.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
         View bridgeView = inflater.inflate(R.layout.devices_viewitem, viewGroup, false);
         int height = viewGroup.getMeasuredHeight() / 4;
         bridgeView.setMinimumHeight(height);
-        DevicesViewHolder vh = new DevicesViewHolder(bridgeView);
-        return vh;
+        return new DevicesViewHolder(bridgeView);
     }
 
     @Override
-    public void onBindViewHolder(DevicesViewHolder devicesViewHolder, int i) {
+    public void onBindViewHolder(@NonNull DevicesViewHolder devicesViewHolder, int i) {
         deviceName.setText(mDataSet.get(i).getName());
         deviceCategory.setText(mDataSet.get(i).getCategory());
         deviceType.setText(mDataSet.get(i).getDevice_type());
-        deviceSwitch.setChecked(true);
-        {
-            Device device = mDataSet.get(i);
-            String company = device.getDevice_company();
-            switch (company.toLowerCase()) {
-                case "tp-link":
-                    volleyService.doRequest(new GetTapoDevice(
-                            userPreferencesService.getAuthorizationToken(),
-                            device.getId(),
-                            error -> {
-                                Log.d(TAG, "onBindViewHolder: ERROR: " + error.getMessage());
-                            },
-                            tapoDevice -> {
-                                Log.d(TAG, "onBindViewHolder: " + tapoDevice.toString());
-                                deviceSwitch.setChecked(tapoDevice.isOn());
-                            }
-                    ));
-            }
-        }
+
         deviceSwitch.setOnClickListener((view) -> {
             boolean isChecked = ((Switch) view).isChecked();
             Log.d(TAG, "onBindViewHolder: " + isChecked);
@@ -101,7 +82,6 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
                     ));
             }
         });
-
     }
 
     @Override
@@ -119,8 +99,6 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
     }
 
     public class DevicesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-
         public DevicesViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
