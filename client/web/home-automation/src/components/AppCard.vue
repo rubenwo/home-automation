@@ -4,9 +4,9 @@
             <b-card
                     v-bind:title="name"
                     style="
-        max-width: 540px;
+        max-width: 200px;
         min-width: 200px;
-        min-height: 425px;
+        min-height: 500px;
         max-height: 500px;
         background-color: rgba(255, 255, 255, 0.25);
         backdrop-filter: blur(5px);

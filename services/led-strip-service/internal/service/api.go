@@ -63,6 +63,8 @@ func New(cfg *Config) (*api, error) {
 	a.router.Get("/leds/devices", a.getDevices)
 	a.router.Post("/leds/devices/register", a.registerDevice)
 	a.router.Post("/leds/devices/{id}/command", a.commandDevice)
+	a.router.Put("/leds/devices/{id}", a.updateDevice)
+
 	return a, nil
 }
 func (a *api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -213,6 +215,28 @@ func (a *api) registerDevice(w http.ResponseWriter, r *http.Request) {
 	resp.Body.Close()
 	fmt.Println(string(raw), err)
 	a.getDevices(w, r)
+}
+
+func (a *api) updateDevice(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		if err := json.NewEncoder(w).Encode(&JsonError{
+			Code:         http.StatusBadRequest,
+			ErrorMessage: "id can't be empty",
+		}); err != nil {
+			log.Printf("error sending json_error: %s\n", err.Error())
+		}
+		return
+	}
+
+	var device LedDeviceModel
+	if err := a.db.Model(&device).Where("led_device_model.id = ?", id).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	panic("Not Implemented")
+
 }
 
 func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {

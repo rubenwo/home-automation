@@ -23,7 +23,7 @@
 const char *ssid = "";
 const char *password = "";
 
-String device_name = "rgb esp32 led-strip";
+String device_name = "rgb esp32 led-strip PCB";
 
 WebServer server(HTTP_PORT);
 
@@ -97,7 +97,7 @@ char buffer[1000];
 
 void setup()
 {
-  Serial.begin(460800);
+  Serial.begin(115200);
   Serial.printf("Connecting to: %s\n", ssid);
 
   led_strip_12v = new RGB12V(12, 13, 14, 0, 1, 2);
@@ -337,9 +337,9 @@ void setup()
   server.begin();
   // init led strip
   led_strip.begin();
-  led_strip.fill(led_strip.gamma32(led_strip.Color(200, 100, 0)), 0, led_strip.numPixels() - 1);
+  led_strip.fill(led_strip.gamma32(led_strip.Color(225, 125, 15)), 0, led_strip.numPixels() - 1);
   led_strip.show();
-  led_strip_12v->set_color(200, 0, 0);
+  led_strip_12v->set_color(225, 125, 15);
   led_strip_12v->show();
 
   timer = millis();
