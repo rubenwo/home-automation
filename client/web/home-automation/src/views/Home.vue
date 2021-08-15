@@ -1,10 +1,12 @@
 <template>
-    <div class="row" v-if="!this.devices.length <= 0">
+    <div>
         <div v-bind:key="groupName" v-for="group, groupName in groups">
-            <h2 style="color:rgba(255, 255, 255, 0.45); text-align:center; border-bottom: 1px solid rgba(255, 255, 255, 0.45);">
-                {{groupName}}</h2>
-            <b-row>
-                <b-col v-bind:key="device.id" v-for="device in group">
+            <div>
+                <h2 style="color:rgba(255, 255, 255, 0.45); text-align:center; border-bottom: 1px solid rgba(255, 255, 255, 0.45);">
+                    {{groupName}}</h2>
+
+                <div v-bind:key="device.id" v-for="device in group"
+                     style="display:inline-block; margin-left:.95%; margin-right: .95%;">
                     <app-card
                             v-bind:height="10"
                             v-bind:name="device.name"
@@ -15,8 +17,8 @@
                             v-bind:id="device.id"
                     >
                     </app-card>
-                </b-col>
-            </b-row>
+                </div>
+            </div>
         </div>
     </div>
 </template>

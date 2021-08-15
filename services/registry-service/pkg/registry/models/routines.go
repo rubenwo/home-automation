@@ -12,7 +12,7 @@ type TriggerType uint8
 
 const (
 	TimerTriggerType TriggerType = iota
-	//OnWebhook called, but that is a problem for another time
+	MqttEventTriggerType
 )
 
 type Trigger struct {

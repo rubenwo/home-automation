@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/go-pg/pg/v10"
+	"github.com/google/uuid"
 	"github.com/gorhill/cronexpr"
 	"github.com/robertkrimen/otto"
 	"github.com/rubenwo/home-automation/services/registry-service/pkg/registry/models"
@@ -93,6 +95,47 @@ func (s *Scheduler) Run(interval time.Duration) {
 		}
 		s.Unlock()
 	}
+}
+
+func (s *Scheduler) eventWorker(path, host string, retry int) {
+	opts := mqtt.NewClientOptions()
+	opts.AddBroker(fmt.Sprintf("%s:1883", host))
+	opts.SetClientID(uuid.New().String())
+	client := mqtt.NewClient(opts)
+
+	var err error
+	for i := 0; i < retry; i++ {
+		token := client.Connect()
+		token.Wait()
+		err = token.Error()
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second * 1)
+	}
+	if err != nil {
+		return
+	}
+
+	client.Subscribe(path, 0, func(cl mqtt.Client, msg mqtt.Message) {
+		msg.Ack()
+		payload := msg.Payload()
+		fmt.Println(string(payload))
+	})
+
+	s.Lock()
+	for _, routine := range s.routines {
+		if !routine.IsActive {
+			continue
+		}
+		if routine.Trigger.Type != models.MqttEventTriggerType {
+			continue
+		}
+
+	}
+	s.Unlock()
+
+	//TODO: Push job to worker
 }
 
 func checkIfRoutineShouldRun(trigger models.Trigger, currentTime time.Time, diffTimeInNanoS int64) bool {
