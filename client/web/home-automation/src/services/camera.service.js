@@ -7,7 +7,6 @@ export default {
         .catch(() => {
           return null;
         });
-    console.log(res);
     return res.data;
   },
   async addCamera(data) {
@@ -16,7 +15,6 @@ export default {
         .catch(() => {
           return null;
         });
-    console.log(res);
     return res.data;
   },
   async updateCamera(cameraId, data) {
@@ -25,7 +23,6 @@ export default {
         .catch(() => {
           return null;
         });
-    console.log(res);
     return res.data;
   },
   async fetchCamera(cameraId) {
@@ -34,7 +31,6 @@ export default {
         .catch(() => {
           return null;
         });
-    console.log(res);
     return res.data;
   },
   async deleteCamera(cameraId) {
@@ -43,7 +39,6 @@ export default {
         .catch(() => {
           return null;
         });
-    console.log(res);
     return res.data;
   }
 };

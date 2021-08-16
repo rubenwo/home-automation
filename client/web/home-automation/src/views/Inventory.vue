@@ -225,219 +225,201 @@
 </template>
 
 <script>
-    import InventoryService from "../services/inventory.service";
-    import Vuetable from "vuetable-2";
-    import VuetablePagination from "vuetable-2/src/components/VuetablePagination";
-    import VuetablePaginationInfo from "vuetable-2/src/components/VuetablePaginationInfo";
-    import _ from "lodash";
-    import InventoryFieldsDef from "../services/inventory.fields.def";
-    // import VuetableBootstrap4Config from "../components/VuetableBootstrap4Config";
-    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-    import FilterBar from "../components/FilterBar";
+  import InventoryService from "../services/inventory.service";
+  import Vuetable from "vuetable-2";
+  import VuetablePagination from "vuetable-2/src/components/VuetablePagination";
+  import VuetablePaginationInfo from "vuetable-2/src/components/VuetablePaginationInfo";
+  import _ from "lodash";
+  import InventoryFieldsDef from "../services/inventory.fields.def";
+  // import VuetableBootstrap4Config from "../components/VuetableBootstrap4Config";
+  import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+  import FilterBar from "../components/FilterBar";
 
-    export default {
-        name: "Inventory",
-        components: {
-            Vuetable,
-            VuetablePagination,
-            // eslint-disable-next-line vue/no-unused-components
-            FontAwesomeIcon,
-            FilterBar,
-            VuetablePaginationInfo,
+  export default {
+    name: "Inventory",
+    components: {
+      Vuetable,
+      VuetablePagination,
+      // eslint-disable-next-line vue/no-unused-components
+      FontAwesomeIcon,
+      FilterBar,
+      VuetablePaginationInfo,
+    },
+    data() {
+      return {
+        inventory: [],
+        fullInventory: [],
+        addItemData: {
+          category: "",
+          product: "",
+          name: "",
+          description: "",
+          count: 0,
         },
-        data() {
-            return {
-                inventory: [],
-                fullInventory: [],
-                addItemData: {
-                    category: "",
-                    product: "",
-                    name: "",
-                    description: "",
-                    count: 0,
-                },
-                perPage: 5,
-                fields: InventoryFieldsDef,
-                css: {
-                    table: {
-                        tableClass: 'table table-striped table-bordered table-hovered',
-                        loadingClass: 'loading',
-                        ascendingIcon: 'glyphicon glyphicon-chevron-up',
-                        descendingIcon: 'glyphicon glyphicon-chevron-down',
-                        handleIcon: 'glyphicon glyphicon-menu-hamburger',
-                    },
-                    pagination: {
-                        infoClass: 'pull-left',
-                        wrapperClass: 'vuetable-pagination pull-right',
-                        activeClass: 'btn-primary',
-                        disabledClass: 'disabled',
-                        pageClass: 'btn btn-border',
-                        linkClass: 'btn btn-border',
-                        icons: {
-                            first: '',
-                            prev: '',
-                            next: '',
-                            last: '',
-                        },
-                    }
-                }
-            };
-        },
-        watch: {
-            // eslint-disable-next-line no-unused-vars
-            inventory(newVal, oldVal) {
-                this.$refs.vuetable.refresh();
+        perPage: 5,
+        fields: InventoryFieldsDef,
+        css: {
+          table: {
+            tableClass: 'table table-striped table-bordered table-hovered',
+            loadingClass: 'loading',
+            ascendingIcon: 'glyphicon glyphicon-chevron-up',
+            descendingIcon: 'glyphicon glyphicon-chevron-down',
+            handleIcon: 'glyphicon glyphicon-menu-hamburger',
+          },
+          pagination: {
+            infoClass: 'pull-left',
+            wrapperClass: 'vuetable-pagination pull-right',
+            activeClass: 'btn-primary',
+            disabledClass: 'disabled',
+            pageClass: 'btn btn-border',
+            linkClass: 'btn btn-border',
+            icons: {
+              first: '',
+              prev: '',
+              next: '',
+              last: '',
             },
-        },
-        methods: {
-            onPaginationData(paginationData) {
-                this.$refs.pagination.setPaginationData(paginationData);
-            },
-            onChangePage(page) {
-                this.$refs.vuetable.changePage(page);
-            },
+          }
+        }
+      };
+    },
+    watch: {
+      // eslint-disable-next-line no-unused-vars
+      inventory(newVal, oldVal) {
+        this.$refs.vuetable.refresh();
+      },
+    },
+    methods: {
+      onPaginationData(paginationData) {
+        this.$refs.pagination.setPaginationData(paginationData);
+      },
+      onChangePage(page) {
+        this.$refs.vuetable.changePage(page);
+      },
 
-            async onActionClicked(event, data) {
-                console.log(event);
-                console.log(data);
-                switch (event) {
-                    case "edit-item":
-                        await this.updateItem(data);
-                        break;
-                    case "delete-item":
-                        await this.removeItem(data.id);
-                        break;
-                }
-            },
-            dataManager(sortOrder, pagination) {
-                if (this.inventory.length < 1) return;
+      async onActionClicked(event, data) {
+        switch (event) {
+          case "edit-item":
+            await this.updateItem(data);
+            break;
+          case "delete-item":
+            await this.removeItem(data.id);
+            break;
+        }
+      },
+      dataManager(sortOrder, pagination) {
+        if (this.inventory.length < 1) return;
 
-                let local = this.inventory;
+        let local = this.inventory;
 
-                // sortOrder can be empty, so we have to check for that as well
-                if (sortOrder.length > 0) {
-                    console.log("orderBy:", sortOrder[0].sortField, sortOrder[0].direction);
-                    local = _.orderBy(
-                        local,
-                        sortOrder[0].sortField,
-                        sortOrder[0].direction
-                    );
-                }
+        // sortOrder can be empty, so we have to check for that as well
+        if (sortOrder.length > 0) {
+          local = _.orderBy(
+              local,
+              sortOrder[0].sortField,
+              sortOrder[0].direction
+          );
+        }
 
-                pagination = this.$refs.vuetable.makePagination(
-                    local.length,
-                    this.perPage
-                );
-                console.log("pagination:", pagination);
-                let from = pagination.from - 1;
-                let to = from + this.perPage;
+        pagination = this.$refs.vuetable.makePagination(
+            local.length,
+            this.perPage
+        );
+        let from = pagination.from - 1;
+        let to = from + this.perPage;
 
-                return {
-                    pagination: pagination,
-                    data: _.slice(local, from, to),
-                };
-            },
-            async removeItem(id) {
-                console.log("removing item with id: " + id);
-                const res = await InventoryService.deleteInventoryItem(id);
-                console.log(res);
-                this.inventory = res;
-            },
-            async addItem() {
-                this.$refs.add_inventory_item.show();
-            },
-            async updateItem(data) {
-                this.addItemData = data;
-                this.$refs.edit_inventory_item.show();
-            },
-            async handleOk(evt) {
-                evt.preventDefault();
-                console.log(this.addItemData);
-                this.handleSubmit();
-            },
-            async handleCancel() {
-                this.addItemData = {
-                    name: "",
-                    description: "",
-                    count: 0,
-                };
-            },
-            async handleSubmit() {
-                console.log(this.addItemData);
-                const res = await InventoryService.addInventoryItem(this.addItemData);
-                console.log(res);
-                this.inventory = res;
-                this.addItemData = {
-                    name: "",
-                    description: "",
-                    count: 0,
-                };
-                this.$nextTick(() => {
-                    this.$refs.add_inventory_item.hide();
-                });
-            },
-            async handleEditOk(evt) {
-                evt.preventDefault();
-                console.log(this.addItemData);
-                this.handleEditSubmit();
-            },
-            async handleEditCancel() {
-                this.addItemData = {
-                    name: "",
-                    description: "",
-                    count: 0,
-                };
-            },
-            async handleEditSubmit() {
-                console.log(this.addItemData);
-                const res = await InventoryService.updateInventoryItem(
-                    this.addItemData.id,
-                    this.addItemData
-                );
-                console.log(res);
-                this.inventory = res;
-                this.addItemData = {
-                    name: "",
-                    description: "",
-                    count: 0,
-                };
-                this.$nextTick(() => {
-                    this.$refs.edit_inventory_item.hide();
-                });
-            },
-            async onFilterSet(filterText) {
-                const res = await InventoryService.fetchInventory();
-                const filtered = res.filter((item) => {
-                    if (item.category.toLowerCase().includes(filterText)) return true;
-                    if (item.product.toLowerCase().includes(filterText)) return true;
-                    if (item.name.toLowerCase().includes(filterText)) return true;
-                    if (item.description.toLowerCase().includes(filterText)) return true;
-                    return false;
-                });
-                if (filtered.length === 0) {
-                    console.log("EMPTY");
-                    this.inventory = [];
-                    this.fields = [];
-                } else {
-                    this.fields = InventoryFieldsDef;
-                    this.inventory = filtered;
-                }
-            },
-            async onFilterReset() {
-                const res = await InventoryService.fetchInventory();
-                this.fields = InventoryFieldsDef;
-                this.inventory = res;
-            },
-        },
-        async mounted() {
-            const res = await InventoryService.fetchInventory();
-            console.log(res);
-            this.inventory = res;
-            this.$events.$on("filter-set", (eventData) => this.onFilterSet(eventData));
-            // eslint-disable-next-line no-unused-vars
-            this.$events.$on("filter-reset", (e) => this.onFilterReset());
-        },
-    };
+        return {
+          pagination: pagination,
+          data: _.slice(local, from, to),
+        };
+      },
+      async removeItem(id) {
+        this.inventory = await InventoryService.deleteInventoryItem(id);
+      },
+      async addItem() {
+        this.$refs.add_inventory_item.show();
+      },
+      async updateItem(data) {
+        this.addItemData = data;
+        this.$refs.edit_inventory_item.show();
+      },
+      async handleOk(evt) {
+        evt.preventDefault();
+        this.handleSubmit();
+      },
+      async handleCancel() {
+        this.addItemData = {
+          name: "",
+          description: "",
+          count: 0,
+        };
+      },
+      async handleSubmit() {
+        this.inventory = await InventoryService.addInventoryItem(this.addItemData);
+        this.addItemData = {
+          name: "",
+          description: "",
+          count: 0,
+        };
+        this.$nextTick(() => {
+          this.$refs.add_inventory_item.hide();
+        });
+      },
+      async handleEditOk(evt) {
+        evt.preventDefault();
+        this.handleEditSubmit();
+      },
+      async handleEditCancel() {
+        this.addItemData = {
+          name: "",
+          description: "",
+          count: 0,
+        };
+      },
+      async handleEditSubmit() {
+        this.inventory = await InventoryService.updateInventoryItem(
+            this.addItemData.id,
+            this.addItemData
+        );
+        this.addItemData = {
+          name: "",
+          description: "",
+          count: 0,
+        };
+        this.$nextTick(() => {
+          this.$refs.edit_inventory_item.hide();
+        });
+      },
+      async onFilterSet(filterText) {
+        const res = await InventoryService.fetchInventory();
+        const filtered = res.filter((item) => {
+          if (item.category.toLowerCase().includes(filterText)) return true;
+          if (item.product.toLowerCase().includes(filterText)) return true;
+          if (item.name.toLowerCase().includes(filterText)) return true;
+          if (item.description.toLowerCase().includes(filterText)) return true;
+          return false;
+        });
+        if (filtered.length === 0) {
+          this.inventory = [];
+          this.fields = [];
+        } else {
+          this.fields = InventoryFieldsDef;
+          this.inventory = filtered;
+        }
+      },
+      async onFilterReset() {
+        const res = await InventoryService.fetchInventory();
+        this.fields = InventoryFieldsDef;
+        this.inventory = res;
+      },
+    },
+    async mounted() {
+      this.inventory = await InventoryService.fetchInventory();
+      this.$events.$on("filter-set", (eventData) => this.onFilterSet(eventData));
+      // eslint-disable-next-line no-unused-vars
+      this.$events.$on("filter-reset", (e) => this.onFilterReset());
+    },
+  };
 </script>
 
 <style scoped>

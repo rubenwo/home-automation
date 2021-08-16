@@ -16,10 +16,10 @@
 </template>
 
 <script>
-import RoutineCard from "../components/RoutineCard";
-import RoutineService from "../services/routines.service";
+  import RoutineCard from "../components/RoutineCard";
+  import RoutineService from "../services/routines.service";
 
-export default {
+  export default {
   name: "Routines",
   components: { RoutineCard },
   data() {
@@ -29,9 +29,7 @@ export default {
   },
   methods: {},
   async mounted() {
-    const routines = await RoutineService.fetchRoutines(this.id);
-    console.log(routines);
-    this.routines = routines;
+    this.routines = await RoutineService.fetchRoutines(this.id);
   },
 };
 </script>

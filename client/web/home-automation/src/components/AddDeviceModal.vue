@@ -134,7 +134,6 @@
       },
       handleOk(evt) {
         evt.preventDefault();
-        console.log(this.newItem);
         this.handleSubmit();
       },
       handleCancel() {
@@ -172,7 +171,6 @@
     },
     created() {
       this.$on("add_device", () => {
-        console.log("Got Event in Device");
         this.$refs.deviceModal.show();
       });
     },

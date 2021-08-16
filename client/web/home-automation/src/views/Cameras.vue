@@ -40,7 +40,6 @@
     },
     async mounted() {
       const cameras = await CameraService.fetchCameras();
-      console.log(cameras);
       this.cameras = cameras;
     },
   };

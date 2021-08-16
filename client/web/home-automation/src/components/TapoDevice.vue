@@ -33,10 +33,8 @@ export default {
     getImgUrl() {
       switch (this.tapoDevice.device_type) {
         case "P100":
-          console.log("returning plug");
           return require("../assets/smart_plug_icon.png");
         case "L510E":
-          console.log("returning light");
           return require("../assets/light_icon.png");
       }
     },
@@ -44,7 +42,6 @@ export default {
   async mounted() {
     this.id = this.$route.params.id;
     await this.fetchTapoDevice(this.id);
-    console.log(this.tapoDevice);
   },
 };
 </script>

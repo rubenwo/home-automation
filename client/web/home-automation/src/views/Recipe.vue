@@ -54,7 +54,6 @@
       this.id = this.$route.params.id;
 
       const res = await FoodService.fetchRecipe(this.id);
-      console.log(res);
       this.recipe = res.recipe;
     },
     mounted() {

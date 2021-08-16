@@ -62,23 +62,18 @@
         return "routine/" + this.id;
       },
       async deleteRoutine() {
-        const res = await RoutineService.deleteRoutine(this.id);
-        console.log(res);
+        await RoutineService.deleteRoutine(this.id);
       },
       async set_active() {
-        console.log("clicked");
-        // this.routine.is_active = !this.routine.is_active;
         this.updateRoutine();
       },
       async updateRoutine() {
         const res = await RoutineService.updateRoutine(this.id, this.routine);
-        console.log(res);
         this.routine = res.routine;
       },
     },
     async mounted() {
       const routine = await RoutineService.fetchRoutine(this.id);
-      console.log(routine);
       this.routine = routine.routine;
     },
   };

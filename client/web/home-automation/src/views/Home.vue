@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="devices.length > 0">
         <div v-bind:key="groupName" v-for="group, groupName in groups">
             <div>
                 <h2 style="color:rgba(255, 255, 255, 0.45); text-align:center; border-bottom: 1px solid rgba(255, 255, 255, 0.45);">
@@ -46,10 +46,6 @@
           }
           result[device.product.company].push(device)
         });
-
-        console.log("GROUPS");
-        console.log(result);
-
         return result
       }
     },

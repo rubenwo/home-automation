@@ -7,7 +7,6 @@ export default {
       .catch(() => {
         return null;
       });
-    console.log(res);
     return res.data;
   },
   async addRecipe(data) {
@@ -16,7 +15,6 @@ export default {
       .catch(() => {
         return null;
       });
-    console.log(res);
     return res.data;
   },
   async fetchRecipe(recipeId) {
@@ -25,7 +23,6 @@ export default {
       .catch(() => {
         return null;
       });
-    console.log(res);
     return res.data;
   },
   async deleteRecipe(recipeId) {
@@ -34,7 +31,6 @@ export default {
       .catch(() => {
         return null;
       });
-    console.log(res);
     return res.data;
   },
 };

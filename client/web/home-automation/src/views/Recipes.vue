@@ -34,7 +34,6 @@
     methods: {},
     async mounted() {
       const recipes = await FoodService.fetchRecipes(this.id);
-      console.log(recipes);
       this.recipes = recipes.recipes;
     },
   };

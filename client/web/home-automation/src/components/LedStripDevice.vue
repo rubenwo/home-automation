@@ -31,10 +31,8 @@
     components: {Verte, ColorPicker},
     methods: {
       onButtonClick() {
-        console.log(this.color);
         let rgb = this.color.replace(/[^\d,]/g, "").split(",");
 
-        console.log(rgb);
         let command = {
           mode: "SINGLE_COLOR_RGB",
           red: parseInt(rgb[0]),
@@ -46,7 +44,6 @@
 
       // eslint-disable-next-line no-unused-vars
       onColorChange(attrs, name) {
-        console.log("Change");
         this.colour = { ...attrs };
       }
     },
@@ -64,7 +61,6 @@
     },
     async mounted() {
       this.id = this.$route.params.id;
-      console.log(this.id);
       const res = await LedStripService.fetchAllLedStripDevices();
       const devices = res.devices;
 
@@ -74,8 +70,6 @@
           break;
         }
       }
-      console.log(this.device);
-
     },
   };
 </script>

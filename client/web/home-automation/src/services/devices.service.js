@@ -7,11 +7,9 @@ export default {
       .catch(() => {
         return null;
       });
-    console.log(res);
     return res.data;
   },
   async addNewDevice(data) {
-    console.log(data);
     let url = "/api/v1";
     switch (data.device_type) {
       case "tapo":
@@ -25,7 +23,6 @@ export default {
       //   break;
     }
     const res = await ApiService().post(url, data.data);
-    console.log(res);
     return res.data;
   },
 };

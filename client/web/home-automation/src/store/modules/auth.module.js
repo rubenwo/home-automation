@@ -36,11 +36,9 @@ export default {
     },
   },
   actions: {
-    async login({ commit }, { username, password }) {
+    async login({commit}, {username, password}) {
       commit("CLEAR_ERROR");
-      console.log("logging in");
       const resp = await AuthService.login(username, password);
-      console.log(resp);
       if (resp.status === 200) {
         const {
           username,
@@ -61,7 +59,7 @@ export default {
       }
       return false;
     },
-    async logout({ commit }) {
+    async logout({commit}) {
       localStorage.removeItem("authorization_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("username");
@@ -69,11 +67,9 @@ export default {
       commit("CLEAR_ALL");
       commit("CLEAR_ERROR");
     },
-    async refreshToken({ commit }, { token }) {
-      console.log(token);
+    async refreshToken({commit}, {token}) {
       const resp = await AuthService.refreshToken(token);
-      console.log(resp);
-      const { authorization_token, refresh_token } = resp.data;
+      const {authorization_token, refresh_token} = resp.data;
       localStorage.setItem("authorization_token", authorization_token);
       localStorage.setItem("refresh_token", refresh_token);
       commit("SET_AUTHORIZATION_TOKEN", authorization_token);
@@ -92,8 +88,7 @@ export default {
       };
       let parsedToken = parseJwt(state.authorization_token);
       if (parsedToken == null) {
-        // eslint-disable-next-line no-console
-        console.log("error decoding!");
+        return false;
       }
       return parsedToken.exp > Math.floor(Date.now() / 1000);
     },

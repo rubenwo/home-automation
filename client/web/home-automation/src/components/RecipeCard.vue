@@ -51,13 +51,10 @@
         return "recipe/" + this.id;
       },
       async deleteRecipe() {
-        const res = await FoodService.deleteRecipe(this.id);
-        console.log(res);
+        await FoodService.deleteRecipe(this.id);
       },
     },
     async mounted() {
-      const recipes = await FoodService.fetchRecipes(this.id);
-      console.log(recipes);
     },
   };
 </script>

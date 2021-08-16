@@ -25,7 +25,6 @@ export default {
   },
   created() {
     this.$on("add_sensor", () => {
-      console.log("Got Event in Sensor");
       this.$refs.sensorModal.show();
     });
   },

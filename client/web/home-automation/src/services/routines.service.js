@@ -7,7 +7,6 @@ export default {
             .catch(() => {
                 return null;
             });
-        console.log(res);
         return res.data;
     },
     async addRoutine(data) {
@@ -16,7 +15,6 @@ export default {
             .catch(() => {
                 return null;
             });
-        console.log(res);
         return res.data;
     },
     async updateRoutine(id, data) {
@@ -25,7 +23,6 @@ export default {
             .catch(() => {
                 return null;
             });
-        console.log(res);
         return res.data;
     },
     async fetchRoutine(routineId) {
@@ -34,7 +31,6 @@ export default {
             .catch(() => {
                 return null;
             });
-        console.log(res);
         return res.data;
     },
     async deleteRoutine(recipeId) {
@@ -43,7 +39,6 @@ export default {
             .catch(() => {
                 return null;
             });
-        console.log(res);
         return res.data;
     },
     async fetchLogs() {
@@ -52,7 +47,6 @@ export default {
             .catch(() => {
                 return null;
             });
-        console.log(res);
         return res.data;
     },
     async fetchLogsForId(routineId) {
@@ -61,7 +55,6 @@ export default {
             .catch(() => {
                 return null;
             });
-        console.log(res);
         return res.data;
     }
 };

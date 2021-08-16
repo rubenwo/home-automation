@@ -34,7 +34,6 @@ export default {
       commit("REQUEST");
       try {
         const result = await LedStripService.fetchAllLedStripDevices();
-        console.log(result.devices);
         commit("LED_STRIP_DEVICES_LOADED", result.devices);
       } catch (err) {
         commit("FAILED", err.message);
@@ -48,7 +47,6 @@ export default {
           data.deviceId,
           data.command
         );
-        console.log(result);
         commit("LED_STRIP_DEVICE_COMMANDED", result.message);
       } catch (err) {
         commit("FAILED", err.message);

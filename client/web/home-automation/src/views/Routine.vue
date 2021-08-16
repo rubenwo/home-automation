@@ -58,14 +58,10 @@
       this.id = this.$route.params.id;
 
       const res = await RoutinesService.fetchRoutine(this.id);
-      console.log(res);
       this.routine = res.routine;
-      console.log(this.routine);
 
       const logsRes = await RoutinesService.fetchLogsForId(this.id);
-      console.log(logsRes);
       this.logs = logsRes.logs;
-      console.log(this.logs);
     },
     mounted() {
     },
