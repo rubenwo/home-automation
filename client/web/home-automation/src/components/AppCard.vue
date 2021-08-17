@@ -13,13 +13,18 @@
       "
                     class="mb-2"
             >
-                <b-card-img
-                        v-bind:src="img"
-                        alt="Image"
-                        height="130"
-                        width="130"
-                        class="mb-4"
-                />
+                <div v-if="device_type === 'RGB_LED_STRIP'" align="center">
+                    <color-picker v-model="color" :width="130" :height="130" @color-change="onRGBClick"></color-picker>
+                </div>
+                <div v-else>
+                    <b-card-img
+                            v-bind:src="img"
+                            alt="Image"
+                            height="130"
+                            width="130"
+                            class="mb-4"
+                    />
+                </div>
                 <p>{{ category }}</p>
                 <p>{{ company }} : {{ device_type }}</p>
                 <div v-if="company === 'tp-link'">
@@ -36,11 +41,13 @@
                         Status: {{ this.dev.device_info.device_on ? "On" : "Off" }}
                     </p>
                 </div>
-                <div v-if="device_type === 'RGB_LED_STRIP'" style="text-align: center">
-                    <b-button pill @click="onRGBClick()" center>
-                        <verte v-model="color" picker="wheel" model="rgb"/>
+
+                <div v-if="device_type === 'RGB_LED_STRIP'">
+                    <b-button pill @click="onRGBClickVerte" center>
+                        <verte v-model="colorVerte" picker="wheel" model="rgb"/>
                     </b-button>
                 </div>
+
                 <div slot="footer">
                     <b-button style="background-color: #4287f5" v-bind:to="navigate()"
                     >Information
@@ -85,6 +92,7 @@
 <script>
   import Loading from "vue-loading-overlay";
   import "vue-loading-overlay/dist/vue-loading.css";
+  import ColorPicker from 'vue-color-picker-wheel';
   import Verte from "verte";
   import "verte/dist/verte.css";
   import LedStripService from "../services/led_strip.service";
@@ -93,7 +101,7 @@
 
   export default {
     name: "app-card",
-    components: {Loading, Verte, ToggleButton},
+    components: {Loading, ColorPicker, ToggleButton, Verte},
     props: {
       name: {
         type: String,
@@ -125,7 +133,8 @@
         device_on: false,
         brightness: 100,
         state: "loading",
-        color: "",
+        color: "#E17D0F",
+        colorVerte: "",
         dev: {},
       };
     },
@@ -148,15 +157,29 @@
         }
       },
       onRGBClick() {
-        let rgb = this.color.replace(/[^\d,]/g, "").split(",");
+        let rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(this.color);
+        rgb = {
+          r: parseInt(rgb[1], 16),
+          g: parseInt(rgb[2], 16),
+          b: parseInt(rgb[3], 16)
+        };
 
         let command = {
           mode: "SINGLE_COLOR_RGB",
-          red: parseInt(rgb[0]),
-          green: parseInt(rgb[1]),
-          blue: parseInt(rgb[2]),
+          red: rgb.r,
+          green: rgb.g,
+          blue: rgb.b,
         };
+
         LedStripService.commandLedStripDevice(this.id, command);
+      },
+
+      onRGBClickVerte() {
+        let rgbToHex = (r, g, b) => {
+          return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        };
+        let rgb = this.colorVerte.replace(/[^\d,]/g, "").split(",");
+        this.color = rgbToHex(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
       },
       async turnOffDevice() {
         if (this.company === "tp-link") {
@@ -186,6 +209,10 @@
           this.device_on = this.dev.device_info.device_on;
         }
         this.state = "loaded";
+      } else if (this.device_type === 'RGB_LED_STRIP') {
+        // TODO: get the current RGB color from the
+        this.state = "loaded";
+
       } else {
         this.state = "loaded";
       }

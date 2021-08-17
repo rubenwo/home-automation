@@ -19,6 +19,7 @@
     "vue-auth-image": "^0.0.3",
     "vue-color-gradient-picker": "^0.1.2",
     "vue-color-kit": "^1.0.5",
+    "vue-color-picker-wheel": "^0.4.3",
     "vue-loading-overlay": "^3.4.2"
   },
   "devDependencies": {

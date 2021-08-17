@@ -3,16 +3,6 @@
         <b-button pill @click="onButtonClick" center>
             <verte v-model="color" picker="wheel" model="rgb"/>
         </b-button>
-
-        <p></p>
-
-
-        <ColorPicker
-                :color="colour"
-                :onStartChange="colour => onColorChange(colour, 'start')"
-                :onChange="colour => onColorChange(colour, 'change')"
-                :onEndChange="colour => onColorChange(colour, 'end')"
-        />
     </div>
 </template>
 
@@ -20,7 +10,6 @@
   import Verte from "verte";
   import "verte/dist/verte.css";
   import LedStripService from "../services/led_strip.service";
-  import {ColorPicker} from 'vue-color-gradient-picker';
 
   export default {
     name: "LedStripDevice",
@@ -28,7 +17,7 @@
       type: String,
       default: "",
     },
-    components: {Verte, ColorPicker},
+    components: {Verte},
     methods: {
       onButtonClick() {
         let rgb = this.color.replace(/[^\d,]/g, "").split(",");
@@ -42,21 +31,11 @@
         LedStripService.commandLedStripDevice(this.id, command);
       },
 
-      // eslint-disable-next-line no-unused-vars
-      onColorChange(attrs, name) {
-        this.colour = { ...attrs };
-      }
     },
     data() {
       return {
         color: "",
         device: {},
-        colour: {
-          red: 255,
-          green: 0,
-          blue: 0,
-          alpha: 1
-        }
       };
     },
     async mounted() {
@@ -74,4 +53,4 @@
   };
 </script>
 
-<style src="vue-color-gradient-picker/dist/index.css" lang="css" />
+<style src="vue-color-gradient-picker/dist/index.css" lang="css"/>
