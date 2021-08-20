@@ -160,8 +160,7 @@ unsigned long timer;
 
 void control_leds(byte *message, unsigned int length)
 {
-
-  DynamicJsonDocument jsonDocument(sizeof(byte) * length);
+  DynamicJsonDocument jsonDocument(65535 * sizeof(byte));
   deserializeJson(jsonDocument, message, length);
 
   const std::string &json_mode = jsonDocument["mode"];
@@ -170,9 +169,9 @@ void control_leds(byte *message, unsigned int length)
   if (mode == Mode::SINGLE_COLOR_RGB)
   {
 
-    red = jsonDocument["red"];
-    green = jsonDocument["green"];
-    blue = jsonDocument["blue"];
+    red = jsonDocument["r"];
+    green = jsonDocument["g"];
+    blue = jsonDocument["b"];
 
     rgb_updated = true;
   }
@@ -190,19 +189,16 @@ void control_leds(byte *message, unsigned int length)
 
     for (const JsonObject &value : json_config)
     {
-
-      int r = value["red"];
-      int g = value["green"];
-      int b = value["blue"];
-      Serial.printf("R: %d, G: %d, B: %d\n", r, g, b);
+      int r = value["r"];
+      int g = value["g"];
+      int b = value["b"];
+      // Serial.printf("R: %d, G: %d, B: %d\n", r, g, b);
       animation_colors.push_back(Color{
-          value["red"],
-          value["green"],
-          value["blue"],
+          r,
+          g,
+          b,
       });
     }
-
-    Serial.println(animation_colors.size());
 
     current_color_index = 0;
   }
@@ -270,11 +266,10 @@ void loop()
     led_strip_12v->show();
   }
 
-  if (mode == Mode::ANIMATION_RGB)
+  if (mode == Mode::ANIMATION_RGB && animation_colors.size() > 0)
   {
     if (millis() - timer > animation_speed)
     {
-
       Color current_color = animation_colors[current_color_index % animation_colors.size()];
 
       led_strip_5v_addressable.fill(led_strip_5v_addressable.gamma32(led_strip_5v_addressable.Color(current_color.R, current_color.G, current_color.B)), 0, led_strip_5v_addressable.numPixels());
@@ -282,10 +277,6 @@ void loop()
 
       led_strip_12v->set_color(current_color.R, current_color.G, current_color.B);
       led_strip_12v->show();
-
-      // Serial.println(animation_colors.size());
-
-      // Serial.printf("R: %d, G: %d, B: %d\n", current_color.R, current_color.G, current_color.B);
 
       current_color_index++;
       timer = millis();
