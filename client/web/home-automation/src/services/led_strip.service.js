@@ -7,7 +7,7 @@ export default {
   },
   async commandLedStripDevice(deviceId, data) {
     const res = await ApiService().post(
-        "/api/v1/leds/devices/" + deviceId + "/command",
+        "/api/v1/leds/devices/" + deviceId + "/command/" + "solid",
         data
     );
     return res.data;

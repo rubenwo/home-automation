@@ -65,11 +65,15 @@ spec:
         methods:
           - GET
         protocol: http
-      - path: "/leds/devices/register"
+      - path: "/leds/devices/{id}"
+        methods:
+          - GET
+        protocol: http
+      - path: "/leds/devices/{id}/command/{mode}"
         methods:
           - POST
         protocol: http
-      - path: "/leds/devices/{id}/command"
+      - path: "/leds/devices/command/{mode}"
         methods:
           - POST
         protocol: http

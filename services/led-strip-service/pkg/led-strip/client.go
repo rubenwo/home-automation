@@ -25,10 +25,10 @@ type Client struct {
 	// TODO: add internal cooldown between requests to the same id
 	connectedLedStrips map[string]string
 
-	onLedStripOnline   func(string)
+	onLedStripOnline func(string, string)
 }
 
-func NewClient(host string, retry int) (*Client, error) {
+func NewClient(host string, retry int, storedDevices map[string]string) (*Client, error) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("%s:1883", host))
 	opts.SetClientID(uuid.New().String())
@@ -49,6 +49,9 @@ func NewClient(host string, retry int) (*Client, error) {
 	}
 
 	ledStripClient := &Client{mqttClient: client, connectedLedStrips: map[string]string{}}
+	if storedDevices != nil {
+		ledStripClient.connectedLedStrips = storedDevices
+	}
 
 	client.Subscribe(AnnouncementMqttPath, QosAtLeastOnce, func(cl mqtt.Client, msg mqtt.Message) {
 		msg.Ack()
@@ -64,7 +67,7 @@ func NewClient(host string, retry int) (*Client, error) {
 		ledStripClient.connectedLedStrips[am.DeviceId] = am.DeviceName
 
 		if ledStripClient.onLedStripOnline != nil {
-			go ledStripClient.onLedStripOnline(am.DeviceId)
+			go ledStripClient.onLedStripOnline(am.DeviceId, am.DeviceName)
 		}
 	})
 
@@ -76,7 +79,7 @@ func (c *Client) ConnectLedStrips() map[string]string {
 	return c.connectedLedStrips
 }
 
-func (c *Client) SetOnLedStripOnlineCallback(f func(string)) {
+func (c *Client) SetOnLedStripOnlineCallback(f func(string, string)) {
 	c.onLedStripOnline = f
 }
 

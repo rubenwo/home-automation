@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-pg/pg/v10"
-	"github.com/google/uuid"
+	ledstrip "github.com/rubenwo/home-automation/services/led-strip-service/pkg/led-strip"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,8 +16,9 @@ import (
 )
 
 type api struct {
-	router *chi.Mux
-	db     *pg.DB
+	router         *chi.Mux
+	db             *pg.DB
+	ledStripClient *ledstrip.Client
 }
 
 func New(cfg *Config) (*api, error) {
@@ -48,6 +49,47 @@ func New(cfg *Config) (*api, error) {
 		db:     db,
 	}
 
+	var deviceInfos []LedDeviceModel
+	if err := a.db.Model(&deviceInfos).Select(); err != nil {
+		log.Println(err)
+	}
+
+	knownDevices := make(map[string]string)
+	if deviceInfos != nil {
+		for _, info := range deviceInfos {
+			knownDevices[info.ID] = info.Name
+		}
+	}
+	ledStripClient, err := ledstrip.NewClient(cfg.MqttHost, 10, knownDevices)
+	if err != nil {
+		return nil, err
+	}
+	a.ledStripClient = ledStripClient
+
+	a.ledStripClient.SetOnLedStripOnlineCallback(func(id, name string) {
+		log.Printf("a new led strip came online with id: %s\n", id)
+
+		var deviceInfo LedDeviceModel
+		if err := a.db.Model(&deviceInfo).Where("led_device_model.id = ?", id).Select(); err != nil {
+			result, err := a.db.Model(&LedDeviceModel{ID: id, Name: name}).Insert()
+			if err != nil {
+				log.Printf("error storing new led strip with id: %s\n", id)
+				return
+			}
+			fmt.Println(result)
+		} else {
+			result, err := a.db.Model(&LedDeviceModel{ID: id, Name: name}).Where("led_device_model.id = ?", id).Update(&LedDeviceModel{ID: id, Name: name})
+			if err != nil {
+				log.Printf("error storing existing led strip with id: %s\n", id)
+				return
+			}
+			fmt.Println(result)
+		}
+		if err := pushToRegistry(id, name); err != nil {
+			log.Printf("error pushing new device to registry: %s\n", err.Error())
+		}
+	})
+
 	// A good base middleware stack
 	a.router.Use(middleware.RequestID)
 	a.router.Use(middleware.RealIP)
@@ -61,15 +103,73 @@ func New(cfg *Config) (*api, error) {
 
 	a.router.Get("/healthz", a.healthz)
 	a.router.Get("/leds/devices", a.getDevices)
-	a.router.Post("/leds/devices/register", a.registerDevice)
-	a.router.Post("/leds/devices/{id}/command", a.commandDevice)
-	a.router.Put("/leds/devices/{id}", a.updateDevice)
+	a.router.Get("/leds/devices/{id}", a.getDevice)
+	a.router.Post("/leds/devices/{id}/command/{mode}", a.commandDevice)
+	a.router.Post("/leds/devices/command/{mode}", a.commandDevices)
 
 	return a, nil
 }
+
+func pushToRegistry(id, name string) error {
+	c := &http.Client{}
+
+	req, err := http.NewRequest("DELETE", "http://registry.default.svc.cluster.local/devices/"+id, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if err := resp.Body.Close(); err != nil {
+		return err
+	}
+
+	var data struct {
+		ID       string `json:"id"`
+		Name     string `json:"name"`
+		Category string `json:"category"`
+		Product  struct {
+			Company string `json:"company"`
+			Type    string `json:"type"`
+		} `json:"product"`
+	}
+	data.ID = id
+	data.Name = name
+	data.Category = "led-strip"
+	data.Product.Company = "esp32"
+	data.Product.Type = "RGB_LED_STRIP"
+	jsonData, err := json.Marshal(&data)
+	if err != nil {
+		return err
+	}
+
+	req, err = http.NewRequest("POST", "http://registry.default.svc.cluster.local/devices", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+	resp, err = c.Do(req)
+	if err != nil {
+		return err
+	}
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if err := resp.Body.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (a *api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.router.ServeHTTP(w, r)
 }
+
 func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	if err := json.NewEncoder(w).Encode(&HealthzModel{
@@ -77,6 +177,30 @@ func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 		ErrorMessage: "",
 	}); err != nil {
 		log.Printf("error sending healthz: %s\n", err.Error())
+	}
+}
+
+func (a *api) getDevice(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, "no id provided", http.StatusBadRequest)
+		return
+	}
+
+	var deviceInfo LedDeviceModel
+	if err := a.db.Model(&deviceInfo).Where("led_device_model.id = ?", id).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	var resp struct {
+		Device LedDeviceModel `json:"device"`
+	}
+	resp.Device = deviceInfo
+
+	w.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("error sending devices: %s\n", err.Error())
 	}
 }
 
@@ -102,218 +226,76 @@ func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *api) registerDevice(w http.ResponseWriter, r *http.Request) {
-	var d RegisterLedDeviceModel
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-		return
-	}
-
-	c := &http.Client{}
-	resp, err := c.Get(fmt.Sprintf("http://%s/healthz", d.IPAddress))
-	if err != nil {
-		w.Header().Set("content-type", "application/json")
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusInternalServerError,
-			ErrorMessage: err.Error(),
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
-		}
-		return
-	}
-	var ledHealthz HealthzModel
-	if err := json.NewDecoder(resp.Body).Decode(&ledHealthz); err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-		return
-	}
-	fmt.Println(ledHealthz)
-	resp.Body.Close()
-
-	resp, err = c.Get(fmt.Sprintf("http://%s/info", d.IPAddress))
-	if err != nil {
-		w.Header().Set("content-type", "application/json")
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusInternalServerError,
-			ErrorMessage: err.Error(),
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
-		}
-		return
-	}
-	var ledControllerInfo LedControllerInfo
-	if err := json.NewDecoder(resp.Body).Decode(&ledControllerInfo); err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-		return
-	}
-	defer resp.Body.Close()
-	id := uuid.New().String()
-
-	device := LedDeviceModel{
-		ID:             id,
-		Name:           ledControllerInfo.DeviceName,
-		NumLeds:        150,
-		SupportedModes: ledControllerInfo.DeviceInfo.SupportedModes,
-		CurrentMode:    ledControllerInfo.DeviceInfo.CurrentMode,
-		IPAddress:      d.IPAddress,
-	}
-
-	result, err := a.db.Model(&device).Insert()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("couldn't insert model into database: %s", err.Error()), http.StatusInternalServerError)
-		return
-	}
-	fmt.Println(result)
-	var data struct {
-		ID       string `json:"id"`
-		Name     string `json:"name"`
-		Category string `json:"category"`
-		Product  struct {
-			Company string `json:"company"`
-			Type    string `json:"type"`
-		} `json:"product"`
-	}
-	data.ID = id
-	data.Name = ledControllerInfo.DeviceName
-	data.Category = "led-strip"
-	data.Product.Company = "esp32"
-	data.Product.Type = ledControllerInfo.DeviceType
-	jsonData, err := json.Marshal(&data)
-	if err != nil {
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusBadRequest,
-			ErrorMessage: "id can't be empty",
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
-		}
-		return
-	}
-
-	req, err := http.NewRequest("POST", "http://registry.default.svc.cluster.local/devices", bytes.NewBuffer(jsonData))
-	if err != nil {
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusBadRequest,
-			ErrorMessage: "id can't be empty",
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
-		}
-		return
-	}
-	resp, err = c.Do(req)
-	if err != nil {
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusBadRequest,
-			ErrorMessage: "id can't be empty",
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
-		}
-		return
-	}
-	raw, err := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-	fmt.Println(string(raw), err)
-	a.getDevices(w, r)
-}
-
-func (a *api) updateDevice(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	if id == "" {
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusBadRequest,
-			ErrorMessage: "id can't be empty",
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
-		}
-		return
-	}
-
-	var device LedDeviceModel
-	if err := a.db.Model(&device).Where("led_device_model.id = ?", id).Select(); err != nil {
-		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
-		return
-	}
-
-	panic("Not Implemented")
-
-}
-
 func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusBadRequest,
-			ErrorMessage: "id can't be empty",
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
-		}
+		http.Error(w, "no id provided", http.StatusBadRequest)
 		return
 	}
 
-	var device LedDeviceModel
-	if err := a.db.Model(&device).Where("led_device_model.id = ?", id).Select(); err != nil {
-		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+	mode := chi.URLParam(r, "mode")
+	if mode == "" {
+		http.Error(w, "no mode provided", http.StatusBadRequest)
 		return
 	}
 
-	fmt.Println("sending command")
-	raw, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.Header().Set("content-type", "application/json")
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusInternalServerError,
-			ErrorMessage: err.Error(),
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
+	if mode == "solid" {
+		var msg struct {
+			Mode  string `json:"mode"`
+			Red   int    `json:"red"`
+			Green int    `json:"green"`
+			Blue  int    `json:"blue"`
 		}
+
+		if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't decode the body: %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
+		if err := a.ledStripClient.SetSolidColorById(ledstrip.Color{R: msg.Red, G: msg.Green, B: msg.Blue}, id); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't set the solid color for led strip with id: %s, %s", id, err.Error()), http.StatusInternalServerError)
+			return
+		}
+	} else if mode == "animation" {
+		if err := a.ledStripClient.SetAnimationColorCycleById(id); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't set the animation color for led strip with id: %s, %s", id, err.Error()), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		http.Error(w, "invalid mode", http.StatusBadRequest)
 		return
 	}
-	fmt.Println(string(raw))
-	proxyReq, err := http.NewRequest("POST", fmt.Sprintf("http://%s/led", device.IPAddress), bytes.NewBuffer(raw))
-	if err != nil {
-		w.Header().Set("content-type", "application/json")
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusInternalServerError,
-			ErrorMessage: err.Error(),
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
-		}
+}
+
+func (a *api) commandDevices(w http.ResponseWriter, r *http.Request) {
+	mode := chi.URLParam(r, "mode")
+	if mode == "" {
+		http.Error(w, "no mode provided", http.StatusBadRequest)
 		return
 	}
 
-	proxyReq.Header.Set("Host", r.Host)
-	proxyReq.Header.Set("X-Forwarded-For", r.RemoteAddr)
+	if mode == "solid" {
+		var msg struct {
+			Mode  string `json:"mode"`
+			Red   int    `json:"red"`
+			Green int    `json:"green"`
+			Blue  int    `json:"blue"`
+		}
 
-	client := &http.Client{}
-	proxyRes, err := client.Do(proxyReq)
-	if err != nil {
-		log.Println(err)
-		w.Header().Set("content-type", "application/json")
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusInternalServerError,
-			ErrorMessage: err.Error(),
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
+		if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't decode the body: %s", err.Error()), http.StatusInternalServerError)
+			return
 		}
-		return
-	}
-	var c CommandResponseModel
-	if err := json.NewDecoder(proxyRes.Body).Decode(&c); err != nil {
-		log.Println(err)
-		w.Header().Set("content-type", "application/json")
-		if err := json.NewEncoder(w).Encode(&JsonError{
-			Code:         http.StatusInternalServerError,
-			ErrorMessage: err.Error(),
-		}); err != nil {
-			log.Printf("error sending json_error: %s\n", err.Error())
+		if err := a.ledStripClient.SetSolidColor(ledstrip.Color{R: msg.Red, G: msg.Green, B: msg.Blue}); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't set the solid color for led strips: %s", err.Error()), http.StatusInternalServerError)
+			return
 		}
+	} else if mode == "animation" {
+		if err := a.ledStripClient.SetAnimationColorCycle(); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't set the animation color for led strips %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		http.Error(w, "invalid mode", http.StatusBadRequest)
 		return
-	}
-	fmt.Println(c)
-	proxyRes.Body.Close()
-	w.Header().Set("content-type", "application/json")
-	if err := json.NewEncoder(w).Encode(&c); err != nil {
-		log.Printf("error sending response: %v", err)
 	}
 }
