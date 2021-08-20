@@ -46,6 +46,8 @@
                     <b-button pill @click="onRGBClickVerte" center>
                         <verte v-model="colorVerte" picker="wheel" model="rgb"/>
                     </b-button>
+
+                    <b-button pill @click="onColorCycleClick" center>Color Cycle</b-button>
                 </div>
 
                 <div slot="footer">
@@ -171,9 +173,11 @@
           blue: rgb.b,
         };
 
-        LedStripService.commandLedStripDevice(this.id, command);
+        LedStripService.commandLedStripDeviceSolid(this.id, command);
       },
-
+      onColorCycleClick() {
+        LedStripService.commandLedStripDeviceColorCycle(this.id);
+      },
       onRGBClickVerte() {
         let rgbToHex = (r, g, b) => {
           return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
