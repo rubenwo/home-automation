@@ -255,9 +255,24 @@ func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("couldn't set the solid color for led strip with id: %s, %s", id, err.Error()), http.StatusInternalServerError)
 			return
 		}
-	} else if mode == "animation" {
+	} else if mode == "colorcycle" {
 		if err := a.ledStripClient.SetAnimationColorCycleById(id); err != nil {
 			http.Error(w, fmt.Sprintf("couldn't set the animation color for led strip with id: %s, %s", id, err.Error()), http.StatusInternalServerError)
+			return
+		}
+	} else if mode == "breathing" {
+		var msg struct {
+			Red   int `json:"red"`
+			Green int `json:"green"`
+			Blue  int `json:"blue"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't decode the body: %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
+		if err := a.ledStripClient.SetAnimationBreathingById(ledstrip.Color{R: msg.Red, G: msg.Green, B: msg.Blue}, id); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't set the breathing color for led strip with id: %s, %s", id, err.Error()), http.StatusInternalServerError)
 			return
 		}
 	} else {
@@ -289,9 +304,24 @@ func (a *api) commandDevices(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("couldn't set the solid color for led strips: %s", err.Error()), http.StatusInternalServerError)
 			return
 		}
-	} else if mode == "animation" {
+	} else if mode == "colorcycle" {
 		if err := a.ledStripClient.SetAnimationColorCycle(); err != nil {
 			http.Error(w, fmt.Sprintf("couldn't set the animation color for led strips %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
+	} else if mode == "breathing" {
+		var msg struct {
+			Red   int `json:"red"`
+			Green int `json:"green"`
+			Blue  int `json:"blue"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't decode the body: %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
+		if err := a.ledStripClient.SetAnimationBreathing(ledstrip.Color{R: msg.Red, G: msg.Green, B: msg.Blue}); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't set the breathing color for led strips %s", err.Error()), http.StatusInternalServerError)
 			return
 		}
 	} else {

@@ -48,6 +48,8 @@
                     </b-button>
 
                     <b-button pill @click="onColorCycleClick" center>Color Cycle</b-button>
+                    <b-button pill @click="onBreathingClick" center>Pulse</b-button>
+
                 </div>
 
                 <div slot="footer">
@@ -177,6 +179,21 @@
       },
       onColorCycleClick() {
         LedStripService.commandLedStripDeviceColorCycle(this.id);
+      },
+      onBreathingClick() {
+        let rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(this.color);
+        rgb = {
+          r: parseInt(rgb[1], 16),
+          g: parseInt(rgb[2], 16),
+          b: parseInt(rgb[3], 16)
+        };
+
+        let command = {
+          red: rgb.r,
+          green: rgb.g,
+          blue: rgb.b,
+        };
+        LedStripService.commandLedStripDeviceBreathing(this.id, command);
       },
       onRGBClickVerte() {
         let rgbToHex = (r, g, b) => {

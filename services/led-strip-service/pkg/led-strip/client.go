@@ -162,6 +162,62 @@ func (c *Client) SetSolidColorById(col Color, id string) error {
 	return nil
 }
 
+// SetAnimationBreathing sets the mode of all known led strips to the animation breathing cycle,
+// increasing and decreasing the brightness of the provided color
+// returns an error in case of failure
+func (c *Client) SetAnimationBreathing(col Color) error {
+	var errs error
+	var wg sync.WaitGroup
+	for id, _ := range c.connectedLedStrips {
+		wg.Add(1)
+		go func(id string) {
+			err := c.SetAnimationBreathingById(col, id)
+			if err != nil {
+				errs = err
+			}
+			wg.Done()
+		}(id)
+	}
+	wg.Wait()
+	return errs
+}
+
+// SetAnimationBreathingById sets the mode of the led strip for the provided id to the animation breathing cycle,
+// increasing and decreasing the brightness of the provided color
+// returns an error in case of failure
+func (c *Client) SetAnimationBreathingById(col Color, id string) error {
+	msg := AnimationMessage{
+		Mode:           AnimationColorMode,
+		AnimationSpeed: 10,
+		Config:         []Color{},
+	}
+
+	for i := 0; i < 255; i++ {
+		r := i * col.R / 255
+		g := i * col.G / 255
+		b := i * col.B / 255
+		msg.Config = append(msg.Config, Color{R: r, G: g, B: b})
+	}
+
+	for i := 255; i > 0; i-- {
+		r := i * col.R / 255
+		g := i * col.G / 255
+		b := i * col.B / 255
+		msg.Config = append(msg.Config, Color{R: r, G: g, B: b})
+	}
+
+	data, err := json.Marshal(&msg)
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("leds/%s/control", id)
+	token := c.mqttClient.Publish(path, QosAtLeastOnce, false, data)
+	token.Wait()
+
+	return token.Error()
+}
+
 // SetAnimationColorCycle sets the mode of all known led strips to the animation color cycle
 // returns an error in case of failure
 func (c *Client) SetAnimationColorCycle() error {
