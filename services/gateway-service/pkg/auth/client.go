@@ -3,7 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/rubenwo/home-automation/services/gateway-service/pkg/auth/models"
 	"log"
 	"net/http"
