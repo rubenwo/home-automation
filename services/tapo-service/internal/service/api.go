@@ -329,11 +329,13 @@ func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 	brightness, err := strconv.Atoi(query.Get("brightness"))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("couldn't convert brightness to integer: %s", err.Error()), http.StatusBadRequest)
+		log.Printf("error converting brightness: %s\n", err.Error())
 		return
 	}
 	var connectionInfo models.DeviceConnectionInfo
 	if err := a.db.Model(&connectionInfo).Where("device_id = ?", id).Select(); err != nil {
-		http.Error(w, fmt.Sprintf("couldn't retrieve model from database: %s", err.Error()), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("couldn't retrieve model from database: %s", err.Error()), http.StatusNotFound)
+		log.Printf("error retrieving model from database with id: %s: %s\n", err.Error(), id)
 		return
 	}
 
@@ -342,6 +344,7 @@ func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 		p, err := p100.New(connectionInfo.IpAddress, connectionInfo.Email, connectionInfo.Password)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("couldn't connect to the tapo device"), http.StatusInternalServerError)
+			log.Printf("couldn't connect to tapo device: %s\n", err.Error())
 			return
 		}
 		a.registry[connectionInfo.DeviceId] = p
@@ -350,6 +353,7 @@ func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 
 	if err := device.SetState(command == "on", brightness); err != nil {
 		http.Error(w, fmt.Sprintf("couldn't command to the tapo device: %s", err.Error()), http.StatusInternalServerError)
+		log.Printf("couldn't command to tapo device: %s\n", err.Error())
 		return
 	}
 
