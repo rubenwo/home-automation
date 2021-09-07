@@ -7,3 +7,5 @@ registry-service/url.db.lock
 registry-service/url.db
 
 client/android/HomeAutomation/app/google-services.json
+
+services/notification-service/service-account-file.json
