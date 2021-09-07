@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	firebase "firebase.google.com/go/v4"
-	"firebase.google.com/go/v4/messaging"
-	"fmt"
 	"github.com/rubenwo/home-automation/servics/notification-service/internal/service"
 	"google.golang.org/api/option"
 	"log"
@@ -27,19 +25,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	msg, err := msgClient.Send(context.Background(), &messaging.Message{
-		Token: "blah",
-		Notification: &messaging.Notification{
-			Title: "Hello World",
-			Body:  "Bla",
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(msg)
 
-	router, err := service.New(cfg)
+	router, err := service.New(cfg, msgClient)
 	if err != nil {
 		log.Fatal(err)
 	}

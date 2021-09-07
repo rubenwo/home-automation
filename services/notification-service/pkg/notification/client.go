@@ -5,7 +5,6 @@ import (
 	"firebase.google.com/go/v4/messaging"
 	"fmt"
 	"github.com/go-pg/pg/v10"
-	"github.com/rubenwo/home-automation/servics/notification-service/internal/service"
 	"log"
 	"sync"
 )
@@ -15,14 +14,21 @@ type Manager struct {
 	msgClient        *messaging.Client
 	db               *pg.DB
 	lock             sync.Mutex
-	subscribeClients []service.NotificationSubscriber
+	subscribeClients []NotificationSubscriber
 }
 
 func NewManager(msgClient *messaging.Client, db *pg.DB) *Manager {
+	var notificationSubscribers []NotificationSubscriber
+	if err := db.Model(&notificationSubscribers).Select(); err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
 	m := &Manager{
-		msgClient:     msgClient,
-		db:            db,
-		notifications: make(chan Notification, 100),
+		msgClient:        msgClient,
+		db:               db,
+		notifications:    make(chan Notification, 100),
+		subscribeClients: notificationSubscribers,
 	}
 	go m.run()
 	return m
@@ -47,8 +53,11 @@ func (m *Manager) run() {
 			fmt.Println(send)
 		}
 		m.lock.Unlock()
-		//token := "fzNfIKbuPJeraNBhx-p9wf:APA91bFSmGLxWk9kKQqeCB37u6elkj4FEGV0ju4rWQFVk3BshhQek0yAmQllp02UGj21BcuAlONNiqGGtjuqTPWGhdEKZ8GwW4pLDZTFVv1Ut-P2FfUTalFvnGg9yJ96tbObVZKEIH1M"
 	}
 }
 
 func (m *Manager) NotifyDatasetChanged() {}
+
+func (m *Manager) SendNotification(notification Notification) {
+	m.notifications <- notification
+}

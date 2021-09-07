@@ -3,18 +3,22 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"firebase.google.com/go/v4/messaging"
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-pg/pg/v10"
+	"github.com/rubenwo/home-automation/servics/notification-service/pkg/notification"
 	"net/http"
 )
 
 type api struct {
 	router *chi.Mux
 	db     *pg.DB
+
+	notificationManager *notification.Manager
 }
 
-func New(cfg *Config) (*api, error) {
+func New(cfg *Config, msgClient *messaging.Client) (*api, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("config can't be nil")
 	}
@@ -37,10 +41,17 @@ func New(cfg *Config) (*api, error) {
 		return nil, fmt.Errorf("couldn't create schema: %w", err)
 	}
 
+	notificationManager := notification.NewManager(msgClient, db)
+
 	a := &api{
-		router: chi.NewRouter(),
-		db:     db,
+		router:              chi.NewRouter(),
+		db:                  db,
+		notificationManager: notificationManager,
 	}
+	a.notificationManager.SendNotification(notification.Notification{
+		Title: "Notification service online",
+		Body:  "The notification service is now online",
+	})
 
 	a.router.Post("/notifications/subscribe", a.subscribeToNotifications)
 
