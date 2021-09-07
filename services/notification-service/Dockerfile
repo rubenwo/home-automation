@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o notification-service ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux go build -o notification-service ./cmd/app
 
 FROM alpine:3.12
 RUN apk --no-cache add ca-certificates

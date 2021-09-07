@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification
+  namespace: default
+  labels:
+    app: notification
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+  selector:
+    app: notification
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification
+  labels:
+    app: notification
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification
+  template:
+    metadata:
+      labels:
+        app: notification
+    spec:
+      containers:
+        - name: notification
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          image: rubenwo/home-automation-notification-service:latest
