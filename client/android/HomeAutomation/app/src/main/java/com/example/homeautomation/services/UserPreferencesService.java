@@ -48,4 +48,17 @@ public class UserPreferencesService {
     }
 
 
+    public void saveAuthenticationKey(String idToken) {
+        Log.d(TAG, "saveAuthenticationKey: " + idToken);
+        SharedPreferences.Editor editor = this.preferences.edit();
+        editor.putString("saveAuthenticationKey", idToken);
+        editor.apply();
+    }
+
+    public void saveFireBaseMessagingId(String token) {
+        Log.d(TAG, "saveFireBaseMessagingId: " + token);
+        SharedPreferences.Editor editor = this.preferences.edit();
+        editor.putString("saveFireBaseMessagingId", token);
+        editor.apply();
+    }
 }

@@ -55,6 +55,14 @@ services:
     depends_on:
       - postgres.default.svc.cluster.local
 
+  notification.default.svc.cluster.local:
+    image: rubenwo/home-automation-notification-service:latest
+    # build: ./services/registry-service
+    restart: on-failure
+    depends_on:
+      - postgres.default.svc.cluster.local
+      - mqtt-broker.default.svc.cluster.local
+      
   inventory.default.svc.cluster.local:
     image: rubenwo/home-automation-inventory-service:latest
     # build: ./services/inventory-service

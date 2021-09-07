@@ -5,3 +5,5 @@ tapo-service/t.py
 registry-service/url.db.lock
 
 registry-service/url.db
+
+client/android/HomeAutomation/app/google-services.json
