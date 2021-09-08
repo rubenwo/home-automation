@@ -41,7 +41,7 @@ func New(cfg *Config, msgClient *messaging.Client) (*api, error) {
 		return nil, fmt.Errorf("couldn't create schema: %w", err)
 	}
 
-	notificationManager := notification.NewManager(msgClient, db)
+	notificationManager := notification.NewManager(cfg.MqttHost, 10, msgClient, db)
 
 	a := &api{
 		router:              chi.NewRouter(),

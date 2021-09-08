@@ -1,8 +1,8 @@
 package notification
 
 type Notification struct {
-	Title string
-	Body  string
+	Title string `json:"title"`
+	Body  string `json:"body"`
 }
 type NotificationSubscriber struct {
 	ClientPlatform         string `json:"client_platform"`
