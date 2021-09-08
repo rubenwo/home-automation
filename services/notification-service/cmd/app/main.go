@@ -25,7 +25,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-
 	router, err := service.New(cfg, msgClient)
 	if err != nil {
 		log.Fatal(err)
