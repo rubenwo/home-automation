@@ -51,7 +51,7 @@ func New(cfg *Config) (*api, error) {
 		router:    chi.NewRouter(),
 		groups:    make(map[string][]string),
 		db:        db,
-		scheduler: routines.NewScheduler(db, runtime.NumCPU()),
+		scheduler: routines.NewScheduler(db, runtime.NumCPU(), cfg.MqttHost, 10),
 	}
 	go a.scheduler.Run(time.Second * 1)
 

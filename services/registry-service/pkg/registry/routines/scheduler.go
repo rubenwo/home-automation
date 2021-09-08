@@ -19,6 +19,14 @@ import (
 	"time"
 )
 
+const (
+	NotificationsMqttPath = "notifications"
+
+	QosAtMostOnce  = 0
+	QosAtLeastOnce = 1
+	QosExactlyOnce = 2
+)
+
 type job struct {
 	RoutineId int64
 	Action    models.Action
@@ -31,6 +39,8 @@ type Scheduler struct {
 	jobs     chan job
 	results  chan error
 	db       *pg.DB
+
+	mqttClient mqtt.Client
 }
 
 func initRoutines(db *pg.DB) ([]models.Routine, error) {
@@ -46,7 +56,7 @@ func initRoutines(db *pg.DB) ([]models.Routine, error) {
 	return routines, nil
 }
 
-func NewScheduler(db *pg.DB, maxConcurrentWorkers int) *Scheduler {
+func NewScheduler(db *pg.DB, maxConcurrentWorkers int, host string, retry int) *Scheduler {
 	routines, err := initRoutines(db)
 	if err != nil {
 		log.Fatal(err)
@@ -60,6 +70,27 @@ func NewScheduler(db *pg.DB, maxConcurrentWorkers int) *Scheduler {
 		go s.worker()
 	}
 	go s.resultWorker()
+
+	opts := mqtt.NewClientOptions()
+	opts.AddBroker(fmt.Sprintf("%s:1883", host))
+	opts.SetClientID(uuid.New().String())
+	client := mqtt.NewClient(opts)
+
+	for i := 0; i < retry; i++ {
+		token := client.Connect()
+		token.Wait()
+		err = token.Error()
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second * 1)
+	}
+	if err != nil {
+		return nil
+	}
+
+	s.mqttClient = client
+
 	return s
 }
 
@@ -85,6 +116,12 @@ func (s *Scheduler) Run(interval time.Duration) {
 				continue
 			}
 			if checkIfRoutineShouldRun(routine.Trigger, currentTime, interval.Nanoseconds()) {
+				data, _ := json.Marshal(models.Notification{
+					Title: fmt.Sprintf("Running routine: %s\n", routine.Name),
+					Body:  fmt.Sprintf("Starting routine: %s with %d actions\n", routine.Name, len(routine.Actions)),
+				})
+				token := s.mqttClient.Publish(NotificationsMqttPath, 0, false, data)
+				token.Wait()
 				for _, action := range routine.Actions {
 					s.jobs <- job{
 						RoutineId: routine.Id,
@@ -97,27 +134,8 @@ func (s *Scheduler) Run(interval time.Duration) {
 	}
 }
 
-func (s *Scheduler) eventWorker(path, host string, retry int) {
-	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("%s:1883", host))
-	opts.SetClientID(uuid.New().String())
-	client := mqtt.NewClient(opts)
-
-	var err error
-	for i := 0; i < retry; i++ {
-		token := client.Connect()
-		token.Wait()
-		err = token.Error()
-		if err == nil {
-			break
-		}
-		time.Sleep(time.Second * 1)
-	}
-	if err != nil {
-		return
-	}
-
-	client.Subscribe(path, 0, func(cl mqtt.Client, msg mqtt.Message) {
+func (s *Scheduler) eventWorker() {
+	s.mqttClient.Subscribe(NotificationsMqttPath, 0, func(cl mqtt.Client, msg mqtt.Message) {
 		msg.Ack()
 		payload := msg.Payload()
 		fmt.Println(string(payload))
@@ -153,6 +171,12 @@ func (s *Scheduler) resultWorker() {
 	log.Println("Scheduler()->resultWorker() started")
 	for err := range s.results {
 		log.Printf("Scheduler()->resultWorker() received an error in channel: %s\n", err.Error())
+		data, _ := json.Marshal(models.Notification{
+			Title: "Scheduler encountered an error",
+			Body:  fmt.Sprintf("error: %s\n", err.Error()),
+		})
+		token := s.mqttClient.Publish(NotificationsMqttPath, 0, false, data)
+		token.Wait()
 	}
 	log.Println("Scheduler()->resultWorker() finished")
 }
@@ -254,5 +278,6 @@ func (s *Scheduler) worker() {
 			Message:   fmt.Sprintf("Scheduler()->worker() finished executing request: [%s] - [%s]\n", action.Method, action.Addr),
 		}).Insert()
 	}
+
 	log.Println("Scheduler()->worker() finished")
 }

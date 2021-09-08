@@ -11,6 +11,7 @@ type Config struct {
 	DatabaseUser     string `json:"database_user"`
 	DatabasePassword string `json:"database_password"`
 	DatabaseName     string `json:"database_name"`
+	MqttHost         string `json:"mqtt_host"`
 }
 
 func (c Config) Validate() error {
