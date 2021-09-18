@@ -281,3 +281,28 @@ func (s *Scheduler) worker() {
 
 	log.Println("Scheduler()->worker() finished")
 }
+
+func (s *Scheduler) Trigger(id int64) error {
+	var routine *models.Routine
+	s.Lock()
+	for _, m := range s.routines {
+		if m.Id == id {
+			routine = &m
+			break
+		}
+	}
+	s.Unlock()
+
+	if routine == nil {
+		return ErrRoutineNotFound
+	}
+
+	for _, action := range routine.Actions {
+		s.jobs <- job{
+			RoutineId: routine.Id,
+			Action:    action,
+		}
+	}
+
+	return nil
+}

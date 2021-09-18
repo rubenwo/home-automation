@@ -35,6 +35,10 @@ spec:
         methods:
           - GET
         protocol: http
+      - path: "/routines/trigger/{id}"
+        methods:
+          - GET
+        protocol: http
       - path: "/sensors"
         methods:
           - GET

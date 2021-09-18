@@ -93,6 +93,7 @@ func New(cfg *Config) (*api, error) {
 	a.router.Put("/routines/{id}", a.updateRoutine)
 	a.router.Get("/routines/logs", a.getRoutinesLogs)
 	a.router.Get("/routines/logs/{id}", a.getRoutineLogs)
+	a.router.Get("/routines/trigger/{id}", a.triggerRoutine)
 
 	a.router.Post("/group", a.createGroup)
 
@@ -420,6 +421,27 @@ func (a *api) getRoutineLogs(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(&resp); err != nil {
 		log.Printf("error sending devices: %s\n", err.Error())
 	}
+}
+
+func (a *api) triggerRoutine(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "provided id was not a number, thus couldn't be parsed", http.StatusBadRequest)
+		return
+	}
+	log.Println(id)
+
+	if err := a.scheduler.Trigger(int64(id)); err != nil {
+		if err == routines.ErrRoutineNotFound {
+			http.NotFound(w, r)
+			return
+		}
+		log.Println(err)
+		http.Error(w, "routine could not be executed", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (a *api) createGroup(w http.ResponseWriter, r *http.Request) {
