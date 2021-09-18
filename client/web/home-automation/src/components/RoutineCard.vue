@@ -19,6 +19,7 @@
                 @change="set_active()"
         >: Active
         </b-checkbox>
+        <b-button @click="triggerRoutine()">Trigger</b-button>
 
         <div slot="footer">
             <b-button style="background-color: #4287f5" v-bind:to="navigate()"
@@ -71,6 +72,10 @@
         const res = await RoutineService.updateRoutine(this.id, this.routine);
         this.routine = res.routine;
       },
+      async triggerRoutine() {
+        const res = await RoutineService.triggerRoutine(this.id);
+        console.log(res);
+      }
     },
     async mounted() {
       const routine = await RoutineService.fetchRoutine(this.id);

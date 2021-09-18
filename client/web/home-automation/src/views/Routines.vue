@@ -27,7 +27,9 @@
       routines: [],
     };
   },
-  methods: {},
+  methods: {
+
+  },
   async mounted() {
     this.routines = await RoutineService.fetchRoutines(this.id);
   },
