@@ -8,6 +8,7 @@ require (
 	github.com/go-pg/pg/v10 v10.10.5
 	github.com/google/uuid v1.3.0
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
+	github.com/mdlayher/wol v0.0.0-20200423173749-bc23029f94e1 // indirect
 	github.com/robertkrimen/otto v0.0.0-20210614181706-373ff5438452
 	github.com/vmihailenco/msgpack/v5 v5.3.4 // indirect
 	golang.org/x/crypto v0.0.0-20210915214749-c084706c2272 // indirect
