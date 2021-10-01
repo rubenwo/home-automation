@@ -110,7 +110,7 @@ services:
     entrypoint: redis-server --appendonly yes
 
   postgres.default.svc.cluster.local:
-    image: postgres
+    image: postgres:13.4
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
