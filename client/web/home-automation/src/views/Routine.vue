@@ -2,7 +2,8 @@
     <div class="routine">
         <h3>{{ routine.name }}</h3>
         <p>Is active: {{routine.is_active ? "True":"False"}}</p>
-        <p>Trigger: type: {{routine.trigger.type}}, cron_expr: {{routine.trigger.cron_expr}}</p>
+        <p>Trigger: type: {{routine.trigger.type}}, cron_expr: {{routine.trigger.cron_expr}}, on_event:
+            {{routine.trigger.on_event}}</p>
         <ul>
             <li v-bind:key="'action-' + index" v-for="(action, index) in routine.actions">
                 [{{ action.method }}] - [{{action.addr}}]
@@ -35,6 +36,7 @@
           is_active: false,
           trigger: {
             cron_expr: "",
+            on_event: "",
             type: 0
           },
           actions: [

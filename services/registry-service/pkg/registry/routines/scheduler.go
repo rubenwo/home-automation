@@ -21,6 +21,7 @@ import (
 
 const (
 	NotificationsMqttPath = "notifications"
+	EventsMqttPath        = "events"
 
 	QosAtMostOnce  = 0
 	QosAtLeastOnce = 1
@@ -34,7 +35,7 @@ type job struct {
 
 //Scheduler holds the routines and their triggers. When a trigger event is raised
 type Scheduler struct {
-	sync.Mutex
+	sync.RWMutex
 	routines []models.Routine
 	jobs     chan job
 	results  chan error
@@ -86,10 +87,11 @@ func NewScheduler(db *pg.DB, maxConcurrentWorkers int, host string, retry int) *
 		time.Sleep(time.Second * 1)
 	}
 	if err != nil {
-		return nil
+		log.Fatalf("could not connect to mqtt broker: %s", err.Error())
 	}
 
 	s.mqttClient = client
+	go s.eventWorker()
 
 	return s
 }
@@ -110,7 +112,7 @@ func (s *Scheduler) UpdateRoutines() error {
 func (s *Scheduler) Run(interval time.Duration) {
 	for range time.Tick(interval) {
 		currentTime := time.Now()
-		s.Lock()
+		s.RLock()
 		for _, routine := range s.routines {
 			if !routine.IsActive {
 				continue
@@ -130,7 +132,7 @@ func (s *Scheduler) Run(interval time.Duration) {
 				}
 			}
 		}
-		s.Unlock()
+		s.RUnlock()
 	}
 }
 
@@ -141,19 +143,27 @@ func (s *Scheduler) eventWorker() {
 		fmt.Println(string(payload))
 	})
 
-	s.Lock()
-	for _, routine := range s.routines {
-		if !routine.IsActive {
-			continue
-		}
-		if routine.Trigger.Type != models.MqttEventTriggerType {
-			continue
-		}
-
+	type eventMsg struct {
+		Name string `json:"name"`
 	}
-	s.Unlock()
 
-	//TODO: Push job to worker
+	s.mqttClient.Subscribe(EventsMqttPath, 0, func(cl mqtt.Client, msg mqtt.Message) {
+		msg.Ack()
+		payload := msg.Payload()
+		fmt.Println(string(payload))
+		var eventMsg eventMsg
+		if err := json.Unmarshal(payload, &msg); err != nil {
+			s.results <- err
+			return
+		}
+		s.RLock()
+		for _, routine := range s.routines {
+			if routine.IsActive && routine.Trigger.Type == models.MqttEventTriggerType && routine.Trigger.OnEvent == eventMsg.Name {
+				s.results <- s.Trigger(routine.Id)
+			}
+		}
+		s.RUnlock()
+	})
 }
 
 func checkIfRoutineShouldRun(trigger models.Trigger, currentTime time.Time, diffTimeInNanoS int64) bool {
@@ -284,14 +294,14 @@ func (s *Scheduler) worker() {
 
 func (s *Scheduler) Trigger(id int64) error {
 	var routine *models.Routine
-	s.Lock()
+	s.RLock()
 	for _, m := range s.routines {
 		if m.Id == id {
 			routine = &m
 			break
 		}
 	}
-	s.Unlock()
+	s.RUnlock()
 
 	if routine == nil {
 		return ErrRoutineNotFound

@@ -19,6 +19,7 @@ type Trigger struct {
 	Type     TriggerType `json:"type"`
 	CronExpr string      `json:"cron_expr,omitempty"`
 	Webhook  string      `json:"webhook,omitempty"`
+	OnEvent  string      `json"on_event,omitempty"`
 }
 
 type Action struct {

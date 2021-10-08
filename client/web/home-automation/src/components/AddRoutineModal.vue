@@ -55,6 +55,25 @@
                                 </b-container>
                             </b-input-group>
                         </div>
+                        <div v-if="isEventTriggerType()">
+                            <b-input-group>
+                                <b-container fluid>
+                                    <b-row class="my-1">
+                                        <b-col sm="4">
+                                            <label>Event:</label>
+                                        </b-col>
+                                        <b-col>
+                                            <input
+                                                    size="sm"
+                                                    class="mx-1"
+                                                    placeholder="ON_EVENT_NAME"
+                                                    v-model="routine.trigger.on_event"
+                                            />
+                                        </b-col>
+                                    </b-row>
+                                </b-container>
+                            </b-input-group>
+                        </div>
                     </b-row>
                     <b-row>
                         <div>
@@ -179,6 +198,7 @@
         chosen_trigger_type: -1,
         trigger_type_options: [
           {value: 0, text: "TimerTriggerType"},
+          {value: 1, text: "EventTriggerType"}
           // {value: 1, text: "WebhookTrigger"},
         ],
         routine: {
@@ -186,6 +206,7 @@
           trigger: {
             type: -1,
             cron_expr: "",
+            on_event: ""
           },
           actions: [
             {
@@ -203,6 +224,9 @@
       },
       isTimerTriggerType() {
         return this.chosen_trigger_type === 0;
+      },
+      isEventTriggerType() {
+        return this.chosen_trigger_type === 1;
       },
       increaseActions() {
         this.routine.actions.push({
@@ -230,6 +254,7 @@
           trigger: {
             type: -1,
             cron_expr: "",
+            on_event: "",
           },
           actions: [
             {
