@@ -159,7 +159,9 @@ func (s *Scheduler) eventWorker() {
 		s.RLock()
 		for _, routine := range s.routines {
 			if routine.IsActive && routine.Trigger.Type == models.MqttEventTriggerType && routine.Trigger.OnEvent == eventMsg.Name {
-				s.results <- s.Trigger(routine.Id)
+				if err := s.Trigger(routine.Id); err != nil {
+					s.results <- err
+				}
 			}
 		}
 		s.RUnlock()
@@ -180,6 +182,9 @@ func checkIfRoutineShouldRun(trigger models.Trigger, currentTime time.Time, diff
 func (s *Scheduler) resultWorker() {
 	log.Println("Scheduler()->resultWorker() started")
 	for err := range s.results {
+		if err == nil {
+			continue
+		}
 		log.Printf("Scheduler()->resultWorker() received an error in channel: %s\n", err.Error())
 		data, _ := json.Marshal(models.Notification{
 			Title: "Scheduler encountered an error",
