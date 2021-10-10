@@ -91,6 +91,13 @@ services:
     depends_on:
       - postgres.default.svc.cluster.local
 
+  tradfri.default.svc.cluster.local:
+    image: rubenwo/home-automation-tradfri-service:latest
+    # build: ./services/tradfri-service
+    restart: on-failure
+    depends_on:
+      - postgres.default.svc.cluster.local
+
   mqtt-broker.default.svc.cluster.local:
     image: eclipse-mosquitto:1.6.13
     restart: on-failure

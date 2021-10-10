@@ -11,3 +11,5 @@ client/android/HomeAutomation/app/google-services.json
 services/notification-service/service-account-file.json
 
 service-account-file.json
+
+services/tradfri-service/config.json
