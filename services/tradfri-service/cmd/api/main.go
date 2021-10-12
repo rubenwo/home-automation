@@ -12,6 +12,7 @@ import (
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/app"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/dao"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/interfaces/api"
+	"github.com/rubenwo/home-automation/services/tradfri-service/internal/services/registrysyncer"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/usecases"
 	"github.com/rubenwo/home-automation/services/tradfri-service/pkg/database"
 	"log"
@@ -62,10 +63,10 @@ func fixtures(db *sql.DB) error {
 
 func main() {
 	db, err := database.NewPostgresDB(database.Config{
-		Host:         "192.168.2.135:5432",
+		Host:         "192.168.178.46:5432",
 		User:         "user",
 		Password:     "password",
-		Database:     "calculation_database",
+		Database:     "tradfri_database",
 		Options:      []string{"sslmode=disable"},
 		MaxOpenConns: 100,
 	})
@@ -85,7 +86,9 @@ func main() {
 		TradfriDao: dao.NewTradfriDB(db),
 	}
 
-	services := &app.Services{}
+	services := &app.Services{
+		RegistrySyncerService: registrysyncer.NewService(db),
+	}
 
 	var (
 		usecasesTradfri = usecases.NewTradfriUsecases(dataAccessOject, services)

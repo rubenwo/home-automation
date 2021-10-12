@@ -1,8 +1,10 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi"
+	"github.com/rubenwo/home-automation/services/tradfri-service/internal/interfaces/api/scheme"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/usecases"
 	"net/http"
 )
@@ -32,7 +34,18 @@ func (h *Handler) getTradfriDevices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(devices)
+	schemeDevices := make([]scheme.Device, len(devices))
+	for i, device := range devices {
+		schemeDevices[i] = scheme.Device{
+			Id:         device.Id,
+			Name:       device.Name,
+			Category:   device.Category,
+			DeviceType: device.DeviceType,
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(&schemeDevices)
 }
 
 func (h *Handler) getTradfriDevice(w http.ResponseWriter, r *http.Request) {

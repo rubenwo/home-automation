@@ -91,6 +91,8 @@ github.com/bitly/go-hostpool v0.0.0-20171023180738-a3a6125de932/go.mod h1:NOuUCS
 github.com/bkaradzic/go-lz4 v1.0.0/go.mod h1:0YdlkowM3VswSROI7qDxhRvJ3sLhlFrRRwjwegp5jy4=
 github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dRnpXw/yCqJaO+ZrUyxD+3VXMFFr56k5XYrpB4=
 github.com/bocajim/dtls v0.0.0-20190226153416-329cdc841d4f/go.mod h1:htuSw7xe15DPFg5oJtcepjot00bvkhmXsx/b0yvFaKU=
+github.com/bocajim/dtls v0.0.0-20190919154819-4ef9c2aba394 h1:n4VIdgSiZMIAWcF5noMuWEU414cquC2tX7/fnPban6E=
+github.com/bocajim/dtls v0.0.0-20190919154819-4ef9c2aba394/go.mod h1:htuSw7xe15DPFg5oJtcepjot00bvkhmXsx/b0yvFaKU=
 github.com/cenkalti/backoff/v4 v4.0.2/go.mod h1:eEew/i+1Q6OrCDZh3WiXYv3+nJwBASZ8Bog/87DQnVg=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
@@ -142,6 +144,7 @@ github.com/envoyproxy/go-control-plane v0.9.9-0.20210217033140-668b12f5399d/go.m
 github.com/envoyproxy/go-control-plane v0.9.9-0.20210512163311-63b5d3c536b0/go.mod h1:hliV/p42l8fGbc6Y9bQ70uLwIvmJyVE5k4iMKlh8wCQ=
 github.com/envoyproxy/go-control-plane v0.9.10-0.20210907150352-cf90f659a021/go.mod h1:AFq3mo9L8Lqqiid3OhADV3RfLJnjiw63cSpi+fDTRC0=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
+github.com/eriklupander/dtls v0.0.0-20190304211642-b36018226359 h1:GrRdzY4NkR4IGoip3PvJH1VYkzMQW6HGV9Bl48yq9js=
 github.com/eriklupander/dtls v0.0.0-20190304211642-b36018226359/go.mod h1:9cQp/YAWpoevkrztrrOhFYyeHX8cOvhwHMiwg91o4Eo=
 github.com/eriklupander/tradfri-go v1.0.1 h1:KXgaV5dB+F/c5dAi/Zh2A//mE8G7hYTWaDow166MrDg=
 github.com/eriklupander/tradfri-go v1.0.1/go.mod h1:YfJVeg82Z9AHi/ZmkQgPc0LRAOqHojCxWlJBOxrMOLo=
@@ -856,8 +859,8 @@ google.golang.org/genproto v0.0.0-20210713002101-d411969a0d9a/go.mod h1:AxrInvYm
 google.golang.org/genproto v0.0.0-20210716133855-ce7ef5c701ea/go.mod h1:AxrInvYm1dci+enl5hChSFPOmmUF1+uAa/UsgNRWd7k=
 google.golang.org/genproto v0.0.0-20210721163202-f1cecdd8b78a/go.mod h1:ob2IJxKrgPT52GcgX759i1sleT07tiKowYBGbczaW48=
 google.golang.org/genproto v0.0.0-20210726143408-b02e89920bf0/go.mod h1:ob2IJxKrgPT52GcgX759i1sleT07tiKowYBGbczaW48=
-google.golang.org/genproto v0.0.0-20211011165927-a5fb3255271e h1:B3r2Cb5u7Od6/WGb95VHDMp99VU/fuqPYZb6VM8IozI=
-google.golang.org/genproto v0.0.0-20211011165927-a5fb3255271e/go.mod h1:5CzLGKJ67TSI2B9POpiiyGha0AjJvZIUgRMt1dSmuhc=
+google.golang.org/genproto v0.0.0-20211012143446-e1d23e1da178 h1:sjksfRCbEowdKjfEEAUtbT/Ji7rS6z/Rr/075r57JLQ=
+google.golang.org/genproto v0.0.0-20211012143446-e1d23e1da178/go.mod h1:5CzLGKJ67TSI2B9POpiiyGha0AjJvZIUgRMt1dSmuhc=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.20.1/go.mod h1:10oTOabMzJvdu6/UiuZezV6QK5dSlG84ov/aaiqXj38=
 google.golang.org/grpc v1.21.1/go.mod h1:oYelfM1adQP15Ek0mdvEgi9Df8B9CZIaU1084ijfRaM=

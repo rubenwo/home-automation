@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"fmt"
+	"github.com/eriklupander/tradfri-go/tradfri"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/app"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/entity"
 )
@@ -10,19 +12,41 @@ type DaoTradfri interface {
 }
 
 type ServicesTradfri interface {
+	app.RegistrySyncerService
 }
 
 func NewTradfriUsecases(dao DaoTradfri, services ServicesTradfri) *TradfriUsecases {
-	return &TradfriUsecases{dao: dao, services: services}
+	return &TradfriUsecases{
+		dao:      dao,
+		services: services,
+		//client:   tradfri.NewTradfriClient("192.168.178.52:5684", "", ""),
+	}
 }
 
 type TradfriUsecases struct {
 	dao      DaoTradfri
 	services ServicesTradfri
+	client   *tradfri.Client
 }
 
 func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
-	return []entity.TradfriDevice{}, nil
+	tradfriDevices, err := u.client.ListDevices()
+	if err != nil {
+		return nil, err
+	}
+
+	devices := make([]entity.TradfriDevice, len(tradfriDevices))
+
+	for i := range tradfriDevices {
+		devices[i] = entity.TradfriDevice{
+			Id:         fmt.Sprintf("%d", tradfriDevices[i].DeviceId),
+			Name:       tradfriDevices[i].Name,
+			Category:   fmt.Sprintf("%d", tradfriDevices[i].Type),
+			DeviceType: fmt.Sprintf("%d", tradfriDevices[i].Type),
+		}
+	}
+
+	return devices, nil
 }
 
 func (u *TradfriUsecases) FetchDevice(deviceId string) (entity.TradfriDevice, error) {
