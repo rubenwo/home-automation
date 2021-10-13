@@ -76,11 +76,23 @@ func main() {
 	}
 	defer db.Close()
 
-	if err := migrations(db); err != nil {
-		log.Fatalf("migrations: %v", err)
-	}
-	if err := fixtures(db); err != nil {
-		log.Fatalf("fixtures: %v", err)
+	//if err := migrations(db); err != nil {
+	//	log.Fatalf("migrations: %v", err)
+	//}
+	//if err := fixtures(db); err != nil {
+	//	log.Fatalf("fixtures: %v", err)
+	//}
+
+	query := `CREATE TABLE IF NOT EXISTS ids_tradfriids
+(
+    id         UUID NOT NULL,
+    tradfri_id TEXT NOT NULL,
+
+    PRIMARY KEY (id, tradfri_id)
+)`
+
+	if _, err := db.Exec(query); err != nil {
+		log.Fatal(err)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
