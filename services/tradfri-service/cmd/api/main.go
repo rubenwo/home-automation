@@ -94,6 +94,57 @@ func main() {
 		usecasesTradfri = usecases.NewTradfriUsecases(dataAccessOject, services)
 	)
 
+	go func() {
+		devices, err := usecasesTradfri.FetchAllDevices()
+		if err != nil {
+			log.Fatalf("error fetching tradfri devices: %s\n", err.Error())
+		}
+
+		for _, device := range devices {
+			if err := services.RegistrySyncerService.PublishDevice(device); err != nil {
+				log.Fatalf("error publishing tradfri device to registry: %s\n", err.Error())
+			}
+		}
+		const retry = 10
+
+		timer := time.NewTimer(time.Minute)
+		errorCount := 0
+		for {
+			select {
+			case <-timer.C:
+				newDevices, err := usecasesTradfri.FetchAllDevices()
+				if err != nil {
+					log.Printf("error publishing tradfri device to registry: %s\n", err.Error())
+					if errorCount > retry {
+						log.Fatalf("max retries for fetching devices reached: %s\n", err.Error())
+					}
+					errorCount++
+					timer.Reset(time.Minute)
+					continue
+				}
+
+				for _, newDevice := range newDevices {
+					add := true
+					for _, device := range devices {
+						if device == newDevice {
+							add = false
+							break
+						}
+					}
+					if add {
+						if err := services.RegistrySyncerService.PublishDevice(newDevice); err != nil {
+							log.Printf("error publishing tradfri device to registry: %s\n", err.Error())
+						}
+					}
+				}
+
+				errorCount = 0
+				timer.Reset(time.Minute)
+			}
+		}
+
+	}()
+
 	router := chi.NewRouter()
 
 	// A good base middleware stack
