@@ -5,6 +5,7 @@ import (
 	"github.com/eriklupander/tradfri-go/tradfri"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/app"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/entity"
+	"os"
 	"strconv"
 )
 
@@ -20,7 +21,11 @@ func NewTradfriUsecases(dao DaoTradfri, services ServicesTradfri) *TradfriUsecas
 	return &TradfriUsecases{
 		dao:      dao,
 		services: services,
-		//client:   tradfri.NewTradfriClient("192.168.178.52:5684", "", ""),
+		client: tradfri.NewTradfriClient(
+			os.Getenv("TRADFRI_GATEWAY_ADDRESS"),
+			os.Getenv("TRADFRI_GATEWAY_CLIENT_ID"),
+			os.Getenv("TRADFRI_GATEWAY_PSK"),
+		),
 	}
 }
 

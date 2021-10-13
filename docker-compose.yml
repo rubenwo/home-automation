@@ -95,6 +95,10 @@ services:
     image: rubenwo/home-automation-tradfri-service:latest
     # build: ./services/tradfri-service
     restart: on-failure
+    environment:
+      - TRADFRI_GATEWAY_ADDRESS=192.168.178.52:5684
+      - TRADFRI_GATEWAY_CLIENT_ID=$TRADFRI_GATEWAY_CLIENT_ID
+      - TRADFRI_GATEWAY_PSK=$TRADFRI_GATEWAY_PSK
     depends_on:
       - postgres.default.svc.cluster.local
 
