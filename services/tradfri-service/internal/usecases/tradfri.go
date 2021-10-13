@@ -5,6 +5,7 @@ import (
 	"github.com/eriklupander/tradfri-go/tradfri"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/app"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/entity"
+	"strconv"
 )
 
 type DaoTradfri interface {
@@ -50,7 +51,21 @@ func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
 }
 
 func (u *TradfriUsecases) FetchDevice(deviceId string) (entity.TradfriDevice, error) {
-	return entity.TradfriDevice{}, nil
+	id, err := strconv.Atoi(deviceId)
+	if err != nil {
+		return entity.TradfriDevice{}, err
+	}
+	tradfriDevice, err := u.client.GetDevice(id)
+	if err != nil {
+		return entity.TradfriDevice{}, err
+	}
+
+	return entity.TradfriDevice{
+		Id:         fmt.Sprintf("%d", tradfriDevice.DeviceId),
+		Name:       tradfriDevice.Name,
+		Category:   fmt.Sprintf("%d", tradfriDevice.Type),
+		DeviceType: fmt.Sprintf("%d", tradfriDevice.Type),
+	}, nil
 }
 
 func (u *TradfriUsecases) CommandDevice(deviceId string) error {

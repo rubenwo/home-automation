@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tradfri
+  namespace: default
+  labels:
+    app: tradfri
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+  selector:
+    app: tradfri
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tradfri
+  labels:
+    app: tradfri
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tradfri
+  template:
+    metadata:
+      labels:
+        app: tradfri
+    spec:
+      containers:
+        - name: tradfri
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          image: rubenwo/home-automation-tradfri-service:latest
