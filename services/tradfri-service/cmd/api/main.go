@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/go-chi/chi"
@@ -82,12 +83,18 @@ func main() {
 		log.Fatalf("fixtures: %v", err)
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	var dataAccessOject = &app.DataAccessObject{
 		TradfriDao: dao.NewTradfriDB(db),
 	}
 
+	registrySyncerService := registrysyncer.NewService(db)
+	registrySyncerService.Run(ctx)
+
 	services := &app.Services{
-		RegistrySyncerService: registrysyncer.NewService(db),
+		RegistrySyncerService: registrySyncerService,
 	}
 
 	var (
