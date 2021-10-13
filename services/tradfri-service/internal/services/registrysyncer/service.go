@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/google/uuid"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/entity"
 	"io/ioutil"
 	"net/http"
@@ -20,19 +21,14 @@ type service struct {
 
 	buffer chan message
 
-	mapTradfriToId *sql.Stmt
+	db *sql.DB
 }
 
 func NewService(db *sql.DB) *service {
-	mapTradfriToId, err := db.Prepare("SELECT id FROM ids_tradfriids WHERE tradfri_id = '$1';")
-	if err != nil {
-		panic(err)
-	}
-
 	return &service{
 		httpClient:     &http.Client{},
 		buffer:         make(chan message, 100),
-		mapTradfriToId: mapTradfriToId,
+		db:             db,
 	}
 }
 
@@ -62,14 +58,18 @@ func (s *service) Run(ctx context.Context) {
 }
 
 func (s *service) publishDevice(device entity.TradfriDevice) error {
-	row := s.mapTradfriToId.QueryRow(device.Id)
-	if row.Err() != nil {
-		return row.Err()
-	}
-
 	var id string
-	if err := row.Scan(&id); err != nil {
-		return err
+	query := `SELECT id FROM ids_tradfriids WHERE tradfri_id = $1`
+	if err := s.db.QueryRow(query, device.Id).Scan(&id); err != nil {
+		if err == sql.ErrNoRows {
+			id = uuid.New().String()
+			query = `INSERT INTO ids_tradfriids (id, tradfri_id) VALUES ($1, $2)`
+			if _, err := s.db.Exec(query, id, device.Id); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
 	}
 
 	req, err := http.NewRequest("DELETE", "http://registry.default.svc.cluster.local/devices/"+id, nil)

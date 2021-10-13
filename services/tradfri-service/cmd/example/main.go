@@ -21,8 +21,15 @@ func main() {
 	//}
 	//
 	//for _, device := range devices {
-	//	fmt.Printf("%+v\n", device)
+	//	fmt.Printf("Name: %s, DeviceId: %d, Type: %d\n", device.Name, device.DeviceId, device.Type)
 	//}
+	//
+	//res, err := client.PutDevicePower(65544, 0)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println(res)
+	//os.Exit(0)
 
 	log.Println("Observe called")
 
