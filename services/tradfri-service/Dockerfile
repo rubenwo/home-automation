@@ -16,6 +16,6 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 COPY --from=builder /go/tradfri-service/tradfri-service .
-#COPY --from=builder /go/tradfri-service/config.json .
+COPY --from=builder /go/calculation-service/database ./database
 
 CMD [ "./tradfri-service" ]
