@@ -147,7 +147,7 @@ func main() {
 				for _, newDevice := range newDevices {
 					add := true
 					for _, device := range devices {
-						if device == newDevice {
+						if device.Id == newDevice.Id && device.Name == newDevice.Name {
 							add = false
 							break
 						}
