@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"github.com/google/uuid"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/entity"
 	"io/ioutil"
 	"net/http"
@@ -56,21 +55,7 @@ func (s *service) Run(ctx context.Context) {
 }
 
 func (s *service) publishDevice(device entity.TradfriDevice) error {
-	var id string
-	query := `SELECT id FROM ids_tradfriids WHERE tradfri_id = $1`
-	if err := s.db.QueryRow(query, device.Id).Scan(&id); err != nil {
-		if err == sql.ErrNoRows {
-			id = uuid.New().String()
-			query = `INSERT INTO ids_tradfriids (id, tradfri_id) VALUES ($1, $2)`
-			if _, err := s.db.Exec(query, id, device.Id); err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-	}
-
-	req, err := http.NewRequest("DELETE", "http://registry.default.svc.cluster.local/devices/"+id, nil)
+	req, err := http.NewRequest("DELETE", "http://registry.default.svc.cluster.local/devices/"+device.Id, nil)
 	if err != nil {
 		return err
 	}
@@ -95,7 +80,7 @@ func (s *service) publishDevice(device entity.TradfriDevice) error {
 			Type    string `json:"type"`
 		} `json:"product"`
 	}
-	data.ID = id
+	data.ID = device.Id
 	data.Name = device.Name
 	data.Category = device.Category
 	data.Product.Company = "IKEA"

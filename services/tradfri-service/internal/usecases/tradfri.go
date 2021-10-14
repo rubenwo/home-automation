@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/app"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/entity"
 	"github.com/rubenwo/home-automation/services/tradfri-service/pkg/tradfri"
@@ -40,6 +41,32 @@ type TradfriUsecases struct {
 	db       *sql.DB
 }
 
+func (u *TradfriUsecases) tradfriIdToApiId(tradfriId int) (string, error) {
+	var id string
+	query := `SELECT id FROM ids_tradfriids WHERE tradfri_id = $1`
+	if err := u.db.QueryRow(query, tradfriId).Scan(&id); err != nil {
+		if err == sql.ErrNoRows {
+			id = uuid.New().String()
+			query = `INSERT INTO ids_tradfriids (id, tradfri_id) VALUES ($1, $2)`
+			if _, err := u.db.Exec(query, id, tradfriId); err != nil {
+				return "", err
+			}
+		} else {
+			return "", err
+		}
+	}
+	return id, nil
+}
+
+func (u *TradfriUsecases) apiIdToTradfriId(id string) (int, error) {
+	var tradfriId int
+	query := `SELECT tradfri_id FROM ids_tradfriids WHERE id = $1`
+	if err := u.db.QueryRow(query, id).Scan(&tradfriId); err != nil {
+		return 0, err
+	}
+	return tradfriId, nil
+}
+
 func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
 	tradfriDevices, err := u.client.ListDevices()
 	if err != nil {
@@ -48,11 +75,10 @@ func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
 
 	devices := make([]entity.TradfriDevice, len(tradfriDevices))
 
-	query := `SELECT id FROM ids_tradfriids WHERE tradfri_id = $1`
 	for i := range tradfriDevices {
 		// Map tradfri id (int) to our uuid. This is done to avoid conflicts in the rest of the application
-		var id string
-		if err := u.db.QueryRow(query, fmt.Sprintf("%d", tradfriDevices[i].DeviceId)).Scan(&id); err != nil {
+		id, err := u.tradfriIdToApiId(tradfriDevices[i].DeviceId)
+		if err != nil {
 			return []entity.TradfriDevice{}, err
 		}
 
@@ -68,9 +94,8 @@ func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
 }
 
 func (u *TradfriUsecases) FetchDevice(deviceId string) (entity.TradfriDevice, error) {
-	query := `SELECT tradfri_id FROM ids_tradfriids WHERE id = $1`
-	var tradfriId int
-	if err := u.db.QueryRow(query, deviceId).Scan(&tradfriId); err != nil {
+	tradfriId, err := u.apiIdToTradfriId(deviceId)
+	if err != nil {
 		return entity.TradfriDevice{}, err
 	}
 
@@ -88,12 +113,10 @@ func (u *TradfriUsecases) FetchDevice(deviceId string) (entity.TradfriDevice, er
 }
 
 func (u *TradfriUsecases) CommandDevice(deviceId string, command entity.DeviceCommand) error {
-	query := `SELECT tradfri_id FROM ids_tradfriids WHERE id = $1`
-	var tradfriId int
-	if err := u.db.QueryRow(query, deviceId).Scan(&tradfriId); err != nil {
+	tradfriId, err := u.apiIdToTradfriId(deviceId)
+	if err != nil {
 		return err
 	}
-
 	switch command.DeviceType {
 	case entity.LIGHT:
 		if command.DimmableLightCommand == nil {
