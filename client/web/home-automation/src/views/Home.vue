@@ -52,6 +52,15 @@
     methods: {
       ...mapActions("devices", ["fetchDevices"]),
       getImgUrl(device) {
+        if (device.product.company === 'IKEA') {
+          switch (device.category) {
+            case "0":
+              return require("../assets/ikea_remote_control.png");
+            case "2":
+              return require("../assets/ikea_light_bulb.png");
+          }
+        }
+
         switch (device.category) {
           case "plug":
             return require("../assets/smart_plug_icon.png");

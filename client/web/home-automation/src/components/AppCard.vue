@@ -52,6 +52,19 @@
 
                 </div>
 
+                <div v-if="company === 'IKEA'">
+                    <toggle-button v-if="category === '2'" v-model="device_on" @change="onChangeEventHandler"/>
+                    <input
+                            v-if="category === '2'"
+                            type="range"
+                            min="1"
+                            max="100"
+                            v-model="brightness"
+                            @change="brightnessChanged()"
+                    />
+
+                </div>
+
                 <div slot="footer">
                     <b-button style="background-color: #4287f5" v-bind:to="navigate()"
                     >Information
@@ -158,6 +171,8 @@
           const deviceResult = await TapoService.fetchTapoDevice(this.id);
           this.dev = deviceResult.device;
           this.device_on = this.dev.device_info.device_on;
+        } else if (this.company === "IKEA") {
+          console.log("turn on IKEA");
         }
       },
       onRGBClick() {
@@ -208,6 +223,8 @@
           const deviceResult = await TapoService.fetchTapoDevice(this.id);
           this.dev = deviceResult.device;
           this.device_on = this.dev.device_info.device_on;
+        } else if (this.company === "IKEA") {
+          console.log("turn off IKEA");
         }
       },
       async deleteDevice() {
@@ -216,7 +233,12 @@
         }
       },
       async brightnessChanged() {
-        await TapoService.setDeviceBrightness(this.id, this.brightness);
+        if (this.company === "tp-link") {
+          await TapoService.setDeviceBrightness(this.id, this.brightness);
+        } else if (this.company === "IKEA") {
+          console.log("change brightness");
+          console.log(this.brightness);
+        }
       },
     },
     async mounted() {
@@ -233,7 +255,9 @@
       } else if (this.device_type === 'RGB_LED_STRIP') {
         // TODO: get the current RGB color from the
         this.state = "loaded";
-
+      } else if (this.company === "IKEA") {
+        this.device_on = true;
+        this.state = "loaded";
       } else {
         this.state = "loaded";
       }
