@@ -76,8 +76,6 @@ func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
 	devices := make([]entity.TradfriDevice, len(tradfriDevices))
 
 	for i, device := range tradfriDevices {
-		fmt.Printf("%+v\n", device)
-
 		// Map tradfri id (int) to our uuid. This is done to avoid conflicts in the rest of the application
 		id, err := u.tradfriIdToApiId(tradfriDevices[i].DeviceId)
 		if err != nil {
