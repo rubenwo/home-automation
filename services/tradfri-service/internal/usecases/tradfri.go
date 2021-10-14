@@ -75,18 +75,40 @@ func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
 
 	devices := make([]entity.TradfriDevice, len(tradfriDevices))
 
-	for i := range tradfriDevices {
+	for i, device := range tradfriDevices {
+		fmt.Printf("%+v\n", device)
+
 		// Map tradfri id (int) to our uuid. This is done to avoid conflicts in the rest of the application
 		id, err := u.tradfriIdToApiId(tradfriDevices[i].DeviceId)
 		if err != nil {
 			return []entity.TradfriDevice{}, err
 		}
 
+		var (
+			remoteData         *entity.RemoteData         = nil
+			dimmableDeviceData *entity.DimmableDeviceData = nil
+		)
+
+		var deviceType entity.DeviceType
+		switch device.Type {
+		case 0:
+			deviceType = entity.Remote
+			remoteData = &entity.RemoteData{BatteryLevel: device.Metadata.Battery}
+		case 2:
+			deviceType = entity.Light
+			dimmableDeviceData = &entity.DimmableDeviceData{
+				Power:      device.LightControl[0].Power,
+				Brightness: device.LightControl[0].Dimmer,
+			}
+		}
+
 		devices[i] = entity.TradfriDevice{
-			Id:         id,
-			Name:       tradfriDevices[i].Name,
-			Category:   fmt.Sprintf("%d", tradfriDevices[i].Type),
-			DeviceType: fmt.Sprintf("%d", tradfriDevices[i].Type),
+			Id:                 id,
+			Name:               tradfriDevices[i].Name,
+			Category:           fmt.Sprintf("%d", tradfriDevices[i].Type),
+			DeviceType:         deviceType,
+			RemoteData:         remoteData,
+			DimmableDeviceData: dimmableDeviceData,
 		}
 	}
 
@@ -104,11 +126,30 @@ func (u *TradfriUsecases) FetchDevice(deviceId string) (entity.TradfriDevice, er
 		return entity.TradfriDevice{}, err
 	}
 
+	var (
+		remoteData         *entity.RemoteData         = nil
+		dimmableDeviceData *entity.DimmableDeviceData = nil
+	)
+
+	var deviceType entity.DeviceType
+	switch tradfriDevice.Type {
+	case 0:
+		deviceType = entity.Remote
+		remoteData = &entity.RemoteData{BatteryLevel: tradfriDevice.Metadata.Battery}
+	case 2:
+		deviceType = entity.Light
+		dimmableDeviceData = &entity.DimmableDeviceData{
+			Power:      tradfriDevice.LightControl[0].Power,
+			Brightness: tradfriDevice.LightControl[0].Dimmer,
+		}
+	}
 	return entity.TradfriDevice{
-		Id:         deviceId,
-		Name:       tradfriDevice.Name,
-		Category:   fmt.Sprintf("%d", tradfriDevice.Type),
-		DeviceType: fmt.Sprintf("%d", tradfriDevice.Type),
+		Id:                 deviceId,
+		Name:               tradfriDevice.Name,
+		Category:           fmt.Sprintf("%d", tradfriDevice.Type),
+		DeviceType:         deviceType,
+		RemoteData:         remoteData,
+		DimmableDeviceData: dimmableDeviceData,
 	}, nil
 }
 
@@ -118,9 +159,9 @@ func (u *TradfriUsecases) CommandDevice(deviceId string, command entity.DeviceCo
 		return err
 	}
 	switch command.DeviceType {
-	case entity.LIGHT:
+	case entity.Light:
 		if command.DimmableLightCommand == nil {
-			return errors.New("device type is 'LIGHT', but command is nil")
+			return errors.New("device type is 'Light', but command is nil")
 		}
 		_, err := u.client.PutDevicePower(tradfriId, command.DimmableLightCommand.Power)
 		if err != nil {

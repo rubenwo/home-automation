@@ -46,11 +46,28 @@ func (h *Handler) getTradfriDevices(w http.ResponseWriter, r *http.Request) {
 
 	schemeDevices := make([]scheme.Device, len(devices))
 	for i, device := range devices {
+		var (
+			remoteData         *scheme.RemoteData         = nil
+			dimmableDeviceData *scheme.DimmableDeviceData = nil
+		)
+
+		switch device.DeviceType {
+		case entity.Remote:
+			remoteData = &scheme.RemoteData{BatteryLevel: device.RemoteData.BatteryLevel}
+		case entity.Light:
+			dimmableDeviceData = &scheme.DimmableDeviceData{
+				Power:      device.DimmableDeviceData.Power,
+				Brightness: device.DimmableDeviceData.Brightness,
+			}
+		}
+
 		schemeDevices[i] = scheme.Device{
-			Id:         device.Id,
-			Name:       device.Name,
-			Category:   device.Category,
-			DeviceType: device.DeviceType,
+			Id:                 device.Id,
+			Name:               device.Name,
+			Category:           device.Category,
+			DeviceType:         string(device.DeviceType),
+			RemoteData:         remoteData,
+			DimmableDeviceData: dimmableDeviceData,
 		}
 	}
 
@@ -65,12 +82,30 @@ func (h *Handler) getTradfriDevice(w http.ResponseWriter, r *http.Request) {
 		errorController(w, err)
 		return
 	}
+
+	var (
+		remoteData         *scheme.RemoteData         = nil
+		dimmableDeviceData *scheme.DimmableDeviceData = nil
+	)
+
+	switch device.DeviceType {
+	case entity.Remote:
+		remoteData = &scheme.RemoteData{BatteryLevel: device.RemoteData.BatteryLevel}
+	case entity.Light:
+		dimmableDeviceData = &scheme.DimmableDeviceData{
+			Power:      device.DimmableDeviceData.Power,
+			Brightness: device.DimmableDeviceData.Brightness,
+		}
+	}
+
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(&scheme.Device{
-		Id:         device.Id,
-		Name:       device.Name,
-		Category:   device.Category,
-		DeviceType: device.DeviceType,
+		Id:                 device.Id,
+		Name:               device.Name,
+		Category:           device.Category,
+		DeviceType:         string(device.DeviceType),
+		RemoteData:         remoteData,
+		DimmableDeviceData: dimmableDeviceData,
 	})
 }
 
@@ -81,7 +116,7 @@ func commandSchemeToEntity(cmd scheme.Command) (entity.DeviceCommand, error) {
 			return entity.DeviceCommand{}, errors.New("device type is 'light', but dimmable light command is nil")
 		}
 		return entity.DeviceCommand{
-			DeviceType: entity.LIGHT,
+			DeviceType: entity.Light,
 			DimmableLightCommand: &entity.DimmableLightCommand{
 				Power:      cmd.DimmableLightCommand.Power,
 				Brightness: cmd.DimmableLightCommand.Brightness,

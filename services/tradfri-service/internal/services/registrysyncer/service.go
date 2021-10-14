@@ -55,6 +55,8 @@ func (s *service) Run(ctx context.Context) {
 }
 
 func (s *service) publishDevice(device entity.TradfriDevice) error {
+	return nil
+
 	req, err := http.NewRequest("DELETE", "http://registry.default.svc.cluster.local/devices/"+device.Id, nil)
 	if err != nil {
 		return err
@@ -84,7 +86,7 @@ func (s *service) publishDevice(device entity.TradfriDevice) error {
 	data.Name = device.Name
 	data.Category = device.Category
 	data.Product.Company = "IKEA"
-	data.Product.Type = device.DeviceType
+	data.Product.Type = string(device.DeviceType)
 	jsonData, err := json.Marshal(&data)
 	if err != nil {
 		return err
