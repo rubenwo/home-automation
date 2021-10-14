@@ -158,6 +158,7 @@ func main() {
 						}
 					}
 				}
+				devices = newDevices
 
 				errorCount = 0
 				timer.Reset(time.Minute)

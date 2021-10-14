@@ -15,6 +15,13 @@ import (
 func RegisterHandler(usecases *usecases.TradfriUsecases, router chi.Router) {
 	handler := Handler{usecases: usecases}
 
+	router.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			next.ServeHTTP(w, r)
+		})
+	})
+
 	router.Get("/tradfri/devices", handler.getTradfriDevices)
 	router.Get("/tradfri/devices/{deviceId}", handler.getTradfriDevice)
 	router.Post("/tradfri/devices/command", handler.postDevicesCommand)
