@@ -1,12 +1,13 @@
 package usecases
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
-	"github.com/eriklupander/tradfri-go/tradfri"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/app"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/entity"
+	"github.com/rubenwo/home-automation/services/tradfri-service/pkg/tradfri"
 	"os"
-	"strconv"
 )
 
 type DaoTradfri interface {
@@ -17,7 +18,9 @@ type ServicesTradfri interface {
 	app.RegistrySyncerService
 }
 
-func NewTradfriUsecases(dao DaoTradfri, services ServicesTradfri) *TradfriUsecases {
+// TODO: move db code to dao/services
+
+func NewTradfriUsecases(db *sql.DB, dao DaoTradfri, services ServicesTradfri) *TradfriUsecases {
 	return &TradfriUsecases{
 		dao:      dao,
 		services: services,
@@ -26,6 +29,7 @@ func NewTradfriUsecases(dao DaoTradfri, services ServicesTradfri) *TradfriUsecas
 			os.Getenv("TRADFRI_GATEWAY_CLIENT_ID"),
 			os.Getenv("TRADFRI_GATEWAY_PSK"),
 		),
+		db: db,
 	}
 }
 
@@ -33,6 +37,7 @@ type TradfriUsecases struct {
 	dao      DaoTradfri
 	services ServicesTradfri
 	client   *tradfri.Client
+	db       *sql.DB
 }
 
 func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
@@ -43,9 +48,16 @@ func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
 
 	devices := make([]entity.TradfriDevice, len(tradfriDevices))
 
+	query := `SELECT id FROM ids_tradfriids WHERE tradfri_id = $1`
 	for i := range tradfriDevices {
+		// Map tradfri id (int) to our uuid. This is done to avoid conflicts in the rest of the application
+		var id string
+		if err := u.db.QueryRow(query, fmt.Sprintf("%d", tradfriDevices[i].DeviceId)).Scan(&id); err != nil {
+			return []entity.TradfriDevice{}, err
+		}
+
 		devices[i] = entity.TradfriDevice{
-			Id:         fmt.Sprintf("%d", tradfriDevices[i].DeviceId),
+			Id:         id,
 			Name:       tradfriDevices[i].Name,
 			Category:   fmt.Sprintf("%d", tradfriDevices[i].Type),
 			DeviceType: fmt.Sprintf("%d", tradfriDevices[i].Type),
@@ -56,24 +68,49 @@ func (u *TradfriUsecases) FetchAllDevices() ([]entity.TradfriDevice, error) {
 }
 
 func (u *TradfriUsecases) FetchDevice(deviceId string) (entity.TradfriDevice, error) {
-	id, err := strconv.Atoi(deviceId)
-	if err != nil {
+	query := `SELECT tradfri_id FROM ids_tradfriids WHERE id = $1`
+	var tradfriId int
+	if err := u.db.QueryRow(query, deviceId).Scan(&tradfriId); err != nil {
 		return entity.TradfriDevice{}, err
 	}
-	tradfriDevice, err := u.client.GetDevice(id)
+
+	tradfriDevice, err := u.client.GetDevice(tradfriId)
 	if err != nil {
 		return entity.TradfriDevice{}, err
 	}
 
 	return entity.TradfriDevice{
-		Id:         fmt.Sprintf("%d", tradfriDevice.DeviceId),
+		Id:         deviceId,
 		Name:       tradfriDevice.Name,
 		Category:   fmt.Sprintf("%d", tradfriDevice.Type),
 		DeviceType: fmt.Sprintf("%d", tradfriDevice.Type),
 	}, nil
 }
 
-func (u *TradfriUsecases) CommandDevice(deviceId string) error {
+func (u *TradfriUsecases) CommandDevice(deviceId string, command entity.DeviceCommand) error {
+	query := `SELECT tradfri_id FROM ids_tradfriids WHERE id = $1`
+	var tradfriId int
+	if err := u.db.QueryRow(query, deviceId).Scan(&tradfriId); err != nil {
+		return err
+	}
+
+	switch command.DeviceType {
+	case entity.LIGHT:
+		if command.DimmableLightCommand == nil {
+			return errors.New("device type is 'LIGHT', but command is nil")
+		}
+		_, err := u.client.PutDevicePower(tradfriId, command.DimmableLightCommand.Power)
+		if err != nil {
+			return err
+		}
+		_, err = u.client.PutDeviceDimming(tradfriId, command.DimmableLightCommand.Brightness)
+		if err != nil {
+			return err
+		}
+	default:
+		return errors.New("unsupported command type")
+	}
+
 	return nil
 }
 

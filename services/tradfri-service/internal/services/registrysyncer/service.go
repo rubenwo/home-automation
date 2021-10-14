@@ -26,9 +26,9 @@ type service struct {
 
 func NewService(db *sql.DB) *service {
 	return &service{
-		httpClient:     &http.Client{},
-		buffer:         make(chan message, 100),
-		db:             db,
+		httpClient: &http.Client{},
+		buffer:     make(chan message, 100),
+		db:         db,
 	}
 }
 
@@ -42,19 +42,17 @@ func (s *service) PublishDevice(device entity.TradfriDevice) error {
 }
 
 func (s *service) Run(ctx context.Context) {
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case msg := <-s.buffer:
-				if err := s.publishDevice(msg.device); err != nil {
-					msg.err <- err
-				}
-				close(msg.err)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case msg := <-s.buffer:
+			if err := s.publishDevice(msg.device); err != nil {
+				msg.err <- err
 			}
+			close(msg.err)
 		}
-	}()
+	}
 }
 
 func (s *service) publishDevice(device entity.TradfriDevice) error {

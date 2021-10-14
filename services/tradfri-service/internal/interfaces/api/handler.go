@@ -2,11 +2,14 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-chi/chi"
+	"github.com/rubenwo/home-automation/services/tradfri-service/internal/entity"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/interfaces/api/scheme"
 	"github.com/rubenwo/home-automation/services/tradfri-service/internal/usecases"
 	"net/http"
+	"strings"
 )
 
 func RegisterHandler(usecases *usecases.TradfriUsecases, router chi.Router) {
@@ -55,7 +58,31 @@ func (h *Handler) getTradfriDevice(w http.ResponseWriter, r *http.Request) {
 		errorController(w, err)
 		return
 	}
-	fmt.Println(device)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(&scheme.Device{
+		Id:         device.Id,
+		Name:       device.Name,
+		Category:   device.Category,
+		DeviceType: device.DeviceType,
+	})
+}
+
+func commandSchemeToEntity(cmd scheme.Command) (entity.DeviceCommand, error) {
+	switch strings.ToLower(cmd.DeviceType) {
+	case "light":
+		if cmd.DimmableLightCommand == nil {
+			return entity.DeviceCommand{}, errors.New("device type is 'light', but dimmable light command is nil")
+		}
+		return entity.DeviceCommand{
+			DeviceType: entity.LIGHT,
+			DimmableLightCommand: &entity.DimmableLightCommand{
+				Power:      cmd.DimmableLightCommand.Power,
+				Brightness: cmd.DimmableLightCommand.Brightness,
+			},
+		}, nil
+	}
+
+	return entity.DeviceCommand{}, nil
 }
 
 func (h *Handler) postDevicesCommand(w http.ResponseWriter, r *http.Request) {
@@ -64,19 +91,48 @@ func (h *Handler) postDevicesCommand(w http.ResponseWriter, r *http.Request) {
 		errorController(w, err)
 		return
 	}
+	var command scheme.Command
+	if err := json.NewDecoder(r.Body).Decode(&command); err != nil {
+		errorController(w, err)
+		return
+	}
+
+	entityCommand, err := commandSchemeToEntity(command)
+	if err != nil {
+		errorController(w, err)
+		return
+	}
 
 	for _, device := range devices {
-		err := h.usecases.CommandDevice(device.Id)
+		err := h.usecases.CommandDevice(device.Id, entityCommand)
 		if err != nil {
 			errorController(w, err)
 			return
 		}
 	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handler) postDeviceCommand(w http.ResponseWriter, r *http.Request) {
 	deviceId := chi.URLParam(r, "deviceId")
-	fmt.Println(deviceId)
+	var command scheme.Command
+	if err := json.NewDecoder(r.Body).Decode(&command); err != nil {
+		errorController(w, err)
+		return
+	}
+
+	entityCommand, err := commandSchemeToEntity(command)
+	if err != nil {
+		errorController(w, err)
+		return
+	}
+
+	if err := h.usecases.CommandDevice(deviceId, entityCommand); err != nil {
+		errorController(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handler) getTradfriGroups(w http.ResponseWriter, r *http.Request) {
@@ -86,6 +142,7 @@ func (h *Handler) getTradfriGroups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(groups)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handler) getTradfriGroup(w http.ResponseWriter, r *http.Request) {
@@ -96,13 +153,15 @@ func (h *Handler) getTradfriGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(group)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handler) postCommandInAllGroups(w http.ResponseWriter, r *http.Request) {
-
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handler) postCommandInGroup(w http.ResponseWriter, r *http.Request) {
 	groupId := chi.URLParam(r, "groupId")
 	fmt.Println(groupId)
+	w.WriteHeader(http.StatusOK)
 }

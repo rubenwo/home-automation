@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eriklupander/tradfri-go/model"
 	coap2 "github.com/moroen/gocoap/v3"
+	"github.com/rubenwo/home-automation/services/tradfri-service/pkg/tradfri/model"
 	"log"
 	"os"
 	"os/signal"

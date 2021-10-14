@@ -160,3 +160,22 @@ spec:
           - GET
         allow_anonymous: true
         protocol: http
+
+  - host: tradfri.default.svc.cluster.local
+    routes:
+      - path: "/tradfri/devices"
+        methods:
+          - GET
+        protocol: http
+      - path: "/tradfri/devices/{deviceId}"
+        methods:
+          - GET
+        protocol: http
+      - path: "/tradfri/devices/command"
+        methods:
+          - POST
+        protocol: http
+      - path: "/tradfri/devices/{deviceId}/command"
+        methods:
+          - POST
+        protocol: http

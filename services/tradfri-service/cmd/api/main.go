@@ -103,17 +103,18 @@ func main() {
 	}
 
 	registrySyncerService := registrysyncer.NewService(db)
-	registrySyncerService.Run(ctx)
+	go registrySyncerService.Run(ctx)
 
 	services := &app.Services{
 		RegistrySyncerService: registrySyncerService,
 	}
 
 	var (
-		usecasesTradfri = usecases.NewTradfriUsecases(dataAccessOject, services)
+		usecasesTradfri = usecases.NewTradfriUsecases(db, dataAccessOject, services)
 	)
 
 	go func() {
+		log.Println("Refreshing tradfri devices list")
 		devices, err := usecasesTradfri.FetchAllDevices()
 		if err != nil {
 			log.Fatalf("error fetching tradfri devices: %s\n", err.Error())
@@ -131,6 +132,7 @@ func main() {
 		for {
 			select {
 			case <-timer.C:
+				log.Println("Refreshing tradfri devices list")
 				newDevices, err := usecasesTradfri.FetchAllDevices()
 				if err != nil {
 					log.Printf("error publishing tradfri device to registry: %s\n", err.Error())
@@ -161,7 +163,6 @@ func main() {
 				timer.Reset(time.Minute)
 			}
 		}
-
 	}()
 
 	router := chi.NewRouter()
