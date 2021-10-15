@@ -57,8 +57,8 @@
                     <input
                             v-if="category === '2'"
                             type="range"
-                            min="1"
-                            max="100"
+                            min="0"
+                            max="255"
                             v-model="brightness"
                             @change="brightnessChanged()"
                     />
@@ -115,6 +115,7 @@
   import LedStripService from "../services/led_strip.service";
   import TapoService from "../services/tapo.service";
   import {ToggleButton} from 'vue-js-toggle-button'
+  import TradfriService from "../services/ikea.service";
 
   export default {
     name: "app-card",
@@ -172,7 +173,12 @@
           this.dev = deviceResult.device;
           this.device_on = this.dev.device_info.device_on;
         } else if (this.company === "IKEA") {
-          console.log("turn on IKEA");
+          await TradfriService.commandTradfriDevice(this.id, {
+            device_type: "light",
+            dimmable_light_command: {
+              power: 1
+            }
+          });
         }
       },
       onRGBClick() {
@@ -224,7 +230,12 @@
           this.dev = deviceResult.device;
           this.device_on = this.dev.device_info.device_on;
         } else if (this.company === "IKEA") {
-          console.log("turn off IKEA");
+          await TradfriService.commandTradfriDevice(this.id, {
+            device_type: "light",
+            dimmable_light_command: {
+              power: 0
+            }
+          });
         }
       },
       async deleteDevice() {
@@ -236,8 +247,12 @@
         if (this.company === "tp-link") {
           await TapoService.setDeviceBrightness(this.id, this.brightness);
         } else if (this.company === "IKEA") {
-          console.log("change brightness");
-          console.log(this.brightness);
+          await TradfriService.commandTradfriDevice(this.id, {
+            device_type: "light",
+            dimmable_light_command: {
+              brightness: this.brightness
+            }
+          });
         }
       },
     },
@@ -256,7 +271,11 @@
         // TODO: get the current RGB color from the
         this.state = "loaded";
       } else if (this.company === "IKEA") {
-        this.device_on = true;
+        let device = await TradfriService.fetchTradfriDevice(this.id);
+        if (device.device_type === 'light') {
+          this.brightness = device.dimmable_device_data.brightness;
+          this.device_on = device.dimmable_device_data.power === 1
+        }
         this.state = "loaded";
       } else {
         this.state = "loaded";
