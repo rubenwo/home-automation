@@ -31,6 +31,6 @@ type DeviceCommand struct {
 }
 
 type DimmableLightCommand struct {
-	Power      int // 0 or 1
-	Brightness int // 0 to 255
+	Power      *int // 0 or 1
+	Brightness *int // 0 to 255
 }

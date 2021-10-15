@@ -161,13 +161,17 @@ func (u *TradfriUsecases) CommandDevice(deviceId string, command entity.DeviceCo
 		if command.DimmableLightCommand == nil {
 			return errors.New("device type is 'Light', but command is nil")
 		}
-		_, err := u.client.PutDevicePower(tradfriId, command.DimmableLightCommand.Power)
-		if err != nil {
-			return err
+		if command.DimmableLightCommand.Power != nil {
+			_, err = u.client.PutDevicePower(tradfriId, *command.DimmableLightCommand.Power)
+			if err != nil {
+				return err
+			}
 		}
-		_, err = u.client.PutDeviceDimming(tradfriId, command.DimmableLightCommand.Brightness)
-		if err != nil {
-			return err
+		if command.DimmableLightCommand.Brightness != nil {
+			_, err = u.client.PutDeviceDimming(tradfriId, *command.DimmableLightCommand.Brightness)
+			if err != nil {
+				return err
+			}
 		}
 	default:
 		return errors.New("unsupported command type")

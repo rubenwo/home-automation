@@ -56,8 +56,8 @@ func (h *Handler) getTradfriDevices(w http.ResponseWriter, r *http.Request) {
 			remoteData = &scheme.RemoteData{BatteryLevel: device.RemoteData.BatteryLevel}
 		case entity.Light:
 			dimmableDeviceData = &scheme.DimmableDeviceData{
-				Power:      device.DimmableDeviceData.Power,
-				Brightness: device.DimmableDeviceData.Brightness,
+				Power:      &device.DimmableDeviceData.Power,
+				Brightness: &device.DimmableDeviceData.Brightness,
 			}
 		}
 
@@ -93,8 +93,8 @@ func (h *Handler) getTradfriDevice(w http.ResponseWriter, r *http.Request) {
 		remoteData = &scheme.RemoteData{BatteryLevel: device.RemoteData.BatteryLevel}
 	case entity.Light:
 		dimmableDeviceData = &scheme.DimmableDeviceData{
-			Power:      device.DimmableDeviceData.Power,
-			Brightness: device.DimmableDeviceData.Brightness,
+			Power:      &device.DimmableDeviceData.Power,
+			Brightness: &device.DimmableDeviceData.Brightness,
 		}
 	}
 

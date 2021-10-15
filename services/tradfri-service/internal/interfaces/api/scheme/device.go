@@ -6,13 +6,13 @@ type Device struct {
 	Category   string `json:"category"`
 	DeviceType string `json:"device_type"`
 
-	DimmableDeviceData *DimmableDeviceData `json:"dimmable_device_data"`
-	RemoteData         *RemoteData         `json:"remote_data"`
+	DimmableDeviceData *DimmableDeviceData `json:"dimmable_device_data,omitempty"`
+	RemoteData         *RemoteData         `json:"remote_data,omitempty"`
 }
 
 type DimmableDeviceData struct {
-	Power      int `json:"power"`      // 0 or 1
-	Brightness int `json:"brightness"` // 0 to 255
+	Power      *int `json:"power,omitempty"`      // 0 or 1
+	Brightness *int `json:"brightness,omitempty"` // 0 to 255
 }
 
 type RemoteData struct {
