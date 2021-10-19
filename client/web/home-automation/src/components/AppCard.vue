@@ -250,7 +250,7 @@
           await TradfriService.commandTradfriDevice(this.id, {
             device_type: "light",
             dimmable_light_command: {
-              brightness: this.brightness
+              brightness: parseInt(this.brightness)
             }
           });
         }
