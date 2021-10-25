@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -37,11 +38,11 @@ func DiscoverIPv4(subnet string) ([]net.IP, error) {
 		if subnetSize >= 24 {
 			ips = append(ips, fmt.Sprintf("%d.%d.%d.%d", subnetIP[0], subnetIP[1], subnetIP[2], i))
 		} else if subnetSize >= 16 {
-			ips = append(ips, fmt.Sprintf("%d.%d.%d.%d", subnetIP[0], subnetIP[1], i/256%256, i%256))
+			ips = append(ips, fmt.Sprintf("%d.%d.%d.%d", subnetIP[0], subnetIP[1], subnetIP[2]+i/256%256, i%256))
 		} else if subnetSize >= 8 {
-			ips = append(ips, fmt.Sprintf("%d.%d.%d.%d", subnetIP[0], i/256/256%256, i/256%256, i%256))
+			ips = append(ips, fmt.Sprintf("%d.%d.%d.%d", subnetIP[0], subnetIP[1]+i/256/256%256, subnetIP[2]+i/256%256, i%256))
 		} else if subnetSize >= 1 {
-			ips = append(ips, fmt.Sprintf("%d.%d.%d.%d", i/256/256/256%256, i/256/256%256, i/256%256, i%256))
+			ips = append(ips, fmt.Sprintf("%d.%d.%d.%d", subnetIP[0]+i/256/256/256%256, subnetIP[1]+i/256/256%256, subnetIP[2]+i/256%256, i%256))
 		}
 	}
 
@@ -58,7 +59,7 @@ func DiscoverIPv4(subnet string) ([]net.IP, error) {
 
 	for i := 0; i < discoverConcurrency; i++ {
 		go func(jobs chan job, results chan result) {
-			client := &http.Client{}
+			client := &http.Client{Timeout: time.Second * 2}
 			for job := range jobs {
 				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/app", job.IP), nil)
 				if err != nil {
