@@ -15,3 +15,9 @@ type TapoDevice struct {
 	DeviceType string                 `json:"device_type"`
 	DeviceInfo map[string]interface{} `json:"device_info"`
 }
+
+type TapoDiscoveryRequest struct {
+	Subnet   string `json:"subnet"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}

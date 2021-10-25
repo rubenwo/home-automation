@@ -8,3 +8,7 @@ var (
 	ErrInvalidUrl     = errors.New("url is not set to a valid value")
 	ErrNoEncryptor    = errors.New("encryptor is not set, please call Handshake function")
 )
+
+var (
+	ErrDiscoverInvalidSubnet = errors.New("invalid subnet")
+)

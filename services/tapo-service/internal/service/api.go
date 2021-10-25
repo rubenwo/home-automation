@@ -27,7 +27,6 @@ type api struct {
 }
 
 func Run(cfg *Config) error {
-
 	db := pg.Connect(&pg.Options{
 		Addr:     cfg.DatabaseBackend,
 		User:     cfg.DatabaseUser,
@@ -81,6 +80,7 @@ func Run(cfg *Config) error {
 	a.router.Delete("/tapo/devices/{device_id}", a.deleteDevice)
 	a.router.Post("/tapo/devices/register", a.addDevice)
 	a.router.Put("/tapo/devices/{device_id}", a.updateDevice)
+	a.router.Post("/tapo/devices/discover", a.discoverDevices)
 
 	a.router.Get("/tapo/lights/{device_id}", a.commandDevice)
 
@@ -98,6 +98,82 @@ func (a *api) healthz(w http.ResponseWriter, r *http.Request) {
 	}); err != nil {
 		log.Printf("error sending healthz: %s\n", err.Error())
 	}
+}
+
+func (a *api) discoverDevices(w http.ResponseWriter, r *http.Request) {
+	var discoveryRequest models.TapoDiscoveryRequest
+	if err := json.NewDecoder(r.Body).Decode(&discoveryRequest); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't process the body"), http.StatusUnprocessableEntity)
+		return
+	}
+
+	clients, err := p100.DiscoverIPv4AndLogin(discoveryRequest.Subnet, discoveryRequest.Email, discoveryRequest.Password)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, fmt.Sprintf("error discovering the tapo devices on the given subnet"), http.StatusBadRequest)
+		return
+	}
+
+	for _, client := range clients {
+		device := models.DeviceConnectionInfo{
+			DeviceId:   uuid.New().String(),
+			DeviceType: client.DeviceType(),
+			IpAddress:  client.URL.Host,
+			Email:      discoveryRequest.Email,
+			Password:   discoveryRequest.Password,
+		}
+
+		a.registry[device.DeviceId] = client
+
+		result, err := a.db.Model(&device).Insert()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("couldn't insert model into database: %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
+		log.Println(result)
+
+		var registryMsg struct {
+			Id       string `json:"id"`
+			Name     string `json:"name"`
+			Category string `json:"category"`
+			Product  struct {
+				Company string `json:"company"`
+				Type    string `json:"type"`
+			} `json:"product"`
+		}
+
+		registryMsg.Id = device.DeviceId
+		registryMsg.Name = client.Name()
+
+		switch strings.ToLower(device.DeviceType) {
+		case "p100":
+			registryMsg.Category = "plug"
+		case "l510e":
+			registryMsg.Category = "light"
+		default:
+			registryMsg.Category = "unknown"
+		}
+
+		registryMsg.Product.Company = "tp-link"
+		registryMsg.Product.Type = device.DeviceType
+
+		data, err := json.Marshal(&registryMsg)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("couldn't marshal registry message"), http.StatusInternalServerError)
+			return
+		}
+
+		resp, err := http.Post(a.registryBaseUrl, "application/json", bytes.NewBuffer(data))
+		if err != nil {
+			http.Error(w, fmt.Sprintf("couldn't post new tapo device to the registry"), http.StatusInternalServerError)
+			return
+		}
+		if err := resp.Body.Close(); err != nil {
+			log.Println(err)
+		}
+		a.getDevices(w, r)
+	}
+
 }
 
 func (a *api) getDevices(w http.ResponseWriter, r *http.Request) {

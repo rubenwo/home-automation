@@ -366,6 +366,10 @@ func (c *Client) Name() string {
 	return string(name)
 }
 
+func (c *Client) DeviceType() string {
+	panic("*client.DeviceType() not implemented")
+}
+
 func (c *Client) checkTokenState() error {
 	if c.cookieToken == "" {
 		return ErrNoCookieToken
