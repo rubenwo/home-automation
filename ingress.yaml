@@ -62,6 +62,10 @@ spec:
           - PUT
           - DELETE
         protocol: http
+      - path: "/recipes/suggestions"
+        methods:
+          - GET
+        protocol: http
 
   - host: led-strip.default.svc.cluster.local
     routes:

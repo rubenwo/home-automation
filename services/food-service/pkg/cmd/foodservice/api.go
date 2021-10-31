@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-pg/pg/v10"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
@@ -61,6 +62,8 @@ func Run(cfg *Config) error {
 	router.Get("/recipes/{id}", a.getRecipe)
 	router.Put("/recipes/{id}", a.updateRecipe)
 	router.Delete("/recipes/{id}", a.deleteRecipe)
+
+	router.Get("/recipes/suggestions", a.getRecipeSuggestions)
 
 	if err := http.ListenAndServe(cfg.ApiAddr, router); err != nil {
 		return fmt.Errorf("http.ListenAndServe returned error: %w", err)
@@ -194,4 +197,33 @@ func (a *api) deleteRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(result)
 	a.getAllRecipes(w, r)
+}
+
+func (a *api) getRecipeSuggestions(w http.ResponseWriter, r *http.Request) {
+	amountStr := r.URL.Query().Get("amount")
+	amount, err := strconv.Atoi(amountStr)
+	if err != nil {
+		http.Error(w, "could not convert the amount param", http.StatusBadRequest)
+		return
+	}
+
+	var recipes []Recipe
+	if err := a.db.Model(&recipes).Select(); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't load item from database: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("content-type", "application/json")
+	if len(recipes) <= amount {
+		if err := json.NewEncoder(w).Encode(&recipes); err != nil {
+			log.Printf("error sending suggestions: %s\n", err.Error())
+		}
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(recipes), func(i, j int) { recipes[i], recipes[j] = recipes[j], recipes[i] })
+	recipes = recipes[:amount]
+	if err := json.NewEncoder(w).Encode(&recipes); err != nil {
+		log.Printf("error sending suggestions: %s\n", err.Error())
+	}
 }

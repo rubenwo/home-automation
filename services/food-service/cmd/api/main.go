@@ -10,7 +10,7 @@ func main() {
 	log.Println("food-service is now running!")
 	if err := foodservice.Run(&foodservice.Config{
 		DatabaseAddr: "postgres.default.svc.cluster.local:5432",
-		//DatabaseAddr:     "localhost:5432",
+		//DatabaseAddr:     "192.168.178.46:5432",
 		DatabaseUser:     "user",
 		DatabasePassword: "password",
 		DatabaseName:     "food_database",
