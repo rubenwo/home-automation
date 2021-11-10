@@ -127,12 +127,12 @@ func main() {
 		}
 		const retry = 10
 
-		timer := time.NewTimer(time.Minute)
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
 		errorCount := 0
 		for {
 			select {
-			case <-timer.C:
-				log.Println("Refreshing tradfri devices list")
+			case <-ticker.C:
 				newDevices, err := usecasesTradfri.FetchAllDevices()
 				if err != nil {
 					log.Printf("error publishing tradfri device to registry: %s\n", err.Error())
@@ -140,7 +140,6 @@ func main() {
 						log.Fatalf("max retries for fetching devices reached: %s\n", err.Error())
 					}
 					errorCount++
-					timer.Reset(time.Minute)
 					continue
 				}
 
@@ -161,7 +160,6 @@ func main() {
 				devices = newDevices
 
 				errorCount = 0
-				timer.Reset(time.Minute)
 			}
 		}
 	}()
