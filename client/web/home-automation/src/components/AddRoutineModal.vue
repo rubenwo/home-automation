@@ -85,75 +85,105 @@
                             v-for="(action, index) in routine.actions"
                     >
                         <b-input-group>
-                            <b-container fluid>
-                                <b-row class="my-1">
-                                    <b-col sm="4">
-                                        <label>Action Addr:</label>
-                                    </b-col>
-                                    <b-col sm="8">
-                                        <b-form-input
-                                                size="sm"
-                                                class="mx-1"
-                                                placeholder="url"
-                                                v-model="action.addr"
-                                        />
-                                    </b-col>
-                                </b-row>
-                            </b-container>
+                            <b-col sm="4">
+                                <label>Device:</label>
+                            </b-col>
+                            <b-col sm="8">
+                                <b-form-select
+                                        v-model="action.deviceId"
+                                        :options="computedDevices"
+                                />
+                                <div v-if="action.deviceId !== ''">
+                                    Available methods:
+                                    <div>
+                                        <div v-bind:key="index + method.key"
+                                             v-for="method in computeMethodsForDevice(action.deviceId)">
+                                            <b-button variant="outline-success"
+                                                      @click="selectMethodForAction(action.deviceId, method)">
+                                                {{method.name}}
+                                            </b-button>
+                                        </div>
+                                        <span v-if="action.name !== ''">Selected: <strong>{{action.name}}</strong></span>
+                                        <span>{{action.deviceId}}</span>
+                                    </div>
+                                </div>
+                            </b-col>
                         </b-input-group>
-                        <b-input-group>
-                            <b-container fluid>
-                                <b-row class="my-1">
-                                    <b-col sm="4">
-                                        <label>Action Method:</label>
-                                    </b-col>
-                                    <b-col sm="8">
-                                        <b-form-input
-                                                size="sm"
-                                                class="mx-1"
-                                                placeholder="method"
-                                                v-model="action.method"
-                                        />
-                                    </b-col>
-                                </b-row>
-                            </b-container>
-                        </b-input-group>
-                        <b-input-group>
-                            <b-container fluid>
-                                <b-row class="my-1">
-                                    <b-col sm="4">
-                                        <label>Action Data:</label>
-                                    </b-col>
-                                    <b-col sm="8">
-                                        <v-jsoneditor
-                                                v-model="action.data"
-                                                :options="jsonEditorOptions"
-                                                :plus="false"
-                                                :height="'300'"
-                                                @error="onError"
-                                        />
-                                    </b-col>
-                                </b-row>
-                            </b-container>
-                        </b-input-group>
-                        <b-input-group>
-                            <b-container fluid>
-                                <b-row class="my-1">
-                                    <b-col sm="4">
-                                        <label>Action Script:</label>
-                                    </b-col>
-                                    <b-col sm="8">
-                                        <!--                                        <b-form-textarea-->
-                                        <!--                                                v-model="action.script"-->
-                                        <!--                                                placeholder="Enter some code in javascript..."-->
-                                        <!--                                                rows="7"-->
-                                        <!--                                        />-->
-                                        <codemirror v-model="action.script" :options="cmOptions"/>
-                                    </b-col>
-                                </b-row>
-                            </b-container>
-                        </b-input-group>
+                        <b-button v-b-toggle.collapse-2 class="m-1">Advanced</b-button>
+                        <b-collapse id="collapse-2">
+
+                            <b-input-group>
+                                <b-container fluid>
+                                    <b-row class="my-1">
+                                        <b-col sm="4">
+                                            <label>Action Addr:</label>
+                                        </b-col>
+                                        <b-col sm="8">
+                                            <b-form-input
+                                                    size="sm"
+                                                    class="mx-1"
+                                                    placeholder="url"
+                                                    v-model="action.addr"
+                                            />
+                                        </b-col>
+                                    </b-row>
+                                </b-container>
+                            </b-input-group>
+                            <b-input-group>
+                                <b-container fluid>
+                                    <b-row class="my-1">
+                                        <b-col sm="4">
+                                            <label>Action Method:</label>
+                                        </b-col>
+                                        <b-col sm="8">
+                                            <b-form-input
+                                                    size="sm"
+                                                    class="mx-1"
+                                                    placeholder="method"
+                                                    v-model="action.method"
+                                            />
+                                        </b-col>
+                                    </b-row>
+                                </b-container>
+                            </b-input-group>
+                            <b-input-group>
+                                <b-container fluid>
+                                    <b-row class="my-1">
+                                        <b-col sm="4">
+                                            <label>Action Data:</label>
+                                        </b-col>
+                                        <b-col sm="8">
+                                            <v-jsoneditor
+                                                    v-model="action.data"
+                                                    :options="jsonEditorOptions"
+                                                    :plus="false"
+                                                    :height="'300'"
+                                                    @error="onError"
+                                            />
+                                        </b-col>
+                                    </b-row>
+                                </b-container>
+                            </b-input-group>
+                            <b-input-group>
+                                <b-container fluid>
+                                    <b-row class="my-1">
+                                        <b-col sm="4">
+                                            <label>Action Script:</label>
+                                        </b-col>
+                                        <b-col sm="8">
+                                            <!--                                        <b-form-textarea-->
+                                            <!--                                                v-model="action.script"-->
+                                            <!--                                                placeholder="Enter some code in javascript..."-->
+                                            <!--                                                rows="7"-->
+                                            <!--                                        />-->
+                                            <codemirror v-model="action.script" :options="cmOptions"/>
+                                        </b-col>
+                                    </b-row>
+                                </b-container>
+                            </b-input-group>
+                        </b-collapse>
                     </b-row>
+
                     <b-button variant="success" @click="increaseActions">+</b-button>
                     <b-button variant="danger" @click="decreaseActions">-</b-button>
                 </b-container>
@@ -166,6 +196,7 @@
   // import VueCronEditorBuefy from "vue-cron-editor-buefy";
   import VJsoneditor from "v-jsoneditor/src/index";
   import RoutineService from "../services/routines.service";
+  import DevicesService from "../services/devices.service";
   import {codemirror} from "vue-codemirror";
   // import language js
   import "codemirror/mode/javascript/javascript.js";
@@ -184,6 +215,7 @@
     },
     data() {
       return {
+        devices: [],
         cmOptions: {
           tabSize: 4,
           mode: "text/javascript",
@@ -210,6 +242,8 @@
           },
           actions: [
             {
+              name: "",
+              deviceId: "",
               addr: "",
               method: "",
               data: null,
@@ -242,6 +276,155 @@
       handleOk() {
         this.handleSubmit();
       },
+      selectMethodForAction(deviceId, method) {
+        this.routine.actions.forEach(action => {
+          if (action.deviceId === deviceId) {
+            action.addr = method.addr;
+            action.method = method.method;
+            action.data = method.data;
+            action.name = method.name;
+          }
+        })
+      },
+      computeMethodsForDevice(deviceId) {
+        let methods = [];
+        if (!deviceId) {
+          return methods;
+        }
+        let device = this.devices.find(device => device.id === deviceId);
+        if (!device) {
+          return methods;
+        }
+        if (device.product.company === "IKEA") {
+          if (device.product.type === "light") {
+            // Turn off device
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-turnoff",
+              name: "Turn Off",
+              addr: `http://tradfri.default.svc.cluster.local/tradfri/devices/${deviceId}/command`,
+              method: "POST",
+              data: {device_type: "light", dimmable_light_command: {power: 0}}
+            });
+            // Turn on device
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-turnon",
+              name: "Turn On",
+              addr: `http://tradfri.default.svc.cluster.local/tradfri/devices/${deviceId}/command`,
+              method: "POST",
+              data: {device_type: "light", dimmable_light_command: {power: 1}}
+            });
+            // Dimm
+            // Turn on device
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-dimm",
+              name: "Dimm",
+              addr: `http://tradfri.default.svc.cluster.local/tradfri/devices/${deviceId}/command`,
+              method: "POST",
+              data: {device_type: "light", dimmable_light_command: {power: 1, brightness: 127}}
+            });
+          }
+        } else if (device.product.company === "esp32") {
+          if (device.category === "led-strip") {
+            // Set color
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-setcolor",
+              name: "Set Color",
+              addr: "",
+              method: "",
+              data: {},
+              optional: {r: 0, g: 0, b: 0}
+            });
+            // Set colorcycle
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-setcolorcycle",
+              name: "Set Colorcycle",
+              addr: "",
+              method: "",
+              data: {},
+            });
+            // Set breathing
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-setbreathing",
+              name: "Set Breathing",
+              addr: "",
+              method: "",
+              data: {},
+              optional: {r: 0, g: 0, b: 0}
+            });
+          }
+        } else if (device.product.company === "tp-link") {
+          if (device.category === "light" && device.product.type === "L510E") {
+            // Turn off device
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-turnoff",
+              name: "Turn Off",
+              addr: `http://tapo.default.svc.cluster.local/tapo/lights/${deviceId}?command=off&brightness=1`,
+              method: "GET",
+              data: null
+            });
+            // Turn on device
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-turnon",
+              name: "Turn On",
+              addr: `http://tapo.default.svc.cluster.local/tapo/lights/${deviceId}?command=on&brightness=100`,
+              method: "GET",
+              data: null
+            });
+            // Dimm
+            // Turn on device
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-dimm",
+              name: "Dimm",
+              addr: `http://tapo.default.svc.cluster.local/tapo/lights/${deviceId}?command=on&brightness=50`,
+              method: "GET",
+              data: null,
+              optional: {brightness: 0}
+            });
+
+          } else if (device.category === "plug" && device.product.type === "P100") {
+            // Turn off device
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-turnoff",
+              name: "Turn Off",
+              addr: `http://tapo.default.svc.cluster.local/tapo/lights/${deviceId}?command=off&brightness=1`,
+              method: "GET",
+              data: null
+            });
+            // Turn on device
+            methods.push({
+              pressed: false,
+              deviceId: deviceId,
+              key: deviceId + "-turnon",
+              name: "Turn On",
+              addr: `http://tapo.default.svc.cluster.local/tapo/lights/${deviceId}?command=on&brightness=100`,
+              method: "GET",
+              data: null
+            });
+          }
+        }
+
+        return methods;
+      },
       handleCancel() {
       },
       async handleSubmit() {
@@ -271,7 +454,19 @@
         });
       },
     },
-    created() {
+    computed: {
+      computedDevices() {
+        let types = [];
+        this.devices.forEach(device => {
+          types.push({value: device.id, text: `${device.product.company} - ${device.category} -  ${device.name}`})
+        });
+        return types;
+      }
+    },
+    async created() {
+      this.devices = (await DevicesService.fetchDevices()).devices;
+      console.log(this.devices);
+
       this.$on("add_routine", () => {
         this.$refs.routineModal.show();
       });
