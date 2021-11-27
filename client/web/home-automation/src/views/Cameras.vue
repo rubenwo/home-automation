@@ -1,6 +1,7 @@
 <template>
     <div>
-
+        <br>
+        <input class="form-control" type="text" placeholder="Search" aria-label="Search"/>
         <div class="row" style="margin-top: 10px">
             <b-col
                     cols="4"

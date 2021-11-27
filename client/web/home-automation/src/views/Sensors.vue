@@ -1,5 +1,7 @@
 <template>
     <div>
+        <br>
+        <input class="form-control" type="text" placeholder="Search" aria-label="Search"/>
         <p style="color: aliceblue">BMP180 Temperature: {{ bmp180_temperature }}</p>
         <p style="color: aliceblue">BMP280 Temperature: {{ bmp280_temperature }}</p>
         <p style="color: aliceblue"># of Satellites: {{ number_of_satellites }}</p>

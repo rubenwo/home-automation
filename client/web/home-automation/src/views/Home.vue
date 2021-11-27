@@ -1,5 +1,7 @@
 <template>
     <div v-if="devices.length > 0">
+        <br>
+        <input class="form-control" type="text" placeholder="Search" aria-label="Search" v-model="searchInput"/>
         <div v-bind:key="groupName" v-for="group, groupName in groups">
             <div>
                 <h2 style="color:rgba(255, 255, 255, 0.45); text-align:center; border-bottom: 1px solid rgba(255, 255, 255, 0.45);">
@@ -31,7 +33,9 @@
   export default {
     name: "Home",
     data() {
-      return {};
+      return {
+        searchInput: ""
+      };
     },
     computed: {
       ...mapState("devices", {
@@ -41,9 +45,15 @@
         const result = {};
 
         this.devices.forEach(device => {
+          if (this.searchInput !== "") {
+            if (!device.product.company.toLowerCase().includes(this.searchInput.toLowerCase())) {
+              return;
+            }
+          }
           if (result[device.product.company] === undefined) {
             result[device.product.company] = []
           }
+
           result[device.product.company].push(device)
         });
         return result
