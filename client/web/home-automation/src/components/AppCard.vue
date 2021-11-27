@@ -14,7 +14,7 @@
                     class="mb-2"
             >
                 <div v-if="device_type === 'RGB_LED_STRIP'" align="center">
-                    <color-picker v-model="color" :width="130" :height="130" @color-change="onRGBClick"></color-picker>
+                    <color-picker v-model="color" :width="130" :height="130" @color-change="onRGBClick"/>
                 </div>
                 <div v-else>
                     <b-card-img
@@ -100,14 +100,13 @@
             </b-card>
         </div>
     </div>
-    <div v-else>
+    <div v-else class="text-center">
         <h3>Loading results...</h3>
-        <Loading :active="this.state === 'loading'" :is-full-page="false"/>
+        <b-spinner style="width: 3rem; height: 3rem;" label="Large Spinner"/>
     </div>
 </template>
 
 <script>
-  import Loading from "vue-loading-overlay";
   import "vue-loading-overlay/dist/vue-loading.css";
   import ColorPicker from 'vue-color-picker-wheel';
   import Verte from "verte";
@@ -119,7 +118,7 @@
 
   export default {
     name: "app-card",
-    components: {Loading, ColorPicker, ToggleButton, Verte},
+    components: {ColorPicker, ToggleButton, Verte},
     props: {
       name: {
         type: String,
