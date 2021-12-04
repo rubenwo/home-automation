@@ -25,6 +25,14 @@ export default {
       });
     return res.data;
   },
+  async fetchRandomRecipes(amount) {
+    const res = await ApiService()
+      .get("/api/v1/recipes/suggestions?amount=" + amount)
+      .catch(() => {
+        return null;
+      });
+    return res.data;
+  },
   async deleteRecipe(recipeId) {
     const res = await ApiService()
       .delete("/api/v1/recipes/" + recipeId)

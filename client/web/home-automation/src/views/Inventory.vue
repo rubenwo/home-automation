@@ -232,7 +232,7 @@
   import _ from "lodash";
   import InventoryFieldsDef from "../services/inventory.fields.def";
   // import VuetableBootstrap4Config from "../components/VuetableBootstrap4Config";
-  import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+  // import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
   import FilterBar from "../components/FilterBar";
 
   export default {
@@ -241,7 +241,7 @@
       Vuetable,
       VuetablePagination,
       // eslint-disable-next-line vue/no-unused-components
-      FontAwesomeIcon,
+      // FontAwesomeIcon,
       FilterBar,
       VuetablePaginationInfo,
     },
