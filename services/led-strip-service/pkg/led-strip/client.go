@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rubenwo/home-automation/services/led-strip-service/pkg/colorconv"
 	"log"
+	"math"
 	"sync"
 	"time"
 )
@@ -256,6 +257,40 @@ func (c *Client) SetAnimationColorCycleById(id string) error {
 		rgb := hsv.RGB()
 
 		msg.Config = append(msg.Config, Color{R: int(rgb.R), G: int(rgb.G), B: int(rgb.B)})
+	}
+
+	data, err := json.Marshal(&msg)
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("leds/%s/control", id)
+	token := c.mqttClient.Publish(path, QosAtLeastOnce, false, data)
+	token.Wait()
+
+	return token.Error()
+}
+
+func (c *Client) SetAnimationChristmasById(id string) error {
+	msg := AnimationMessage{
+		Mode:           AnimationColorMode,
+		AnimationSpeed: 1,
+		Config:         []Color{},
+	}
+
+	for i := 0; i < 255; i++ {
+		msg.Config = append(msg.Config, Color{R: i, G: int(math.Min(float64(i), 15)), B: 0})
+	}
+
+	for i := 255; i > 0; i-- {
+		msg.Config = append(msg.Config, Color{R: i, G: int(math.Min(float64(i), 15)), B: 0})
+	}
+
+	for i := 0; i < 255; i++ {
+		msg.Config = append(msg.Config, Color{R: int(math.Min(float64(i), 15)), G: i, B: 0})
+	}
+	for i := 255; i > 0; i-- {
+		msg.Config = append(msg.Config, Color{R: int(math.Min(float64(i), 15)), G: i, B: 0})
 	}
 
 	data, err := json.Marshal(&msg)

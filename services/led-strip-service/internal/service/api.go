@@ -260,6 +260,12 @@ func (a *api) commandDevice(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("couldn't set the animation color for led strip with id: %s, %s", id, err.Error()), http.StatusInternalServerError)
 			return
 		}
+
+	} else if mode == "christmas" {
+		if err := a.ledStripClient.SetAnimationChristmasById(id); err != nil {
+			http.Error(w, fmt.Sprintf("couldn't set the animation color for led strip with id: %s, %s", id, err.Error()), http.StatusInternalServerError)
+			return
+		}
 	} else if mode == "breathing" {
 		var msg struct {
 			Red   int `json:"red"`

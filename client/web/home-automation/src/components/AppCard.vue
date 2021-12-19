@@ -6,8 +6,8 @@
                     style="
         max-width: 200px;
         min-width: 200px;
-        min-height: 500px;
-        max-height: 500px;
+        min-height: 550px;
+        max-height: 550px;
         background-color: rgba(255, 255, 255, 0.25);
         backdrop-filter: blur(5px);
       "
@@ -48,6 +48,7 @@
                     </b-button>
 
                     <b-button pill @click="onColorCycleClick" center>Color Cycle</b-button>
+                    <b-button pill @click="onChristmasClick" center>Christmas</b-button>
                     <b-button pill @click="onBreathingClick" center>Pulse</b-button>
 
                 </div>
@@ -150,6 +151,7 @@
         device_on: false,
         brightness: 100,
         state: "loading",
+        colorPickerInitiated: false,
         color: "#E17D0F",
         colorVerte: "",
         dev: {},
@@ -181,6 +183,10 @@
         }
       },
       onRGBClick() {
+        if (!this.colorPickerInitiated) {
+          this.colorPickerInitiated = true;
+          return;
+        }
         let rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(this.color);
         rgb = {
           r: parseInt(rgb[1], 16),
@@ -199,6 +205,9 @@
       },
       onColorCycleClick() {
         LedStripService.commandLedStripDeviceColorCycle(this.id);
+      },
+      onChristmasClick() {
+        LedStripService.commandLedStripDeviceChristmas(this.id);
       },
       onBreathingClick() {
         let rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(this.color);

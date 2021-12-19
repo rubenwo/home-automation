@@ -17,6 +17,11 @@ export default {
         "/api/v1/leds/devices/" + deviceId + "/command/" + "colorcycle");
     return res.data;
   },
+  async commandLedStripDeviceChristmas(deviceId) {
+    const res = await ApiService().post(
+        "/api/v1/leds/devices/" + deviceId + "/command/" + "christmas");
+    return res.data;
+  },
   async commandLedStripDeviceBreathing(deviceId, data) {
     const res = await ApiService().post(
         "/api/v1/leds/devices/" + deviceId + "/command/" + "breathing",
