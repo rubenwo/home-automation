@@ -4,11 +4,10 @@
             style="
       max-width: 300px;
       min-width: 300px;
-      min-height: 250px;
-      max-height: 250px;
+      min-height: 300px;
+      max-height: 300px;
         background-color: rgba(255, 255, 255, 0.25);
         backdrop-filter: blur(5px);    "
-            class="mb-2"
     >
         <div>Type: {{ routine.trigger.type }}</div>
         <div>Schedule: {{ routine.trigger.cron_expr }}</div>
@@ -18,6 +17,9 @@
                 v-model="routine.is_active"
                 @change="set_active()"
         >: Active
+
+            <toggle-button :sync="true" v-model="routine.is_active" @change="set_active()"/>
+
         </b-checkbox>
         <b-button @click="triggerRoutine()">Trigger</b-button>
 
@@ -32,9 +34,11 @@
 
 <script>
   import RoutineService from "../services/routines.service";
+  import {ToggleButton} from 'vue-js-toggle-button'
 
   export default {
     name: "RoutineCard",
+    components: {ToggleButton},
     props: {
       id: {
         type: Number,
