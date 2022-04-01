@@ -72,6 +72,11 @@ services:
     depends_on:
       - postgres.default.svc.cluster.local
 
+  qr.default.svc.cluster.local:
+    image: rubenwo/home-automation-qr-service:latest
+    # build: ./services/qr-service
+    restart: on-failure
+
   web.default.svc.cluster.local:
     image: rubenwo/home-automation-web-client:latest
     # build: ./client/web/home-automation
