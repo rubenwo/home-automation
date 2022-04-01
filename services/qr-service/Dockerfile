@@ -16,5 +16,6 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 COPY --from=builder /go/qr-service/qr-service .
+COPY --from=builder /go/qr-service/config.json .
 
 CMD [ "./qr-service" ]
