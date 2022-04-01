@@ -1,6 +1,6 @@
 FROM golang:1.17 AS builder
 
-WORKDIR /go/food-service
+WORKDIR /go/qr-service
 
 COPY go.mod .
 COPY go.sum .
@@ -9,12 +9,12 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o food-service ./cmd/api
+RUN CGO_ENABLED=1 GOOS=linux go build -o qr-service ./cmd/app
 
 FROM alpine:3.12
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
-COPY --from=builder /go/food-service/food-service .
+COPY --from=builder /go/qr-service/qr-service .
 
-CMD [ "./food-service" ]
+CMD [ "./qr-service" ]
