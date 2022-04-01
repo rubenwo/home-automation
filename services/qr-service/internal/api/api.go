@@ -5,6 +5,7 @@ import (
 	"github.com/rubenwo/home-automation/services/qr-service/internal/api/config"
 	"github.com/rubenwo/home-automation/services/qr-service/internal/pkg/qr"
 	"image/jpeg"
+	"log"
 	"net/http"
 	"os"
 )
@@ -46,12 +47,39 @@ func (a *api) generateQRCode(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func castExt(ext string) qr.OutputFormat {
+	switch qr.OutputFormat(ext) {
+	case qr.SVG:
+		return qr.SVG
+	case qr.JPG:
+		return qr.JPG
+	case qr.PNG:
+		return qr.PNG
+	}
+	return qr.PNG
+}
+
 func (a *api) renderQRCode(w http.ResponseWriter, r *http.Request) {
-	b, err := a.generator.GenerateQRCode("some content here", 2000, 1, qr.PNG, qr.WithAlphaBlending)
+	id := chi.URLParam(r, "uuid")
+	log.Printf("received QR render request for id: %s\n", id)
+	ext := chi.URLParam(r, "ext")
+
+	b, err := a.generator.GenerateQRCode("some content here", 2000, 1, castExt(ext), qr.WithAlphaBlending)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("Internal Server Error"))
 	}
-	w.Header().Set("Content-Type", "image/png")
+
+	var contentType string
+	switch castExt(ext) {
+	case qr.SVG:
+		contentType = "image/svg+xml"
+	case qr.JPG:
+		contentType = "image/jpg"
+	case qr.PNG:
+		contentType = "image/png"
+	}
+
+	w.Header().Set("Content-Type", contentType)
 	_, _ = b.WriteTo(w)
 }

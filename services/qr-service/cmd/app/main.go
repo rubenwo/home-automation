@@ -15,7 +15,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("hue-service is up and running!")
+	log.Printf("qr-service is up and running on %s\n", apiConfig.Listen)
 	if err := a.Run(); err != nil {
 		log.Fatal(err)
 	}
