@@ -1,7 +1,7 @@
 package pnglib
 
-// #cgo CXXFLAGS: -g -Wall -O4 -march=native -mavx2 -msse4.1 -fno-strict-aliasing
-// #cgo CFLAGS: -g -Wall -O4 -march=native -mavx2 -msse4.1 -fno-strict-aliasing
+// #cgo CXXFLAGS: -g -Wall -O4 -march=native
+// #cgo CFLAGS: -g -Wall -O4 -march=native
 // #include <stdlib.h>
 // #include "png.h"
 import "C"
@@ -10,9 +10,9 @@ import (
 	"unsafe"
 )
 
-//func init() {
-//	C.fpng_init_wrapper()
-//}
+func init() {
+	C.fpng_init_wrapper()
+}
 
 func EncodeFromMat2d(data []uint8, w, h uint32, size int) []byte {
 	var pngSize uintptr
