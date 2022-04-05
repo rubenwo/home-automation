@@ -10,9 +10,9 @@ import (
 	"unsafe"
 )
 
-func init() {
-	C.fpng_init_wrapper()
-}
+//func init() {
+//	C.fpng_init_wrapper()
+//}
 
 func EncodeFromMat2d(data []uint8, w, h uint32, size int) []byte {
 	var pngSize uintptr
