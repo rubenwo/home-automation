@@ -13,7 +13,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.4 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/net v0.0.0-20210917221730-978cfadd31cf // indirect
-	golang.org/x/sys v0.0.0-20210923061019-b8560ed6a9b7 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
 
