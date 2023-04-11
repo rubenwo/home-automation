@@ -19,6 +19,7 @@ FROM scratch
 WORKDIR /
 COPY --from=builder /go/tradfri-service/tradfri-service .
 COPY --from=builder /go/tradfri-service/database ./database
+COPY --from=builder /go/tradfri-service/config.json .
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "./tradfri-service" ]

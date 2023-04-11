@@ -18,6 +18,7 @@ FROM scratch
 
 WORKDIR /
 COPY --from=builder /go/hue-service/hue-service .
+COPY --from=builder /go/hue-service/config.json .
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "./hue-service" ]

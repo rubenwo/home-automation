@@ -9,7 +9,7 @@ services:
       - JWT_KEY=$JWT_KEY
       - ENABLE_ADMIN=true
       - ADMIN_PWD=$ADMIN_PWD
-      - PRODUCTION=true
+      - PRODUCTION=false
       - DOMAINS=homeautomation.rubenwoldhuis.nl
     ports:
       - 443:443

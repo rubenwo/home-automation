@@ -18,6 +18,7 @@ FROM scratch
 
 WORKDIR /
 COPY --from=builder /go/notification-service/notification-service .
+COPY --from=builder /go/notification-service/config.json .
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "./notification-service" ]

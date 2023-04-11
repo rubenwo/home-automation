@@ -19,6 +19,7 @@ FROM scratch
 WORKDIR /
 COPY --from=builder /go/qr-service/qr-service .
 COPY --from=builder /go/qr-service/config.json .
+COPY --from=builder /go/qr-service/logo.png .
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "./qr-service" ]

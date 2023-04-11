@@ -18,6 +18,7 @@ FROM scratch
 
 WORKDIR /
 COPY --from=builder /go/led-strip-service/led-strip-service .
+COPY --from=builder /go/led-strip-service/config.json .
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "./led-strip-service" ]
