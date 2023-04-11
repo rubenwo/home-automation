@@ -5,5 +5,6 @@ go 1.15
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/go-redis/redis v6.15.9+incompatible
-	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/gomega v1.27.6 // indirect
 )
