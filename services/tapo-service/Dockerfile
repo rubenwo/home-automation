@@ -17,7 +17,7 @@ RUN apk --no-cache add ca-certificates
 FROM scratch
 
 WORKDIR /
-COPY --from=builder /go/actions-service/tapo-service .
+COPY --from=builder /go/tapo-service/tapo-service .
 COPY --from=builder /go/tapo-service/config.json .
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 

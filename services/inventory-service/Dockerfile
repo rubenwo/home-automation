@@ -17,7 +17,7 @@ RUN apk --no-cache add ca-certificates
 FROM scratch
 
 WORKDIR /
-COPY --from=builder /go/actions-service/inventory-service .
+COPY --from=builder /go/inventory-service/inventory-service .
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "./inventory-service" ]

@@ -17,7 +17,7 @@ RUN apk --no-cache add ca-certificates
 FROM scratch
 
 WORKDIR /
-COPY --from=builder /go/actions-service/led-strip-service .
+COPY --from=builder /go/led-strip-service/led-strip-service .
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "./led-strip-service" ]

@@ -17,7 +17,7 @@ RUN apk --no-cache add ca-certificates
 FROM scratch
 
 WORKDIR /
-COPY --from=builder /go/actions-service/gateway-service .
+COPY --from=builder /go/gateway-service/gateway-service .
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "./gateway-service" ]

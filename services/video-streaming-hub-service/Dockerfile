@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o video-streaming-hub-service ./cmd/video-streaming-hub
+RUN CGO_ENABLED=0 GOOS=linux go build -o video-streaming-hub-service ./cmd/app
 
 FROM alpine:3.12 AS alpine
 RUN apk --no-cache add ca-certificates
