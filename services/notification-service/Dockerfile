@@ -1,4 +1,4 @@
-FROM golang:1.17 AS builder
+FROM golang:1.20 AS builder
 
 WORKDIR /go/notification-service
 
@@ -9,13 +9,15 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o notification-service ./cmd/app
+RUN CGO_ENABLED=0 GOOS=linux go build -o notification-service ./cmd/api
 
-FROM alpine:3.12
+FROM alpine:3.12 AS alpine
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
-COPY --from=builder /go/notification-service/notification-service .
-COPY --from=builder /go/notification-service/config.json .
+FROM scratch
+
+WORKDIR /
+COPY --from=builder /go/actions-service/notification-service .
+COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD [ "./notification-service" ]
