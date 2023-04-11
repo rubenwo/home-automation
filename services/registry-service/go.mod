@@ -12,8 +12,8 @@ require (
 	github.com/robertkrimen/otto v0.0.0-20211008084715-4eacda02dd21
 	github.com/vmihailenco/msgpack/v5 v5.3.4 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
 
