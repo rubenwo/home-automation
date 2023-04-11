@@ -13,9 +13,9 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/vmihailenco/msgpack/v5 v5.3.4 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/net v0.0.0-20210907225631-ff17edfbf26d // indirect
-	golang.org/x/sys v0.0.0-20210923061019-b8560ed6a9b7 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/api v0.58.0
 	google.golang.org/genproto v0.0.0-20211013025323-ce878158c4d4 // indirect
 )
